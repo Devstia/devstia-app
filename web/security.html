@@ -1,0 +1,81 @@
+<p>
+    You can change security options for Code Garden PWS; the password is used to 
+    protect the Personal Web Server interface. The `Allow Code Garden` option allows PWS to 
+    <a href="https://code.gdn/about-access/">connect with Code Garden</a> for 
+    obtaining updates, support, and access to enhanced features.
+</p>
+<div class="mb-3">
+    <label class="form-label">PWS Password</label>
+    <div class="row g-2">
+      <div class="col">
+        <input id="pws-pass" type="password" class="form-control" />
+      </div>
+      <div class="col-auto">
+        <button id="view-pass" class="btn btn-icon" aria-label="view password">
+            <svg id="show-pw" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye-off" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"></path>
+                <path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87"></path>
+                <path d="M3 3l18 18"></path>
+            </svg>
+            <svg id="hide-pw" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
+                <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"></path>
+            </svg>
+        </button>
+      </div>
+    </div>
+</div>
+<div class="mb-3">
+    <label class="form-label">SSH Port</label>
+    <div class="row g-2">
+        <div class="col">
+          <input id="ssh-port" type="text" class="form-control" />
+        </div>
+    </div>
+</div>
+<div class="mb-3">
+    <label class="form-check">
+        <input id="allow-cg" class="form-check-input" type="checkbox" checked="">
+        <span class="form-check-label">Allow Code Garden (code.gdn)</span>
+    </label>
+</div>
+<script>
+
+    // Handle view password button
+    $('#view-pass').click( r => {
+        if ($('#show-pw').is(':visible')) {
+            $('#show-pw').hide();
+            $('#hide-pw').show();
+            $('#pws-pass').attr('type', 'text');
+        } else {
+            $('#show-pw').show();
+            $('#hide-pw').hide();
+            $('#pws-pass').attr('type', 'password');
+        }
+    });
+
+    // Fill in current values of password and allow cg
+    pws.getSetting('pwsPass', r => {
+        $('#pws-pass').val(r.value);
+    });
+    pws.getSetting('sshPort', r => {
+        $('#ssh-port').val(r.value);
+    });
+    pws.getSetting('allowCG', r => {
+        $('#allow-cg').prop('checked', r.value);
+    });
+
+    // Update settings when value changes
+    $('#pws-pass').change( r => {
+        pws.setSetting('pwsPass', r.target.value);
+    });
+    $('#ssh-port').change( r => {
+        pws.setSetting('sshPort', r.target.value);
+    });
+    $('#allow-cg').change( r => {
+        pws.setSetting('allowCG', $('#allow-cg').prop('checked'));
+    });
+</script>
+<script src="links.js"></script>

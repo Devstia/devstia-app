@@ -1,0 +1,80 @@
+    <p>
+        Use the 'Websites Folder' to set the location for your websites on your local file system. LAN IP Address is used to assist testing on mobile devices.
+    </p>
+    <div class="mb-3">
+        <label class="form-label">Websites Folder</label>
+        <div class="row g-2">
+          <div class="col">
+            <input id="websites-folder" type="text" class="form-control" />
+          </div>
+          <div class="col-auto">
+            <button id="select-folder-button" title="Browse for folder" class="btn btn-icon" aria-label="select folder">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-folder" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"></path>
+                </svg>
+            </button>
+          </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">LAN IP Address</label>
+        <div class="row g-2">
+          <div class="col">
+            <input id="lan-ip" type="text" class="form-control" />
+          </div>
+          <div class="col-auto">
+            <button id="lan-ip-button" title="Get local IP automatically" class="btn btn-icon" aria-label="lan ip address">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-network" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M12 9m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0"></path>
+                    <path d="M12 3c1.333 .333 2 2.333 2 6s-.667 5.667 -2 6"></path>
+                    <path d="M12 3c-1.333 .333 -2 2.333 -2 6s.667 5.667 2 6"></path>
+                    <path d="M6 9h12"></path>
+                    <path d="M3 19h7"></path>
+                    <path d="M14 19h7"></path>
+                    <path d="M12 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                    <path d="M12 15v2"></path>
+                 </svg>
+            </button>
+          </div>
+        </div>
+    </div>
+    <script>
+        // Fill in current value of websites folder
+        pws.getSetting('websitesFolder', (r) => {
+            $('#websites-folder').val(r.value);
+        });
+
+        // Handle select folder button, update setting
+        $('#select-folder-button').click( (r) => {
+            pws.invokeEvent('selectWebsitesFolder', (r) => {
+                $('#websites-folder').val(r.value);
+                pws.setSetting('websitesFolder', r.value);
+            });
+        });
+
+        // Update setting when value changes
+        $('#websites-folder').change( r => {
+            pws.setSetting('websitesFolder', r.target.value);
+        });
+
+        // Fill in current value of lan ip address
+        pws.getSetting('lanIP', (r) => {
+            $('#lan-ip').val(r.value);
+        });
+
+        // Handle lan ip address button, update setting
+        $('#lan-ip-button').click( (r) => {
+            pws.invokeEvent('getDefaultLocalIP', (r) => {
+                $('#lan-ip').val(r.value);
+                pws.setSetting('lanIP', r.value);
+            });
+        });
+
+        // Update setting when value changes
+        $('#lan-ip').change( r => {
+            pws.setSetting('lanIP', r.target.value);
+        });
+    </script>
+    <script src="links.js"></script>

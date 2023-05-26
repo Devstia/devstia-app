@@ -1,0 +1,52 @@
+/* App Window */
+.card-body {
+    height: 350px;
+}
+.settings {
+    padding: 8px;
+    float: right;
+}
+.settings #cancel-button {
+    margin-right: 8px;
+}
+
+/* Services */
+#status-column {
+    min-width:150px;
+    padding-left:28px;
+}
+.service-status {
+    padding: 0 30px;
+}
+.service-status span.status {
+    font-size: smaller;
+    margin-top: -15px;
+    margin-bottom: -15px;
+}
+.service-action {
+    text-align: center;
+}
+
+/* Preferences */
+#tabs-preferences-ex2 .mb-3 {
+    padding: 0 30px;
+}
+
+/* Security */
+#tabs-security-ex2 .mb-3 {
+    padding: 0 30px;
+}
+#hide-pw {
+    display: none;
+}
+/* About */
+#tabs-about-ex2 .mb-3 {
+    text-align: center;
+    padding: 50px;
+}
+
+/* License */
+#license {
+    height: 320px;
+    overflow-y: scroll;
+}
