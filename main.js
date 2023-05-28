@@ -117,7 +117,7 @@ function createSetttingsAPI() {
         switch (arg.name) {
 
             // Used by Browse button for websites folder
-            case 'selectWebsitesFolder':
+            case 'selectWebFolder':
                 dialog.showOpenDialog({
                     properties: ['openDirectory']
                 }).then(result => {
@@ -553,7 +553,7 @@ function readSettings() {
     // Set /default settings
     const path = require('path');
     let pwsSettings = {
-        websitesFolder: path.join(app.getPath('home'), 'Sites'),
+        webFolder: path.join(app.getPath('home'), 'Sites'),
         pwsPass: 'personal-web-server',
         sshPort: 8022,
         allowCG: true,
