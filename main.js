@@ -166,7 +166,11 @@ function createTrayAppIcon() {
                 click: () => shell.openExternal('http://localhost')
             },
             {
-                label: 'Command Line (SSH)',
+                label: 'Terminal (ssh)',
+                click: () => {}
+            },
+            {
+                label: 'Files (smb)',
                 click: () => {}
             },
             {
