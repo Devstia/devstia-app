@@ -129,45 +129,50 @@ function readSettings() {
 
 /** 
  * startServer - Starts the platform and architecture specific server.
- * 
  */
 function startServer() {
     const { spawn } = require('child_process');
-    const path = require('path');
     const qemuArgs = [
+        '-machine', 'q35,vmport=off',
         '-accel', 'hvf',
         '-cpu', 'Haswell-v1',
-        '-smp', '3',
+        '-smp', 'cpus=4,sockets=1,cores=4,threads=1',
         '-m', '4G',
         '-vga', 'virtio',
-        '-display', 'default,show-cursor=on',
+        //'-display', 'default,show-cursor=on',
+        '-nographic',
+        '-drive', 'if=pflash,format=raw,file=efi_amd64.img,readonly=on',
+        '-drive', 'if=pflash,format=raw,file=efi_amd64_vars.img,readonly=on',
         '-device', 'virtio-net-pci,netdev=net0',
         '-netdev', 'user,id=net0,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083',
-        '-drive', 'if=virtio,format=qcow2,file=pws-amd64.img'
+        '-drive', 'if=virtio,format=qcow2,file=pws-amd64.img',
+        '-fsdev', '"local,id=virtfs0,path=' + pwsSettings.appFolder + ',security_model=mapped-xattr"',
+        '-device', 'virtio-9p-pci,fsdev=virtfs0,mount_tag=appFolder',
+        '-device', 'virtio-balloon-pci'
     ];
+    console.log("Starting QEMU with the following arguments: " + qemuArgs.join(' ') + "\n");
     const qemuProcess = spawn('qemu-system-x86_64', qemuArgs, {
-        cwd: pwsSettings.appFolder
+        cwd: pwsSettings.appFolder,
+        shell: true
     });
-
     qemuProcess.stdout.on('data', (data) => {
-        console.log(`QEMU stdout: ${data}`);
+        console.log(`QEMU stdout: ${data}` + "\n");
     });
-
     qemuProcess.stderr.on('data', (data) => {
-        console.error(`QEMU stderr: ${data}`);
+        console.error(`QEMU stderr: ${data}` + "\n");
     });
-
     qemuProcess.on('close', (code) => {
-        console.log(`QEMU process exited with code ${code}`);
+        console.log(`QEMU process exited with code ${code}` + "\n");
     });
 
+    // Gracefully terminate the QEMU process on SIGINT (e.g., when pressing Ctrl+C)
     process.on('SIGINT', () => {
-        // Gracefully terminate the QEMU process on SIGINT (e.g., when pressing Ctrl+C)
+        console.log("Got SIGINT, terminating QEMU process...");
         qemuProcess.kill('SIGINT');
     });
-
     // Keep the Node.js process running until the QEMU process is terminated
     qemuProcess.on('exit', () => {
+        console.log("QEMU process terminated, exiting...");
         process.exit();
     });
 }

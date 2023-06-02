@@ -255,15 +255,9 @@ function createTrayAppIcon() {
                             app.dock.hide();
                         }
                         if (response.response === 0) {
-                            console.log('Yes selected');
-
-                            //
-                            // TODO: Stop background services here
-                            //
-
+                            stopHelper();
                             app.quit();
                         } else {
-                            console.log('No selected');
                             app.quit();
                         }
                     });
@@ -683,4 +677,19 @@ function startHelper() {
             resolve();
         }
     });
+}
+
+/**
+ * stopHelper - stops the helper application.
+ */
+function stopHelper() {
+    const { execSync } = require('child_process');
+    try {
+        let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no ';
+        cmd += '-p \'' + pwsSettings.sshPort + '\' debian@local.code.gdn "echo \\"';
+        cmd += pwsSettings.pwsPass + '\\" | sudo -S shutdown now\"';
+        const output = execSync(cmd);
+    } catch (error) {
+        // Ignore sudden disconnect error from shutdown
+    }
 }
