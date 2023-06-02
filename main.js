@@ -555,6 +555,7 @@ function readSettings() {
         pwsPass: 'personal-web-server',
         sshPort: 8022,
         allowCG: true,
+        debugMode: false,
         lanIP: getDefaultLocalIP()
     };
 

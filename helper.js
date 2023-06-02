@@ -132,24 +132,27 @@ function readSettings() {
  */
 function startServer() {
     const { spawn } = require('child_process');
-    const qemuArgs = [
+    let qemuArgs = [
         '-machine', 'q35,vmport=off',
         '-accel', 'hvf',
         '-cpu', 'Haswell-v1',
         '-smp', 'cpus=4,sockets=1,cores=4,threads=1',
         '-m', '4G',
         '-vga', 'virtio',
-        //'-display', 'default,show-cursor=on',
-        '-nographic',
         '-drive', 'if=pflash,format=raw,file=efi_amd64.img,readonly=on',
         '-drive', 'if=pflash,format=raw,file=efi_amd64_vars.img,readonly=on',
         '-device', 'virtio-net-pci,netdev=net0',
-        '-netdev', 'user,id=net0,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083',
+        '-netdev', 'user,id=net0,hostfwd=tcp::8445-:445,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083',
         '-drive', 'if=virtio,format=qcow2,file=pws-amd64.img',
         '-fsdev', '"local,id=virtfs0,path=' + pwsSettings.appFolder + ',security_model=mapped-xattr"',
         '-device', 'virtio-9p-pci,fsdev=virtfs0,mount_tag=appFolder',
         '-device', 'virtio-balloon-pci'
     ];
+    if (pwsSettings.debugMode) {
+        qemuArgs.push('-display', 'default,show-cursor=on');
+    } else {
+        qemuArgs.push('-nographic');
+    }
     console.log("Starting QEMU with the following arguments: " + qemuArgs.join(' ') + "\n");
     const qemuProcess = spawn('qemu-system-x86_64', qemuArgs, {
         cwd: pwsSettings.appFolder,

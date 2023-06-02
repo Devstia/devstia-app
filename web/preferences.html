@@ -1,5 +1,6 @@
     <p>
-        Use the 'Websites Folder' to set the location for your websites on your local file system. LAN IP Address is used to assist testing on mobile devices.
+        Use the 'Websites Folder' to set the location for your websites on your local file system. 
+        LAN IP Address is used to assist testing on mobile devices. Debug mode is used for troubleshooting and can impact performance.
     </p>
     <div class="mb-3">
         <label class="form-label">Websites Folder</label>
@@ -40,6 +41,12 @@
           </div>
         </div>
     </div>
+    <div class="mb-3">
+        <label class="form-check">
+            <input id="debug-mode" class="form-check-input" type="checkbox" checked="">
+            <span class="form-check-label">Enable debug mode (not recommended)</span>
+        </label>
+    </div>
     <script>
         // Fill in current value of websites folder
         pws.getSetting('webFolder', (r) => {
@@ -64,6 +71,11 @@
             $('#lan-ip').val(r.value);
         });
 
+        // Fill in current value of debug mode
+        pws.getSetting('debugMode', r => {
+            $('#debug-mode').prop('checked', r.value);
+        });
+
         // Handle lan ip address button, update setting
         $('#lan-ip-button').click( (r) => {
             pws.invokeEvent('getDefaultLocalIP', (r) => {
@@ -75,6 +87,9 @@
         // Update setting when value changes
         $('#lan-ip').change( r => {
             pws.setSetting('lanIP', r.target.value);
+        });
+        $('#debug-mode').change( r => {
+            pws.setSetting('debugMode', $('#debug-mode').prop('checked'));
         });
     </script>
     <script src="links.js"></script>
