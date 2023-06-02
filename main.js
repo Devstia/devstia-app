@@ -145,6 +145,34 @@ function createSetttingsAPI() {
                 arg.value = getDefaultLocalIP();;
                 event.sender.send(arg.uuid, arg);
                 break;
+            
+            // Stop services
+            case 'stopServices':
+                stopHelper();
+                break;
+
+            // Check status
+            case 'checkStatus':
+                arg.method = 'reply_checkStatus';
+                if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
+                    arg.value = {
+                        apache: true,
+                        nginx: true,
+                        php_fpm: true,
+                        mariadb: true,
+                        postgresql: true
+                    };
+                } else {
+                    arg.value = {
+                        apache: false,
+                        nginx: false,
+                        php_fpm: false,
+                        mariadb: false,
+                        postgresql: false
+                    };
+                }
+                event.sender.send(arg.uuid, arg);
+                break;
         }
     });
 }
@@ -240,27 +268,34 @@ function createTrayAppIcon() {
             {
                 label: 'Quit',
                 click: () => {
-                    if (process.platform === 'darwin') {
-                        app.dock.show();
-                    }
-                    dialog.showMessageBox({
-                        type: 'question',
-                        buttons: ['Yes', 'No'],
-                        defaultId: 1,
-                        message: 'Stop all background services before quitting?',
-                        title: 'Code Garden - Quit Application',
-                        icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
-                    }).then((response) => {
+                    const fs = require('fs');
+                    if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
+
+                        // Prompt to stop all services before quitting
                         if (process.platform === 'darwin') {
-                            app.dock.hide();
+                            app.dock.show();
                         }
-                        if (response.response === 0) {
-                            stopHelper();
-                            app.quit();
-                        } else {
-                            app.quit();
-                        }
-                    });
+                        dialog.showMessageBox({
+                            type: 'question',
+                            buttons: ['Yes', 'No'],
+                            defaultId: 1,
+                            message: 'Stop all background services before quitting?',
+                            title: 'Code Garden - Quit Application',
+                            icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
+                        }).then((response) => {
+                            if (process.platform === 'darwin') {
+                                app.dock.hide();
+                            }
+                            if (response.response === 0) {
+                                stopHelper();
+                                app.quit();
+                            } else {
+                                app.quit();
+                            }
+                        });
+                    }else{
+                        app.quit();
+                    }
                 }
             }
         ]);
@@ -569,6 +604,8 @@ function readSettings() {
     const fs = require('fs');
     if (fs.existsSync(pwsFilePath)) {
         pwsSettings = JSON.parse(fs.readFileSync(pwsFilePath));
+        const CryptoJS = require('crypto-js');
+        pwsSettings.pwsPass = CryptoJS.AES.decrypt(pwsSettings.pwsPass, "personal-web-server").toString(CryptoJS.enc.Utf8);
         pwsSettings.appFolder = appFolder;
     }else{
         saveSettings(pwsSettings); // Save the default settings
@@ -596,6 +633,8 @@ function saveSettings(pwsSettings) {
     }
 
     // Save the settings
+    const CryptoJS = require('crypto-js');
+    pwsCopy.pwsPass = CryptoJS.AES.encrypt(pwsCopy.pwsPass, "personal-web-server").toString();
     const path = require('path');
     const pwsFilePath = path.join(pwsCopy.appFolder, 'settings.json');
     delete pwsCopy.appFolder; // Remove the appFolder property prior to saving

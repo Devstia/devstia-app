@@ -118,6 +118,8 @@ function readSettings() {
     let pwsSettings = null;
     if (fs.existsSync(pwsFilePath)) {
         pwsSettings = JSON.parse(fs.readFileSync(pwsFilePath));
+        const CryptoJS = require('crypto-js');
+        pwsSettings.pwsPass = CryptoJS.AES.decrypt(pwsSettings.pwsPass, "personal-web-server").toString(CryptoJS.enc.Utf8);
     }
     if (!pwsSettings) {
         console.error('Unable to read settings file.');

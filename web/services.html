@@ -71,15 +71,52 @@
     const status_stopped = '<span class="status status-red"><span class="status-dot"></span> Stopped</span>';
     const status_checking = '<span class="status status-yellow">Checking<span class="animated-dots"></span></span>';
 
+    // Check if main server is running
+    function checkStatus() {
+        pws.invokeEvent('checkStatus', (r) => {
+            $('.service-stat').html(status_checking);
+            if (r.value.apache) {
+                $('#status-apache').html(status_online);
+            } else {
+                $('#status-apache').html(status_stopped);
+            }
+            if (r.value.nginx) {
+                $('#status-nginx').html(status_online);
+            } else {
+                $('#status-nginx').html(status_stopped);
+            }
+            if (r.value.php_fpm) {
+                $('#status-php-fpm').html(status_online);
+            } else {
+                $('#status-php-fpm').html(status_stopped);
+            }
+            if (r.value.mariadb) {
+                $('#status-mariadb').html(status_online);
+            } else {
+                $('#status-mariadb').html(status_stopped);
+            }
+            if (r.value.postgresql) {
+                $('#status-postgresql').html(status_online);
+            } else {
+                $('#status-postgresql').html(status_stopped);
+            }
+        });
+    }
+    let checkStatusPolling = setInterval(checkStatus, 5000);
+    checkStatus();
+
     // Stop button
     const stopButton = document.getElementById('stop-button');
     stopButton.addEventListener('click', () => {
-        $('#stop-button').addClass('btn-loading');
+        clearInterval(checkStatusPolling);
         $('.service-stat').html(status_checking);
+        pws.invokeEvent('stopServices');
+        $('#stop-button').addClass('btn-loading');
         setTimeout(function () {
             (function($) {
-                $('.service-stat').html(status_stopped);
+                checkStatusPolling = setInterval(checkStatus, 5000);
                 $('#stop-button').removeClass('btn-loading');
+                checkStatus();
             })(jQuery);
         }, 3000);
     });
