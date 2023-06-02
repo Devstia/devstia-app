@@ -124,14 +124,17 @@
     // Restart button
     const restartButton = document.getElementById('restart-button');
     restartButton.addEventListener('click', () => {
-        $('#restart-button').addClass('btn-loading');
+        clearInterval(checkStatusPolling);
         $('.service-stat').html(status_checking);
+        pws.invokeEvent('restartServices');
+        $('#restart-button').addClass('btn-loading');
         setTimeout(function () {
             (function($) {
-                $('.service-stat').html(status_stopped);
+                checkStatusPolling = setInterval(checkStatus, 5000);
                 $('#restart-button').removeClass('btn-loading');
+                checkStatus();
             })(jQuery);
-        }, 3000);
+        }, 15000);
     });
 </script>
 <script src="links.js"></script>

@@ -173,6 +173,11 @@ function createSetttingsAPI() {
                 }
                 event.sender.send(arg.uuid, arg);
                 break;
+            
+            // Restart services
+            case 'restartServices':
+                restartHelper();
+                break;
         }
     });
 }
@@ -214,22 +219,29 @@ function createTrayAppIcon() {
                     } else {
                         const BrowserWindow = require('electron').BrowserWindow;
                         const path = require('path');
-                        win = new BrowserWindow({
+                        let winOptions = {
                             width: 600,
                             height: 480,
                             modal: true,
                             title: 'Code Garden - Settings',
                             maximizable: false,
                             minimizable: false,
-                            //resizable: false,
-                            resizable: true,
+                            resizable: false,
                             show: false,
                             icon: './images/cg.png',
                             webPreferences: {
                                 preload: path.join(__dirname, 'preload.js'),
-                                devTools: true
+                                devTools: false
                             }
-                        });
+                        };
+
+                        // Enable dev tools in debug mode
+                        if (pwsSettings.debugMode) {
+                            winOptions.webPreferences.devTools = true;
+                            winOptions.resizable = true;
+                            winOptions.width = 840;
+                        }
+                        win = new BrowserWindow(winOptions);
 
                         // Load the window content
                         win.loadFile('web/settings.html');
@@ -639,6 +651,39 @@ function saveSettings(pwsSettings) {
     const pwsFilePath = path.join(pwsCopy.appFolder, 'settings.json');
     delete pwsCopy.appFolder; // Remove the appFolder property prior to saving
     fs.writeFileSync(pwsFilePath, JSON.stringify(pwsCopy, null, 2));
+}
+
+/**
+ * restartHelper - restarts the helper application.
+ */
+function restartHelper() {
+    console.log("restartHelper...");
+
+    // Check for helper lock file, do a quick shutdown/restart if it exists
+    const fs = require('fs');
+    if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
+        console.log("quick restart...");
+        const { execSync } = require('child_process');
+        try {
+            let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no ';
+            cmd += '-p \'' + pwsSettings.sshPort + '\' debian@local.code.gdn "echo \\"';
+            cmd += pwsSettings.pwsPass + '\\" | sudo -S shutdown -r now\"';
+            const output = execSync(cmd);
+        } catch (error) {
+            // Ignore sudden disconnect error from shutdown
+        }
+    
+    // Otherwise, start the helper application
+    } else {
+        console.log("otherwise startHelper...");
+        startHelper().then(() => {
+            console.log('Helper started.');
+        }
+        ).catch((error) => {
+            console.error('Unable to start helper.');
+            console.error(error);
+        });
+    }
 }
 
 /**
