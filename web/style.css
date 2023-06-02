@@ -9,6 +9,11 @@
 .settings #cancel-button {
     margin-right: 8px;
 }
+.settings #help-button {
+    float: left;
+    position: fixed;
+    left: 8px;
+}
 
 /* Services */
 #status-column {
@@ -49,4 +54,5 @@
 #license {
     height: 320px;
     overflow-y: scroll;
+    border: 1px solid var(--tblr-tabler-lt);
 }

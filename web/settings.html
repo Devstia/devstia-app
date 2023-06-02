@@ -80,6 +80,7 @@
         </div>
     </div>
     <div class="settings">
+        <button id="help-button" class="btn">Help</button>
         <button id="cancel-button" class="btn">Cancel</button>
         <button id="save-button" class="btn btn-primary">Save</button>
     </div>
@@ -102,6 +103,12 @@
             $("#tabs-about-ex2").load("about.html");
             $("#tabs-license-ex2").load("license.html");
         })(jQuery);
+
+        // Help button
+        const helpButton = document.getElementById('help-button');
+        helpButton.addEventListener('click', () => {
+            pws.invokeEvent('openLink', null, 'https://code.gdn/pws/support');
+        });
 
         // Save button
         const saveButton = document.getElementById('save-button');
