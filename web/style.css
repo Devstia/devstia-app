@@ -24,9 +24,14 @@
     padding: 0 30px;
 }
 .service-status span.status {
-    font-size: smaller;
+    font-size: x-small;
+    font-weight: bold;
     margin-top: -15px;
     margin-bottom: -15px;
+}
+.service-status table {
+    font-size: smaller;
+    margin-top: -8px;
 }
 .service-action {
     text-align: center;

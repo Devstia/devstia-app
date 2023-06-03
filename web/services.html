@@ -38,6 +38,12 @@
                     <span class="status status-yellow">Checking<span class="animated-dots"></span></span>
                 </td>
             </tr>
+            <tr>
+                <td>Samba</td>
+                <td id="status-samba" class="text-muted service-stat">
+                    <span class="status status-yellow">Checking<span class="animated-dots"></span></span>
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
@@ -100,21 +106,32 @@
             } else {
                 $('#status-postgresql').html(status_stopped);
             }
+            if (r.value.samba) {
+                $('#status-samba').html(status_online);
+            } else {
+                $('#status-samba').html(status_stopped);
+            }
         });
     }
-    let checkStatusPolling = setInterval(checkStatus, 5000);
-    checkStatus();
+    setInterval(function() {
+        if ($('#tabs-services-ex2').css('display') != 'none') {
+            checkStatus();
+        }
+    }, 10000);
+    $("a[href='#tabs-services-ex2']").click( () => {
+        $('.service-stat').html(status_checking);
+        checkStatus();
+    });
+    setTimeout(checkStatus, 1000);
 
     // Stop button
     const stopButton = document.getElementById('stop-button');
     stopButton.addEventListener('click', () => {
-        clearInterval(checkStatusPolling);
         $('.service-stat').html(status_checking);
         pws.invokeEvent('stopServices');
         $('#stop-button').addClass('btn-loading');
         setTimeout(function () {
             (function($) {
-                checkStatusPolling = setInterval(checkStatus, 5000);
                 $('#stop-button').removeClass('btn-loading');
                 checkStatus();
             })(jQuery);
@@ -124,13 +141,11 @@
     // Restart button
     const restartButton = document.getElementById('restart-button');
     restartButton.addEventListener('click', () => {
-        clearInterval(checkStatusPolling);
         $('.service-stat').html(status_checking);
         pws.invokeEvent('restartServices');
         $('#restart-button').addClass('btn-loading');
         setTimeout(function () {
             (function($) {
-                checkStatusPolling = setInterval(checkStatus, 5000);
                 $('#restart-button').removeClass('btn-loading');
                 checkStatus();
             })(jQuery);

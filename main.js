@@ -8,7 +8,6 @@
 const app = require('electron').app;
 let pathAddendum = '';
 let pwsSettings = initApplication();
-console.log(pwsSettings);
 cleanupApplication();
 
 // checkRuntimeArchive promise return values
@@ -154,23 +153,7 @@ function createSetttingsAPI() {
             // Check status
             case 'checkStatus':
                 arg.method = 'reply_checkStatus';
-                if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
-                    arg.value = {
-                        apache: true,
-                        nginx: true,
-                        php_fpm: true,
-                        mariadb: true,
-                        postgresql: true
-                    };
-                } else {
-                    arg.value = {
-                        apache: false,
-                        nginx: false,
-                        php_fpm: false,
-                        mariadb: false,
-                        postgresql: false
-                    };
-                }
+                arg.value = getStatus();
                 event.sender.send(arg.uuid, arg);
                 break;
             
@@ -239,7 +222,7 @@ function createTrayAppIcon() {
                         if (pwsSettings.debugMode) {
                             winOptions.webPreferences.devTools = true;
                             winOptions.resizable = true;
-                            winOptions.width = 840;
+                            winOptions.width = 1024;
                         }
                         win = new BrowserWindow(winOptions);
 
@@ -478,7 +461,6 @@ function downloadFile(url, localFile) {
 function extractFile(archiveFile) {
     return new Promise((resolve, reject) => {
         const path = require('path');
-        const fs = require('fs');
         const ProgressBar = require('electron-progressbar');
         const progressBar = new ProgressBar({
             indeterminate: true,
@@ -547,6 +529,39 @@ function getDefaultLocalIP() {
 }
 
 /**
+ * getStatus - Gets the current status of services.
+ * 
+ * @returns {Object} Current status of services.
+ */
+function getStatus() {
+    const fs = require('fs');
+    let status = {
+        apache: false,
+        nginx: false,
+        php_fpm: false,
+        mariadb: false,
+        postgresql: false,
+        samba: false
+    };
+    if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
+        const { execSync } = require('child_process');
+        let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no -p ';
+        cmd += pwsSettings.sshPort + " debian@local.code.gdn \"echo '" + pwsSettings.pwsPass;
+        cmd += "' | sudo -S service --status-all\"";
+        const output = execSync(cmd).toString();
+        status = {
+            apache: output.indexOf('[ + ]  apache2') > -1,
+            nginx: output.indexOf('[ + ]  nginx') > -1,
+            php_fpm: output.indexOf('  php') > -1 && output.indexOf('[ - ]  php') == -1,
+            mariadb: output.indexOf('[ + ]  mariadb') > -1,
+            postgresql: output.indexOf('[ + ]  postgresql') > -1,
+            samba: output.indexOf('[ + ]  smbd') > -1
+        };
+    }
+    return status;
+}
+
+/**
  * initApplication - Initializes the application, set the display settings,
  * and return application settings.
  * 
@@ -610,7 +625,6 @@ function readSettings() {
     const packageJson = require('./package.json');
     const appName = packageJson.name;
     const appFolder = path.join(app.getPath('appData'), appName);
-    console.log(appFolder);
     pwsSettings.appFolder = appFolder;
     const pwsFilePath = path.join(appFolder, 'settings.json');
     const fs = require('fs');
@@ -657,12 +671,10 @@ function saveSettings(pwsSettings) {
  * restartHelper - restarts the helper application.
  */
 function restartHelper() {
-    console.log("restartHelper...");
 
     // Check for helper lock file, do a quick shutdown/restart if it exists
     const fs = require('fs');
     if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
-        console.log("quick restart...");
         const { execSync } = require('child_process');
         try {
             let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no ';
@@ -675,7 +687,6 @@ function restartHelper() {
     
     // Otherwise, start the helper application
     } else {
-        console.log("otherwise startHelper...");
         startHelper().then(() => {
             console.log('Helper started.');
         }
@@ -746,7 +757,6 @@ function startHelper() {
                     }else{
                         cmd += `/../../MacOS/Code Garden" "${app.getAppPath()}/helper.js"`;
                     }
-                    console.log(cmd);
                 }
             }
             sudo.exec(cmd, options, (error, stdout, stderr) => {
