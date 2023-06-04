@@ -554,8 +554,7 @@ function getStatus() {
             nginx: output.indexOf('[ + ]  nginx') > -1,
             php_fpm: output.indexOf('  php') > -1 && output.indexOf('[ - ]  php') == -1,
             mariadb: output.indexOf('[ + ]  mariadb') > -1,
-            postgresql: output.indexOf('[ + ]  postgresql') > -1,
-            samba: output.indexOf('[ + ]  smbd') > -1
+            postgresql: output.indexOf('[ + ]  postgresql') > -1 //, samba: output.indexOf('[ + ]  smbd') > -1
         };
     }
     return status;

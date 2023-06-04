@@ -38,12 +38,12 @@
                     <span class="status status-yellow">Checking<span class="animated-dots"></span></span>
                 </td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td>Samba</td>
                 <td id="status-samba" class="text-muted service-stat">
                     <span class="status status-yellow">Checking<span class="animated-dots"></span></span>
                 </td>
-            </tr>
+            </tr> -->
         </tbody>
     </table>
 </div>
@@ -106,11 +106,11 @@
             } else {
                 $('#status-postgresql').html(status_stopped);
             }
-            if (r.value.samba) {
-                $('#status-samba').html(status_online);
-            } else {
-                $('#status-samba').html(status_stopped);
-            }
+            // if (r.value.samba) {
+            //     $('#status-samba').html(status_online);
+            // } else {
+            //     $('#status-samba').html(status_stopped);
+            // }
         });
     }
     setInterval(function() {
