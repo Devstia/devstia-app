@@ -40,9 +40,24 @@ app.on('ready', () => {
             case START_RUNTIME:
             default:
         }
-
+        
         // Create our settings API
         createSetttingsAPI();
+
+        // Copy over our user customizable scripts folder
+        const fs = require('fs');
+        const scriptsFolder = path.join(pwsSettings.appFolder, 'scripts');
+        if (!fs.existsSync(scriptsFolder)) {
+
+            // Copy over our default scripts
+            const defaultScriptsFolder = path.join(__dirname, 'scripts');
+            const fse = require('fs-extra');
+            try {
+                fse.copySync(defaultScriptsFolder, scriptsFolder);
+            } catch (err) {
+                console.error('Error copying folder:', err);
+            }
+        }
 
         // Create our tray app icon
         await createTrayAppIcon();
@@ -182,11 +197,23 @@ function createTrayAppIcon() {
                 click: () => shell.openExternal('http://localhost')
             },
             {
-                label: 'Terminal (ssh)',
-                click: () => {}
+                label: 'Terminal',
+                click: () => {
+                    const { spawn } = require('child_process');
+                    const path = require('path');
+                    const scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
+                    console.log(scriptTerminal);
+                    const p = spawn(scriptTerminal, [pwsSettings.pwsPass, pwsSettings.sshPort.toString()], {
+                        cwd: path.dirname(scriptTerminal),
+                        detached: true,
+                        stdio: 'ignore'
+                    });
+                    console.log( 'Process started' );
+                    console.log(p);
+                }
             },
             {
-                label: 'Files (smb)',
+                label: 'Files',
                 click: () => {}
             },
             {
