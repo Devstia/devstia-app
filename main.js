@@ -573,7 +573,7 @@ function getStatus() {
     if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
         const { execSync } = require('child_process');
         let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no -p ';
-        cmd += pwsSettings.sshPort + " debian@local.code.gdn \"echo '" + pwsSettings.pwsPass;
+        cmd += pwsSettings.sshPort + " debian@local.dev.cc \"echo '" + pwsSettings.pwsPass;
         cmd += "' | sudo -S service --status-all\"";
         const output = execSync(cmd).toString();
         status = {
@@ -704,7 +704,7 @@ function restartHelper() {
         const { execSync } = require('child_process');
         try {
             let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no ';
-            cmd += '-p \'' + pwsSettings.sshPort + '\' debian@local.code.gdn "echo \\"';
+            cmd += '-p \'' + pwsSettings.sshPort + '\' debian@local.dev.cc "echo \\"';
             cmd += pwsSettings.pwsPass + '\\" | sudo -S shutdown -r now\"';
             const output = execSync(cmd);
         } catch (error) {
@@ -807,7 +807,7 @@ function stopHelper() {
     const { execSync } = require('child_process');
     try {
         let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no ';
-        cmd += '-p \'' + pwsSettings.sshPort + '\' debian@local.code.gdn "echo \\"';
+        cmd += '-p \'' + pwsSettings.sshPort + '\' debian@dev.cc "echo \\"';
         cmd += pwsSettings.pwsPass + '\\" | sudo -S shutdown now\"';
         const output = execSync(cmd);
     } catch (error) {
