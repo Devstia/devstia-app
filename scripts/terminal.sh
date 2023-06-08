@@ -12,7 +12,7 @@ tell application "Terminal"
     activate
     
     -- Open a new window and execute SSH command
-    set newTab to do script "clear && sshpass -p '$password' ssh -o StrictHostKeyChecking=no -t -p $port debian@dev.cc"
+    set newTab to do script "clear && sshpass -p '$password' ssh -o StrictHostKeyChecking=no -t -p $port debian@local.dev.cc"
     
 end tell
 EOF
