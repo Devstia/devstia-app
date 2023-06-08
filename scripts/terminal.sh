@@ -10,6 +10,9 @@ script_path="$(pwd)/terminal_login.sh"
 osascript <<EOF
 tell application "Terminal"
     activate
-    do script "'$script_path' '$password' '$port'"
+    
+    -- Open a new window and execute SSH command
+    set newTab to do script "clear && sshpass -p '$password' ssh -o StrictHostKeyChecking=no -t -p $port debian@dev.cc"
+    
 end tell
 EOF
