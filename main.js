@@ -158,7 +158,7 @@ function createSetttingsAPI() {
                             }
                             dialog.showMessageBoxSync({
                                 type: 'info',
-                                message: "Code Garden will now erase sites, reset settings and quit. Please restart Code Garden to begin anew.",
+                                message: "Code Garden will now erase, reset, and shutdown. Please restart Code Garden for a fresh install.",
                                 title: 'Code Garden - Reset System',
                                 icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
                             });
@@ -563,7 +563,7 @@ function extractFile(archiveFile) {
             indeterminate: true,
             closeOnComplete: false,
             title: 'Code Garden - Extracting',
-            text: 'Please wait. Extracting...',
+            text: 'Please wait. Extracting and installing...',
             style: {
                 bar: {
                     "background-color": "#054b1d"
