@@ -130,6 +130,76 @@ function createSetttingsAPI() {
         const fs = require('fs');
         switch (arg.name) {
 
+            // Used to erase and reset the system
+            case 'eraseResetSystem':
+                const prompt = require('electron-prompt');
+                prompt({
+                    title: 'Prompt example',
+                    label: '<div style="font-size:smaller;"><span style="font-weight: bold;">WARNING:</span> This will destroy all sites and reset the server installation. <br>Please type "ERASE" to confirm.</div>',
+                    value: '',
+                    inputAttrs: {
+                        type: 'text'
+                    },
+                    type: 'input',
+                    useHtmlLabel: true,
+                    width: 480,
+                    height: 210
+                })
+                .then((r) => {
+                    if(r === null) {
+                        console.log('user cancelled');
+                    } else {
+                        if (r === 'ERASE') {
+
+                            const dialog = require('electron').dialog;
+                            const nativeImage = require('electron').nativeImage;
+                            if (process.platform === 'darwin') {
+                                app.dock.show();
+                            }
+                            dialog.showMessageBoxSync({
+                                type: 'info',
+                                message: "Code Garden will now erase sites, reset settings and quit. Please restart Code Garden to begin anew.",
+                                title: 'Code Garden - Reset System',
+                                icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
+                            });
+                            const fs = require('fs');
+                            if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
+                                stopHelper();
+                            }
+                            
+                            // Delete all img files in the app folder
+                            const path = require('path');                                    
+                            fs.readdir(pwsSettings.appFolder, (err, files) => {
+                                if (err) {
+                                console.error('Error reading directory:', err);
+                                return;
+                                }
+                                files.forEach((file) => {
+                                    const filePath = path.join(pwsSettings.appFolder, file);
+                                    if (fs.statSync(filePath).isFile() && file.endsWith('.img')) {
+                                        fs.unlink(filePath, (err) => {
+                                        if (err) {
+                                            console.error('Error deleting file:', err);
+                                            return;
+                                        }
+                                        console.log(`Deleted file: ${filePath}`);
+                                        });
+                                    }
+                                });
+                            });
+
+                            // Delete settings file
+                            fs.unlinkSync(path.join(pwsSettings.appFolder, 'settings.json'));
+                            if (process.platform === 'darwin') {
+                                app.dock.hide();
+                            }
+                            app.quit();
+                        }
+                    }
+                })
+                .catch(console.error);
+                break;
+
             // Used by Browse button for websites folder
             case 'selectWebFolder':
                 dialog.showOpenDialog({
@@ -414,13 +484,13 @@ function checkRuntimeArchive(archiveFile) {
                         return;
                     }
                 
-                    // Check if there are no files ending with .img
-                    const noImgFiles = files.every((file) => !file.endsWith('.img'));
-                
-                    if (noImgFiles) {
-                        resolve(EXTRACT_ARCHIVE);
-                    } else {
+                    // Check if the VM image file is present (.img of the same name as the archive)
+                    const vmFile = path.basename(archiveFile.replace('.tar.xz', '.img'));
+                    const hasVM = files.includes(vmFile);
+                    if (hasVM) {
                         resolve(START_RUNTIME);
+                    } else {
+                        resolve(EXTRACT_ARCHIVE);                        
                     }
                 });
             }
