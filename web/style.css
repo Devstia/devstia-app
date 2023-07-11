@@ -41,6 +41,14 @@
 #tabs-preferences-ex2 .mb-3 {
     padding: 0 30px;
 }
+#cert-instructions {
+    padding-top: 4px;
+    font-size: smaller;
+    float: right;
+}
+#cert-instructions span {
+    display: block;
+}
 
 /* Security */
 #tabs-security-ex2 .mb-3 {
