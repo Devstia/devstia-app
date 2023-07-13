@@ -134,9 +134,6 @@ function createSetttingsAPI() {
             case 'regenerateCertificates':
                 const dialog = require('electron').dialog;
                 const nativeImage = require('electron').nativeImage;
-                if (process.platform === 'darwin') {
-                    app.dock.show();
-                }
                 dialog.showMessageBox({
                     type: 'question',
                     buttons: ['Yes', 'No'],
@@ -144,9 +141,8 @@ function createSetttingsAPI() {
                     message: 'Regenerate certificates will erase and recreate the master certificate and all dependent website certificates. You will need to re-install the master certificate for your browser(s); continue?',
                     title: 'Code Garden - Regenerate Certificates',
                     icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
-                }).then((response) => {
-                    app.dock.hide();
-                });
+                }).then((r) => {
+                }).catch(console.error); 
                 break;
 
             // Used to erase and reset the system
@@ -660,11 +656,7 @@ function getStatus() {
         samba: false
     };
     if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
-        const { execSync } = require('child_process');
-        let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no -p ';
-        cmd += pwsSettings.sshPort + " debian@local.dev.cc \"echo '" + pwsSettings.pwsPass;
-        cmd += "' | sudo -S service --status-all\"";
-        const output = execSync(cmd).toString();
+        const output = remoteExecute('service --status-all');
         status = {
             apache: output.indexOf('[ + ]  apache2') > -1,
             nginx: output.indexOf('[ + ]  nginx') > -1,
@@ -755,6 +747,56 @@ function readSettings() {
 }
 
 /**
+ * remoteExecute - Executes a command on the remote host and returns the results.
+ * 
+ * @cmd {String} Command to execute.
+ * @returns {String} Results of the command.
+ */
+function remoteExecute(rcmd) {
+
+    // TODO: replace with trusted key generated via hcpp-cg-pws
+    const fs = require('fs');
+    let output = '';
+    if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
+        try {
+            const { execSync } = require('child_process');
+            let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no -p ';
+            cmd += pwsSettings.sshPort + " debian@local.dev.cc \"echo '" + pwsSettings.pwsPass;
+            cmd += "' | sudo -S " + rcmd + "\"";
+            output = execSync(cmd).toString();
+        } catch (error) {
+            console.log("Unable to execute remote command.");
+            console.log(error);
+        }
+    }else{
+        console.log("Unable to execute remote command. Helper not running.");
+    }
+    return output;
+}
+
+/**
+ * restartHelper - restarts the helper application.
+ */
+function restartHelper() {
+
+    // Check for helper lock file, do a quick shutdown/restart if it exists
+    const fs = require('fs');
+    if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
+        const output = remoteExecute('shutdown -r now');
+    
+    // Otherwise, start the helper application
+    } else {
+        startHelper().then(() => {
+            console.log('Helper started.');
+        }
+        ).catch((error) => {
+            console.error('Unable to start helper.');
+            console.error(error);
+        });
+    }
+}
+
+/**
  * saveSettings - Saves the settings to the settings file.
  * 
  * @param {Object} pwsSettings Application settings.
@@ -780,36 +822,6 @@ function saveSettings(pwsSettings) {
     const pwsFilePath = path.join(pwsCopy.appFolder, 'settings.json');
     delete pwsCopy.appFolder; // Remove the appFolder property prior to saving
     fs.writeFileSync(pwsFilePath, JSON.stringify(pwsCopy, null, 2));
-}
-
-/**
- * restartHelper - restarts the helper application.
- */
-function restartHelper() {
-
-    // Check for helper lock file, do a quick shutdown/restart if it exists
-    const fs = require('fs');
-    if (fs.existsSync(pwsSettings.appFolder + '/helper.lock')) {
-        const { execSync } = require('child_process');
-        try {
-            let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no ';
-            cmd += '-p \'' + pwsSettings.sshPort + '\' debian@local.dev.cc "echo \\"';
-            cmd += pwsSettings.pwsPass + '\\" | sudo -S shutdown -r now\"';
-            const output = execSync(cmd);
-        } catch (error) {
-            // Ignore sudden disconnect error from shutdown
-        }
-    
-    // Otherwise, start the helper application
-    } else {
-        startHelper().then(() => {
-            console.log('Helper started.');
-        }
-        ).catch((error) => {
-            console.error('Unable to start helper.');
-            console.error(error);
-        });
-    }
 }
 
 /**
@@ -893,13 +905,5 @@ function startHelper() {
  * stopHelper - stops the helper application.
  */
 function stopHelper() {
-    const { execSync } = require('child_process');
-    try {
-        let cmd = 'sshpass -p "' + pwsSettings.pwsPass + '" ssh -o StrictHostKeyChecking=no ';
-        cmd += '-p \'' + pwsSettings.sshPort + '\' debian@dev.cc "echo \\"';
-        cmd += pwsSettings.pwsPass + '\\" | sudo -S shutdown now\"';
-        const output = execSync(cmd);
-    } catch (error) {
-        // Ignore sudden disconnect error from shutdown
-    }
+    remoteExecute('shutdown now');
 }
