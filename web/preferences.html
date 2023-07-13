@@ -1,6 +1,5 @@
     <p>
-        Use the 'Websites Folder' to set the location for your websites on your local file system. 
-        LAN IP Address is used to assist testing on mobile devices. Debug mode is used for troubleshooting and can impact performance.
+        Use the preferences panel to set the local IP address for your server, manage the master certificate, or reset the system to a new installation. Debug mode is used for troubleshooting and can impact performance.
     </p>
     <!-- <div class="mb-3">
         <label class="form-label">Websites Folder</label>
@@ -68,6 +67,12 @@
         </label>
     </div> 
     <script>
+
+        // Handle regenerate certificates button
+        $('#regenerate-certificates').click( (r) => {
+            pws.invokeEvent('regenerateCertificates', (r) => {
+            });
+        });
 
         // Handle erase and reset button
         $('#erase-reset-system').click( (r) => {

@@ -130,6 +130,25 @@ function createSetttingsAPI() {
         const fs = require('fs');
         switch (arg.name) {
 
+            // Regenerate all website certificates
+            case 'regenerateCertificates':
+                const dialog = require('electron').dialog;
+                const nativeImage = require('electron').nativeImage;
+                if (process.platform === 'darwin') {
+                    app.dock.show();
+                }
+                dialog.showMessageBox({
+                    type: 'question',
+                    buttons: ['Yes', 'No'],
+                    defaultId: 1,
+                    message: 'Regenerate certificates will erase and recreate the master certificate and all dependent website certificates. You will need to re-install the master certificate for your browser(s); continue?',
+                    title: 'Code Garden - Regenerate Certificates',
+                    icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
+                }).then((response) => {
+                    app.dock.hide();
+                });
+                break;
+
             // Used to erase and reset the system
             case 'eraseResetSystem':
                 const prompt = require('electron-prompt');
