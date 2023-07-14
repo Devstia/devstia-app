@@ -142,6 +142,35 @@ function createSetttingsAPI() {
                     title: 'Code Garden - Regenerate Certificates',
                     icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
                 }).then((r) => {
+                    if (r.response == 1) {
+                        console.log('user cancelled');
+                    }else {
+                        const ProgressBar = require('electron-progressbar');
+                        const progressBar = new ProgressBar({
+                            indeterminate: true,
+                            closeOnComplete: false,
+                            title: 'Code Garden - Regenerating Certificates',
+                            text: 'Please wait. Regenerating Certificates...',
+                            style: {
+                                bar: {
+                                    "background-color": "#054b1d"
+                                },
+                                value: {
+                                    "background-color": "#89c23f"
+                                }
+                            },
+                            browserWindow: {
+                                icon: './images/cg.png'
+                            }
+                        });
+                        setTimeout(function () {
+                            console.log( remoteExecute('/usr/local/hestia/bin/v-invoke-plugin regenerate_certificates') );
+                            progressBar.setCompleted();
+                            setTimeout(function () {
+                                progressBar.close();
+                            }, 1000);
+                        }, 1000);
+                    }
                 }).catch(console.error); 
                 break;
 
