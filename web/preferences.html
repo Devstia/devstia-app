@@ -48,8 +48,8 @@
             </span>
         </button>
         <div id="cert-instructions">
-            <span><a href="">&#128279; How to install master certificate</a></span>
-            <span><a href="">&#128279; Download master certificate</a></span>
+            <span><a href="https://code.gdn/pws/install-master-cert">&#128279; How to install master certificate</a></span>
+            <span><a href="#dlMasterCert" id="dlMasterCert">&#128279; Show master certificate</a></span>
         </div>
     </div>
     <div class="mb-3">
@@ -71,7 +71,6 @@
         // Handle regenerate certificates button
         $('#regenerate-certificates').click( (r) => {
             pws.invokeEvent('regenerateCertificates', (r) => {
-                
             });
         });
 
@@ -93,6 +92,12 @@
         // Fill in current value of lan ip address
         pws.getSetting('lanIP', (r) => {
             $('#lan-ip').val(r.value);
+        });
+
+        // Fill in download master certificate link
+        $('a#dlMasterCert').click( (r) => {
+            pws.invokeEvent('dlMasterCert', (r) => {
+            });
         });
 
         // Fill in current value of debug mode

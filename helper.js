@@ -146,7 +146,7 @@ function startServer() {
         '-device', 'virtio-net-pci,netdev=net0',
         '-netdev', 'user,id=net0,hostfwd=tcp::8445-:445,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083',
         '-drive', 'if=virtio,format=qcow2,file=pws-amd64.img',
-        '-fsdev', '"local,id=virtfs0,path=' + pwsSettings.appFolder + ',security_model=mapped-xattr"',
+        '-fsdev', '"local,id=virtfs0,path=' + pwsSettings.appFolder + ',security_model=mapped-xattr,fmode=0644,dmode=0755"',
         '-device', 'virtio-9p-pci,fsdev=virtfs0,mount_tag=appFolder',
         '-device', 'virtio-balloon-pci'
     ];

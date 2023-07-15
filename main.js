@@ -130,6 +130,11 @@ function createSetttingsAPI() {
         const fs = require('fs');
         switch (arg.name) {
 
+            // Download the master certificate
+            case 'dlMasterCert':
+                require('electron').shell.showItemInFolder(pwsSettings.appFolder + '/pws.crt');
+                break;
+
             // Regenerate all website certificates
             case 'regenerateCertificates':
                 const dialog = require('electron').dialog;
