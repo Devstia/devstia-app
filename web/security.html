@@ -1,8 +1,7 @@
 <p>
-    You can change security options for Code Garden PWS; the password is used to
-    protect the Personal Web Server interface. The `Allow Code Garden` option allows PWS to
-    <a href="https://code.gdn/about-access/">connect with Code Garden</a> for
-    obtaining updates, support, and access to enhanced features.
+    The password is for control panel and SSH access. Use the <a href="https://code.gdn/docs/install-master-cert">`Regenerate...`</a>
+    button for web certificates and SSH keys. The <a href="https://code.gdn/about-access/">`Allow Code Garden`</a> option allows 
+    connecting to code.gdn for enhanced features.
 </p>
 <div class="mb-3">
     <label class="form-label">PWS Password</label>
@@ -39,6 +38,18 @@
         <div class="col">
             <input id="ssh-port" type="text" class="form-control" />
         </div>
+    </div>
+</div>
+<div class="mb-3">
+    <button id="regenerate-certificates" title="Regenerate Certificates" class="btn btn-icon" aria-label="erase and reset">
+        <span style="padding: 0 8px;">
+            <svg fill="none" stroke="currentColor" width="20" height="20" viewBox="0 0 24 24" stroke-width="1" xmlns="http://www.w3.org/2000/svg"><path id="path49" d="m 4.4707031,1.2734375 c -0.2339012,0 -0.4364941,0.091868 -0.6074219,0.2753906 C 3.6923534,1.7323505 3.6074219,1.9500359 3.6074219,2.2011719 V 13.328125 c 0,0.830681 0.1517499,1.654509 0.453125,2.470703 0.3013703,0.81619 0.6738262,1.541157 1.1191406,2.173828 0.4453095,0.632668 0.9755547,1.248794 1.5917969,1.847656 0.6162373,0.598864 1.1852516,1.096166 1.7070312,1.492188 0.5217797,0.396022 1.0660515,0.770493 1.6328124,1.123047 0.566761,0.352559 0.970584,0.591229 1.208984,0.716797 0.238398,0.125568 0.428327,0.221448 0.572266,0.289062 0.107954,0.05795 0.225615,0.08789 0.351563,0.08789 0.125945,0 0.243608,-0.02994 0.351562,-0.08789 0.143939,-0.06761 0.333865,-0.163494 0.572266,-0.289062 0.238398,-0.125568 0.642224,-0.364238 1.208984,-0.716797 0.566761,-0.352554 1.111032,-0.727025 1.632813,-1.123047 0.521778,-0.396022 1.090788,-0.893324 1.707031,-1.492188 0.616238,-0.598862 1.146483,-1.214988 1.591797,-1.847656 0.445308,-0.632671 0.817766,-1.357638 1.11914,-2.173828 0.301371,-0.816194 0.453125,-1.640022 0.453125,-2.470703 V 2.2011719 c 0,-0.251136 -0.08688,-0.4688214 -0.257812,-0.6523438 C 20.45212,1.3653057 20.25148,1.2734375 20.017578,1.2734375 Z m 7.7734379,2.7832031 h 6.044921 v 9.2714844 c 0,1.699998 -1.055815,3.439527 -3.169921,5.216797 -0.840353,0.710299 -1.793019,1.367282 -2.855469,1.972656 -0.0069,-0.01599 -0.0131,-0.0425 -0.01953,-0.07227 z" /></svg>
+            Regenerate Certificates & Keys
+        </span>
+    </button>
+    <div id="cert-instructions">
+        <span><a href="https://code.gdn/docs/install-master-cert">&#128279; How to install master certificate</a></span>
+        <span><a href="#dlMasterCert" id="dlMasterCert">&#128279; Show master certificate & keys</a></span>
     </div>
 </div>
 <div class="mb-3">
@@ -80,6 +91,18 @@
     });
     pws.getSetting('allowCG', r => {
         $('#allow-cg').prop('checked', r.value);
+    });
+
+    // Handle regenerate certificates button
+    $('#regenerate-certificates').click( (r) => {
+        pws.invokeEvent('regenerateCertificates', (r) => {
+        });
+    });
+
+    // Process download master certificate link
+    $('a#dlMasterCert').click( (r) => {
+        pws.invokeEvent('dlMasterCert', (r) => {
+        });
     });
 
     // Update settings when value changes

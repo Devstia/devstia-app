@@ -143,8 +143,8 @@ function createSetttingsAPI() {
                     type: 'question',
                     buttons: ['Yes', 'No'],
                     defaultId: 1,
-                    message: 'Regenerate certificates will erase and recreate the master certificate and all dependent website certificates. You will need to re-install the master certificate for your browser(s); continue?',
-                    title: 'Code Garden - Regenerate Certificates',
+                    message: 'Regenerate will erase and recreate SSH keys and website certificates. You will need to re-install the master certificate for your browser(s); continue?',
+                    title: 'Code Garden - Regenerate',
                     icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
                 }).then((r) => {
                     if (r.response == 1) {
@@ -154,8 +154,8 @@ function createSetttingsAPI() {
                         const progressBar = new ProgressBar({
                             indeterminate: true,
                             closeOnComplete: false,
-                            title: 'Code Garden - Regenerating Certificates',
-                            text: 'Please wait. Regenerating Certificates...',
+                            title: 'Code Garden - Regenerating',
+                            text: 'Please wait. Regenerating...',
                             style: {
                                 bar: {
                                     "background-color": "#054b1d"
@@ -169,7 +169,7 @@ function createSetttingsAPI() {
                             }
                         });
                         setTimeout(function () {
-                            console.log( remoteExecute('/usr/local/hestia/bin/v-invoke-plugin regenerate_certificates') );
+                            console.log( remoteExecute('/usr/local/hestia/bin/v-invoke-plugin regenerate_cert_keys') );
                             progressBar.setCompleted();
                             setTimeout(function () {
                                 progressBar.close();
