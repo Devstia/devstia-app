@@ -169,7 +169,7 @@ function createSetttingsAPI() {
                             }
                         });
                         setTimeout(function () {
-                            console.log( remoteExecute('/usr/local/hestia/bin/v-invoke-plugin regenerate_cert_keys') );
+                            console.log( remoteExecute('/usr/local/hestia/bin/v-invoke-plugin regenerate_certificates') );
                             progressBar.setCompleted();
                             setTimeout(function () {
                                 progressBar.close();
