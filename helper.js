@@ -1,5 +1,5 @@
 /**
- * Virtuosoft - Code Garden PWS (Personal Web Server) Helper
+ * Virtuosoft - CodeGarden PWS (Personal Web Server) Helper
  * 
  * Our elevated/privileged functions that are used to start/stop/restart the server
  */

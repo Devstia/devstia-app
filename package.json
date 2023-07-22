@@ -1,7 +1,7 @@
 {
   "name": "@virtuosoft/cg-pws-app",
   "version": "1.0.0",
-  "description": "Virtuosoft's Code Garden PWS (personal web server) Edition for running and developing web applications locally.",
+  "description": "Virtuosoft's CodeGarden PWS (personal web server) Edition for running and developing web applications locally.",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",

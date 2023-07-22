@@ -1,5 +1,5 @@
 /**
- * Virtuosoft - Code Garden PWS (Personal Web Server)
+ * Virtuosoft - CodeGarden PWS (Personal Web Server)
  * 
  * Our routine for simply downloading a file at a given URL and providing a progress.
  */

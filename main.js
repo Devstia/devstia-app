@@ -1,5 +1,5 @@
 /**
- * Virtuosoft - Code Garden PWS (Personal Web Server)
+ * Virtuosoft - CodeGarden PWS (Personal Web Server)
  * 
  * Provides a desktop application for managing CODE (Core Open Developer Elements)
  */
@@ -144,7 +144,7 @@ function createSetttingsAPI() {
                     buttons: ['Yes', 'No'],
                     defaultId: 1,
                     message: 'Regenerate will erase and recreate SSH keys and website certificates. You will need to re-install the master certificate for your browser(s); continue?',
-                    title: 'Code Garden - Regenerate',
+                    title: 'CodeGarden - Regenerate',
                     icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
                 }).then((r) => {
                     if (r.response == 1) {
@@ -154,7 +154,7 @@ function createSetttingsAPI() {
                         const progressBar = new ProgressBar({
                             indeterminate: true,
                             closeOnComplete: false,
-                            title: 'Code Garden - Regenerating',
+                            title: 'CodeGarden - Regenerating',
                             text: 'Please wait. Regenerating...',
                             style: {
                                 bar: {
@@ -207,8 +207,8 @@ function createSetttingsAPI() {
                             }
                             dialog.showMessageBoxSync({
                                 type: 'info',
-                                message: "Code Garden will now erase, reset, and shutdown. Please restart Code Garden for a fresh install.",
-                                title: 'Code Garden - Reset System',
+                                message: "CodeGarden will now erase, reset, and shutdown. Please restart CodeGarden for a fresh install.",
+                                title: 'CodeGarden - Reset System',
                                 icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
                             });
                             const fs = require('fs');
@@ -352,7 +352,7 @@ function createTrayAppIcon() {
                             width: 600,
                             height: 480,
                             modal: true,
-                            title: 'Code Garden - Settings',
+                            title: 'CodeGarden - Settings',
                             maximizable: false,
                             minimizable: false,
                             resizable: false,
@@ -421,7 +421,7 @@ function createTrayAppIcon() {
                             buttons: ['Yes', 'No'],
                             defaultId: 1,
                             message: 'Stop all background services before quitting?',
-                            title: 'Code Garden - Quit Application',
+                            title: 'CodeGarden - Quit Application',
                             icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
                         }).then((response) => {
                             if (process.platform === 'darwin') {
@@ -476,7 +476,7 @@ function checkHostCompatibility() {
             dialog.showMessageBoxSync({
                 type: 'warning',
                 message: 'Unsupported platform; the application will now quit.',
-                title: 'Code Garden - Unsupported Platform',
+                title: 'CodeGarden - Unsupported Platform',
                 icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
             });
             if (process.platform === 'darwin') {
@@ -515,7 +515,7 @@ function checkRuntimeArchive(archiveFile) {
                     buttons: ['Download', 'Quit'],
                     defaultId: 1,
                     message: 'A runtime file for your ' + process.arch + ' based processor is required. Download it now (approx. 1.8gb)?',
-                    title: 'Code Garden - Download',
+                    title: 'CodeGarden - Download',
                     icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
                 });
                 if (process.platform === 'darwin') {
@@ -565,7 +565,7 @@ function downloadFile(url, localFile) {
         const progressBar = new ProgressBar({
             indeterminate: false,
             closeOnComplete: false,
-            title: 'Code Garden - Downloading',
+            title: 'CodeGarden - Downloading',
             text: 'Please wait. Downloading...',
             style: {
                 bar: {
@@ -611,7 +611,7 @@ function extractFile(archiveFile) {
         const progressBar = new ProgressBar({
             indeterminate: true,
             closeOnComplete: false,
-            title: 'Code Garden - Extracting',
+            title: 'CodeGarden - Extracting',
             text: 'Please wait. Extracting and installing...',
             style: {
                 bar: {
@@ -878,8 +878,8 @@ function startHelper() {
             }
             dialog.showMessageBoxSync({
                 type: 'info',
-                message: "Code Garden will now ask you for authorization to start services.\n Click OK to continue.",
-                title: 'Code Garden - Information',
+                message: "CodeGarden will now ask you for authorization to start services.\n Click OK to continue.",
+                title: 'CodeGarden - Information',
                 icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
             });
             if (process.platform === 'darwin') {
@@ -889,7 +889,7 @@ function startHelper() {
             // Prompt for authorization to start helper application
             const sudo = require('sudo-prompt');
             let options = {
-                name: 'Code Garden'
+                name: 'CodeGarden'
             };
             let cmd = '';
 
@@ -899,7 +899,7 @@ function startHelper() {
 
                 // macOS bundled application
                 if (process.platform === 'darwin') {
-                    cmd = `export ELECTRON_RUN_AS_NODE=true && "${app.getAppPath()}/../../MacOS/Code Garden" "${app.getAppPath()}/helper.js"`;
+                    cmd = `export ELECTRON_RUN_AS_NODE=true && "${app.getAppPath()}/../../MacOS/CodeGarden" "${app.getAppPath()}/helper.js"`;
                 }
 
                 // Windows executable
@@ -914,9 +914,9 @@ function startHelper() {
                     // Check for out folder
                     cmd += `export ELECTRON_RUN_AS_NODE=true && "${app.getAppPath()}`;
                     if (fs.existsSync(`${app.getAppPath()}/out`)) {
-                        cmd += `/out/Code Garden-darwin-x64/Code Garden.app/Contents/MacOS/Code Garden" "${app.getAppPath()}/helper.js"`;
+                        cmd += `/out/CodeGarden-darwin-x64/CodeGarden.app/Contents/MacOS/CodeGarden" "${app.getAppPath()}/helper.js"`;
                     }else{
-                        cmd += `/../../MacOS/Code Garden" "${app.getAppPath()}/helper.js"`;
+                        cmd += `/../../MacOS/CodeGarden" "${app.getAppPath()}/helper.js"`;
                     }
                 }
             }
