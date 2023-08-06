@@ -338,12 +338,10 @@ function createTrayAppIcon() {
                     if (os.platform() === 'darwin') {
                         const { exec } = require('child_process');
                         const pwsPass = pwsSettings.pwsPass;
-                        const script = `
-                        osascript <<END
-                          mount volume "https://webdav-pws.dev.cc" as user name "pws" with password "${pwsPass}"
-                          do shell script "open /Volumes/webdav-pws.dev.cc"
-                        END
-                        `;
+                        const script = `osascript <<END
+                            mount volume "https://webdav-pws.dev.cc" as user name "pws" with password "${pwsPass}"
+                            do shell script "open /Volumes/webdav-pws.dev.cc"
+END`;
                         exec(script, (error, stdout, stderr) => {
                             if (error) {
                               console.error(`Error executing the script: ${error.message}`);
@@ -445,7 +443,25 @@ function createTrayAppIcon() {
                             if (process.platform === 'darwin') {
                                 app.dock.hide();
                             }
+
+                            // Stop all services and quit
                             if (response.response === 0) {
+
+                                // Unmount webdav on macOS
+                                const os = require('os');
+                                const fs = require('fs');
+                                if (os.platform() === 'darwin') {
+                                    if (fs.existsSync('/Volumes/webdav-pws.dev.cc')) {
+                                        const { exec } = require('child_process');
+                                        const script = 'umount /Volumes/webdav-pws.dev.cc';
+                                        exec(script, (error, stdout, stderr) => {
+                                            if (error) {
+                                              console.error(`Error executing the script: ${error.message}`);
+                                              return;
+                                            }
+                                        });
+                                    }
+                                }
                                 stopHelper();
                                 app.quit();
                             } else {
