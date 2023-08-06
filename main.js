@@ -333,7 +333,25 @@ function createTrayAppIcon() {
             },
             {
                 label: 'Files',
-                click: () => {}
+                click: () => {
+                    const os = require('os');
+                    if (os.platform() === 'darwin') {
+                        const { exec } = require('child_process');
+                        const pwsPass = pwsSettings.pwsPass;
+                        const script = `
+                        osascript <<END
+                          mount volume "https://webdav-pws.dev.cc" as user name "pws" with password "${pwsPass}"
+                          do shell script "open /Volumes/webdav-pws.dev.cc"
+                        END
+                        `;
+                        exec(script, (error, stdout, stderr) => {
+                            if (error) {
+                              console.error(`Error executing the script: ${error.message}`);
+                              return;
+                            }
+                        });
+                    }
+                }
             },
             {
                 type: 'separator'
