@@ -144,7 +144,7 @@ function startServer() {
         '-drive', 'if=pflash,format=raw,file=efi_amd64.img,readonly=on',
         '-drive', 'if=pflash,format=raw,file=efi_amd64_vars.img,readonly=on',
         '-device', 'virtio-net-pci,netdev=net0',
-        '-netdev', 'user,id=net0,hostfwd=tcp::8445-:445,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083',
+        '-netdev', 'user,id=net0,hostfwd=tcp::445-:445,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083',
         '-drive', 'if=virtio,format=qcow2,file=pws-amd64.img',
         '-fsdev', '"local,id=virtfs0,path=' + pwsSettings.appFolder + ',security_model=mapped-xattr,fmode=0644,dmode=0755"',
         '-device', 'virtio-9p-pci,fsdev=virtfs0,mount_tag=appFolder',
