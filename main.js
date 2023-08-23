@@ -313,7 +313,25 @@ function createTrayAppIcon() {
         const menu = Menu.buildFromTemplate([
             {
                 label: 'My Websites (localhost)',
-                click: () => shell.openExternal('http://localhost')
+                click: () => {
+                    // Write trusted token for auto-login, this verifies the source of the request
+                    const fs = require('fs');
+                    const path = require('path');
+                    const altFile = path.join(pwsSettings.appFolder, 'alt.txt');
+
+                    /**
+                     * Private utility function to generate a UUID.
+                     */
+                    function uuidv4() {
+                        const crypto = require('crypto');
+                        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) =>
+                            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+                        );
+                    }
+                    const altContent = uuidv4().toString();
+                    fs.writeFileSync(altFile, altContent);
+                    shell.openExternal('http://localhost/?alt=' + altContent);
+                }
             },
             {
                 label: 'Terminal',
