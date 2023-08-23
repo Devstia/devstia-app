@@ -3,16 +3,19 @@
 # This script is executed by the Terminal menu in the system/tray icon.
 # It expects two parameters: the password and the port number.
 #
-password=$1
-port=$2
-script_path="$(pwd)/terminal_login.sh"
+port=$1
+private_key="$(pwd)/../security/ssh/pws_rsa"
 
 osascript <<EOF
 tell application "Terminal"
     activate
     
     -- Open a new window and execute SSH command
-    set newTab to do script "clear && sshpass -p '$password' ssh -o StrictHostKeyChecking=no -t -p $port pws@local.dev.cc"
-    
+    set newTab to do script ""
+    do script "ssh -q -o StrictHostKeyChecking=no -i \"$private_key\" pws@local.dev.cc -p $port && exit" in newTab
+    repeat while newTab is not missing value
+        delay 1
+        set custom title of newTab to "CodeGarden\n"
+    end repeat
 end tell
 EOF

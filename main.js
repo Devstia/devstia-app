@@ -322,7 +322,7 @@ function createTrayAppIcon() {
                     const path = require('path');
                     const scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
                     console.log(scriptTerminal);
-                    const p = spawn(scriptTerminal, [pwsSettings.pwsPass, pwsSettings.sshPort.toString()], {
+                    const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
                         cwd: path.dirname(scriptTerminal),
                         detached: true,
                         stdio: 'ignore'
