@@ -823,8 +823,7 @@ function readSettings() {
     const fs = require('fs');
     if (fs.existsSync(pwsFilePath)) {
         pwsSettings = JSON.parse(fs.readFileSync(pwsFilePath));
-        const CryptoJS = require('crypto-js');
-        pwsSettings.pwsPass = CryptoJS.AES.decrypt(pwsSettings.pwsPass, "personal-web-server").toString(CryptoJS.enc.Utf8);
+        pwsSettings.pwsPass = decrypt(pwsSettings.pwsPass);
         pwsSettings.appFolder = appFolder;
     }else{
         saveSettings(pwsSettings); // Save the default settings
@@ -902,8 +901,7 @@ function saveSettings(pwsSettings) {
     }
 
     // Save the settings
-    const CryptoJS = require('crypto-js');
-    pwsCopy.pwsPass = CryptoJS.AES.encrypt(pwsCopy.pwsPass, "personal-web-server").toString();
+    pwsCopy.pwsPass = encrypt(pwsCopy.pwsPass);
     const path = require('path');
     const pwsFilePath = path.join(pwsCopy.appFolder, 'settings.json');
     delete pwsCopy.appFolder; // Remove the appFolder property prior to saving
@@ -992,4 +990,48 @@ function startHelper() {
  */
 function stopHelper() {
     remoteExecute('shutdown now');
+}
+
+/**
+ * Encrypts data using aes-256-cbc algorithm
+ * 
+ * @param data string to be encrypted
+ * @returns string containing encrypted data and iv
+ */
+function encrypt(data) {
+    const crypto = require('crypto');
+    const key = crypto.createHash('md5').update('personal-web-server').digest('hex');
+    let iv = crypto.randomBytes(16);
+    let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+    let encrypted = cipher.update(data);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+
+    // Returning iv and encrypted data
+    return encrypted.toString('base64') + ":" + iv.toString('base64');
+}
+
+/**
+ * Decrypts data using aes-256-cbc algorithm
+ * 
+ * @param data string to be decrypted
+ * @returns string containing decrypted data
+ */
+function decrypt(data) {
+    const crypto = require('crypto');
+    const key = crypto.createHash('md5').update('personal-web-server').digest('hex');
+    let encryptedText = data.split(':');
+    let iv = encryptedText[1];
+    iv = Buffer.from(iv, 'base64');
+    encryptedText = encryptedText[0];
+    encryptedText = Buffer.from(encryptedText, 'base64');
+
+    // Creating Decipher
+    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+
+    // Updating encrypted text
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+
+    // returns data after decryption
+    return decrypted.toString();
 }
