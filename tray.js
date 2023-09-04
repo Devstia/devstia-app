@@ -1,0 +1,111 @@
+/**
+ * Tray object represents application tray/system icon with pull down menu.
+ */
+var Tray = {
+
+    // Properties
+    listeners: [],
+    menu: null,
+    qutting: false,
+
+    // Methods
+    addEventListener: function(event, callback) {
+        this.listeners.push({event: event, callback: callback});
+    },
+
+    create: function() {
+        
+        // Create the tray icon
+        const nativeImage = require('electron').nativeImage;
+        const app = require('electron').app;
+        let icon = nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
+        icon = icon.resize({
+            height: 16,
+            width: 16
+        });
+        const Tray = require('electron').Tray;
+        const tray = new Tray(icon);
+     
+        // Create the menu
+        const Menu = require('electron').Menu;
+        this.menu = Menu.buildFromTemplate([
+            {
+                label: 'My Websites (localhost)',
+                id: 'localhost',
+                enabled: false,
+                click: () => {
+                    this.invokeListeners('localhost');
+                }
+            },
+            {
+                label: 'Terminal',
+                id: 'terminal',
+                enabled: false,
+                click: () => {
+                    this.invokeListeners('terminal');
+                }
+            },
+            {
+                label: 'Files',
+                id: 'files',
+                enabled: false,
+                click: () => {
+                    this.invokeListeners('files');
+                }
+            },
+            {
+                type: 'separator'
+            },
+            {
+                label: 'Settings',
+                id: 'settings',
+                enabled: false,
+                click: () => {
+                    this.invokeListeners('settings');
+                }
+            },
+            {
+                type: 'separator'
+            },
+            {
+                label: 'Quit',
+                id: 'quit',
+                click: () => {
+                    this.quitting = this.invokeListeners('quit', true);
+                    app.quit();
+                }
+            }
+        ]);
+        tray.setContextMenu(this.menu);
+
+        // Keep app in memory when the user closes the window
+        app.on('before-quit', (event) => {
+            if (!this.quitting) { // Unless quitting
+                event.preventDefault();
+            }
+        });
+    },
+
+    invokeListeners: function(event, arg) {
+        for (let i = 0; i < this.listeners.length; i++) {
+            if (this.listeners[i].event === event) {
+                arg = this.listeners[i].callback(arg);
+            }
+        }
+        return arg;
+    },
+
+    removeEventListener: function(event, callback) {
+        for (let i = 0; i < this.listeners.length; i++) {
+            if (this.listeners[i].event === event && this.listeners[i].callback === callback) {
+                this.listeners.splice(i, 1);
+                break;
+            }
+        }
+    },
+
+    setMenuState: function(menuItem, enabled) {
+        this.menu.getMenuItemById(menuItem).enabled = enabled;
+    },
+}
+module.exports = Tray;
