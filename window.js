@@ -11,7 +11,6 @@ var Window = {
     addEventListener: function(event, callback) {
         this.listeners.push({event: event, callback: callback});
     },
-
     invokeListeners: function(event, arg) {
         for (let i = 0; i < this.listeners.length; i++) {
             if (this.listeners[i].event === event) {
@@ -20,7 +19,6 @@ var Window = {
         }
         return arg;
     },
-
     removeEventListener: function(event, callback) {
         for (let i = 0; i < this.listeners.length; i++) {
             if (this.listeners[i].event === event && this.listeners[i].callback === callback) {
@@ -29,7 +27,6 @@ var Window = {
             }
         }
     },
-
     /**
      * show - Shows the main application window with the given file.
      * @param {*} file contains the URL to load.
@@ -52,8 +49,8 @@ var Window = {
                 //devTools: false
             }
         }
+        this.win = new BrowserWindow(winOptions);
         let win = this.win;
-        win = new BrowserWindow(winOptions);
         win.on('closed', () => {
             this.invokeListeners('closed');
             const app = require('electron').app;
@@ -83,6 +80,16 @@ var Window = {
             win.show();
         });
         win.loadFile(file);
+    },
+
+    /**
+     * setElmTextById - updates the text within the given element by id.
+     * @param {string} id - the id of the element to update.
+     * @param {string} text - the inner text to set the element content to.
+     */
+    setElmTextById: function(id, text) {
+        if (this.win == null) return;
+        this.win.webContents.executeJavaScript("if (document.getElementById('" + id + "') != null) document.getElementById('" + id + "').innerText = '" + text + "';");
     }
 };
 module.exports = Window;

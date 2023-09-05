@@ -2,7 +2,6 @@
  * Our preload script provides a bridge between the main process and the renderer process.
  */
 const { contextBridge, ipcRenderer } = require('electron');
-
 const ipcMain = {
 
     // Properties
