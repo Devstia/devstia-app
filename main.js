@@ -31,27 +31,45 @@ app.on('ready', () => {
     const Tray = require('./tray.js');
     Tray.create();
 
-    // Show the main application window
-    const Window = require('./window.js');
-    const VMS = require('./vms.js');
-    const state = VMS.state(pwsSettings);
-    Window.show('./web/' + state + '.html');
+    // Show the main application window state
+    function showWindow() {
+        const Window = require('./window.js');
+        const VMS = require('./vms.js'); 
+        const state = VMS.state(pwsSettings);
+        Window.show('./web/' + state + '.html');
 
-    // Download compatible VMS (virtual machine server) runtime
-    if (state == 'download') {
-        VMS.download( (percentage) => {
-            if (isNaN(percentage)) percentage = 0;
-            Window.setElmTextById('progress', percentage + '%');
-        });
+        // Download compatible VMS (virtual machine server) runtime
+        if (state == 'download') {
+            VMS.download( (percentage) => {
+                if (isNaN(percentage)) percentage = 0;
+                Window.setElmTextById('progress', percentage + '%');
+                if (percent == 100) {
+                    showWindow(); // Done, re-check state, and extract
+                } 
+            });
+        }
+        
+        // Extract the VMS archive runtime
+        if (state == 'extract') {
+            VMS.extract(() => {
+                showWindow(); // Done, re-check state, and startup 
+            });
+        }
+
+        // Quit the application if we're not in startup state
+        if (state != 'startup') {
+            Window.addEventListener('closed', () => {
+                Tray.quitting = true;
+                VMS.quitting = true;
+                
+                // Give a second for pending dl/extract to quit
+                setTimeout(() => {
+                    app.quit();
+                }, 1000);
+            });
+        };
     }
-
-    // Quit the application if we're not in startup state
-    if (state != 'startup') {
-        Window.addEventListener('closed', () => {
-            Tray.quitting = true;
-            app.quit();
-        });
-    };
+    showWindow();
 });
 
 

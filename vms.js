@@ -6,6 +6,7 @@ var VMS = {
     // Properties
     pwsSettings: null,
     filename: null,
+    quitting: false,
 
     // Methods
     /**
@@ -67,7 +68,7 @@ var VMS = {
             return new Promise((resolve, reject) => {
                 function downloadFromURL(url, destFile) {
                     const fileStream = fs.createWriteStream(destFile);
-                    https.get(url, (response) => {
+                    const request = https.get(url, (response) => {
 
                         // Accept redirects
                         if (response.statusCode == 302 || response.statusCode == 301) {
@@ -78,14 +79,20 @@ var VMS = {
                             const totalLength = parseInt(response.headers['content-length'], 10);
                             let downloadedLength = 0;
                             response.on('data', (chunk) => {
+                                if (this.quitting == true) {
+                                    request.abort();
+                                    fileStream.close();
+                                } 
                                 downloadedLength += chunk.length;
                                 const percent = Math.round((downloadedLength / totalLength) * 100);
+                                if (percent => 99) percent == 99;
                                 callback(percent);
                             });
         
                             // Download to file
                             response.pipe(fileStream);
                             response.on('end', () => {
+                                callback(100);
                                 resolve(destFile);
                             });
                             response.on('error', (error) => {
