@@ -40,9 +40,9 @@ app.on('ready', () => {
 
         // Download compatible VMS (virtual machine server) runtime
         if (state == 'download') {
-            VMS.download( (percentage) => {
-                if (isNaN(percentage)) percentage = 0;
-                Window.setElmTextById('progress', percentage + '%');
+            VMS.download( (percent) => {
+                if (isNaN(percent)) percent = 0;
+                Window.setElmTextById('progress', percent + '%');
                 if (percent == 100) {
                     showWindow(); // Done, re-check state, and extract
                 } 
@@ -51,8 +51,12 @@ app.on('ready', () => {
         
         // Extract the VMS archive runtime
         if (state == 'extract') {
-            VMS.extract(() => {
-                showWindow(); // Done, re-check state, and startup 
+            VMS.extract((message) => {
+                if (message != '') {
+                    Window.setElmTextById('progress', message);
+                }else{
+                    showWindow(); // Done, re-check state, and startup 
+                }
             });
         }
 

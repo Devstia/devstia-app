@@ -89,7 +89,11 @@ var Window = {
      */
     setElmTextById: function(id, text) {
         if (this.win == null) return;
-        this.win.webContents.executeJavaScript("if (document.getElementById('" + id + "') != null) document.getElementById('" + id + "').innerText = '" + text + "';");
+        try {
+            this.win.webContents.executeJavaScript("if (document.getElementById('" + id + "') != null) document.getElementById('" + id + "').innerText = '" + text + "';");
+        }catch(error) {
+            console.error(error);
+        }
     }
 };
 module.exports = Window;

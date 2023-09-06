@@ -17,9 +17,6 @@ var VMS = {
         const https = require('https');
         const fs = require('fs');
         const path = require('path');
-        const { promisify } = require('util');
-        const readFileAsync = promisify(fs.readFile);
-        const writeFileAsync = promisify(fs.writeFile);
         const jsonUrl = 'https://virtuosoft.com/downloads/cg-pws';
         const filename = this.filename;
         const archiveFile = path.join(this.pwsSettings.appFolder, 'vms', filename + '.tar.xz');
@@ -130,6 +127,35 @@ var VMS = {
                 console.error('Error:', error);
             }
         })();
+    },
+    /**
+     * extract - Extracts the VMS runtime from the downloaded archive.
+     * @param {function} callback - The callback function to invoke after extraction completes.
+     */
+    extract: function(callback) {
+        const path = require('path');
+        const filename = this.filename;
+        const archiveFile = path.join(this.pwsSettings.appFolder, 'vms', filename + '.tar.xz');
+        const tarProcess = require('child_process').spawn('tar', ['-xf', path.basename(archiveFile)], {
+            cwd: path.dirname(archiveFile),
+            env: {
+                PATH: pathAddendum + `${process.env.PATH}${path.delimiter}`,
+            },
+        });
+        tarProcess.on('exit', (code) => {
+            if (code === 0) {
+                callback('Success');
+            } else {
+                let err = `Archive extraction failed with exit code ${code}`;
+                console.error(err);
+                callback(err);
+            }
+        });
+        tarProcess.on('error', (err) => {
+            err = `Archive extraction failed: ${err}`;
+            console.error(err);
+            callback(err);
+        });
     },
     /**
      * state - Determines the state of our virtual machine server.
