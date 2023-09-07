@@ -7,13 +7,15 @@ var VMS = {
     pwsSettings: null,
     filename: null,
     quitting: false,
+    listeners: {},
 
     // Methods
     /**
      * download - Locates the compatible VMS runtime at virtuosoft.com/downloads/cg-pws.
      * @param {function} callback - The callback function to furnish the download progress.
      */
-    download: function(callback) {
+    download: function() {
+        var self = this;
         const https = require('https');
         const fs = require('fs');
         const path = require('path');
@@ -25,6 +27,7 @@ var VMS = {
             try {
                 fs.mkdirSync(directoryPath, { recursive: true });
             } catch (error) {
+                this.invoke('downloadError', { error: `Error creating directory: ${directoryPath}` + JSON.stringify(error) });
                 console.error(`Error creating directory: ${directoryPath}`, error);
             }
         }
@@ -76,25 +79,33 @@ var VMS = {
                             const totalLength = parseInt(response.headers['content-length'], 10);
                             let downloadedLength = 0;
                             response.on('data', (chunk) => {
-                                if (this.quitting == true) {
+                                if (self.quitting == true) {
                                     request.abort();
                                     fileStream.close();
-                                } 
-                                downloadedLength += chunk.length;
-                                const percent = Math.round((downloadedLength / totalLength) * 100);
-                                if (percent => 99) percent == 99;
-                                callback(percent);
+                                }else{
+                                    downloadedLength += chunk.length;
+                                    const percent = Math.round((downloadedLength / totalLength) * 100);
+                                    if (percent >= 99) percent == 99;
+                                    self.invoke('downloadProgress', percent);
+                                }
                             });
-        
-                            // Download to file
-                            response.pipe(fileStream);
                             response.on('end', () => {
-                                callback(100);
+                                self.invoke('downloadProgress', 100);
+                                setTimeout(() => {
+                                    self.invoke('downloadComplete');
+                                }, 1000);
                                 resolve(destFile);
                             });
                             response.on('error', (error) => {
                                 reject(error);
                             });
+
+                            // Download to the file
+                            try {
+                                response.pipe(fileStream);
+                            }catch(error) {
+                                reject(error);
+                            }
                         }
                     });
                 }
@@ -121,10 +132,13 @@ var VMS = {
                     await downloadFile(dlURL, archiveFile + '.download');
                     fs.renameSync(archiveFile + '.download', archiveFile);
                 }else{
-                    console.log('No download available for ' + filename + ' platform.');
+                    let err = 'No download available for ' + filename + ' platform.';
+                    console.error(err);
+                    self.invoke('downloadError', { error: err });
                 }
             } catch (error) {
                 console.error('Error:', error);
+                self.invoke('downloadError', { error: JSON.stringify(error) });
             }
         })();
     },
@@ -132,10 +146,16 @@ var VMS = {
      * extract - Extracts the VMS runtime from the downloaded archive.
      * @param {function} callback - The callback function to invoke after extraction completes.
      */
-    extract: function(callback) {
+    extract: function() {
+        let self = this;
         const path = require('path');
         const filename = this.filename;
-        const archiveFile = path.join(this.pwsSettings.appFolder, 'vms', filename + '.tar.xz');
+        const archiveFile = path.join(self.pwsSettings.appFolder, 'vms', filename + '.tar.xz');
+        let pathAddendum = '';
+        if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
+            const path = require('path');
+            pathAddendum = path.join(__dirname, 'runtime', 'win_x64') + ';';
+        }
         const tarProcess = require('child_process').spawn('tar', ['-xf', path.basename(archiveFile)], {
             cwd: path.dirname(archiveFile),
             env: {
@@ -144,18 +164,62 @@ var VMS = {
         });
         tarProcess.on('exit', (code) => {
             if (code === 0) {
-                callback('Success');
+                self.invoke('extractComplete');
             } else {
                 let err = `Archive extraction failed with exit code ${code}`;
                 console.error(err);
-                callback(err);
+                self.invoke('extractError', { error: err });
             }
         });
         tarProcess.on('error', (err) => {
             err = `Archive extraction failed: ${err}`;
             console.error(err);
-            callback(err);
+            self.invoke('extractError', { error: err });
         });
+    },
+    getProcessID: function() {
+        const { execSync } = require('child_process');
+        try {
+            const stdout = execSync('ps -ax | grep "qemu.*file=' + this.filename + '.img" | grep -v grep | awk \'{print $1}\'');
+            const processIds = stdout.toString().trim().split('\n');
+            if (isNaN(processIds[0]) || processIds == '') return null;
+            if (processIds.length == 0) return null;
+            return processIds[0];
+        } catch (error) {
+            console.error(`Error executing command: ${error.message}`);
+            return null;
+        }
+    },
+    /**
+     * 
+     * @param {string} event - the name of the event to invoke.
+     * @param {*} message - an optional message to send, if not an object, will be wrapped in an object with a 'value' property.
+     */
+    invoke: function(event, message = {}) {
+        if (typeof message == 'object' && Array.isArray(message) == false) {
+        }else{
+            message = { value: message, uuid: this.uuidv4() };
+        }
+        try {
+            if (this.listeners[event] != undefined) {
+                this.listeners[event].forEach(listener => {
+                    listener(message);
+                });
+            }
+        }catch(error) {
+            console.error(`Error invoking listener for ${event}: ${error}`);
+        }
+    },
+    /**
+     * on - allows the main process to listen for events our VMS object.
+     * @param {string} event - the name of the event to listen for.
+     * @param {function} listener - the listener function to invoke when the event is received.
+     */
+    on: function(event, listener) {
+        if (this.listeners[event] == undefined) {
+            this.listeners[event] = [];
+        }
+        this.listeners[event].push(listener);
     },
     /**
      * state - Determines the state of our virtual machine server.
@@ -168,6 +232,9 @@ var VMS = {
         if (process.arch == 'arm64') this.filename = 'pws-arm64';
         if (process.arch == 'x64') this.filename = 'pws-amd64';
         if (this.filename != null) {
+            if (this.getProcessID() != null) {
+                return 'running';               // Running
+            }
             const path = require('path');
             const fs = require('fs');
             const archiveFile = path.join(pwsSettings.appFolder, 'vms', this.filename + '.tar.xz');
@@ -184,6 +251,79 @@ var VMS = {
         }else{
             return 'unsupported';               // Unsupported
         }
-    }
+    },
+    /**
+     * startup - Starts the virtual machine server.
+     */
+    startup: function() {
+        
+        // Copy over our user customizable scripts folder
+        const self = this;
+        const fs = require('fs');
+        const path = require('path');
+        const scriptsFolder = path.join(this.pwsSettings.appFolder, 'scripts');
+        if (!fs.existsSync(scriptsFolder)) {
+
+            // Copy over our default scripts
+            const defaultScriptsFolder = path.join(__dirname, 'scripts');
+            const fse = require('fs-extra');
+            try {
+                fse.copySync(defaultScriptsFolder, scriptsFolder);
+            } catch (err) {
+                console.error('Error copying folder:', err);
+            }
+        }
+
+        // Startup doesn't require sudo, so we can just execute the script
+        let cmd = '"' + this.pwsSettings.appFolder + '/scripts/startup.sh" ' + this.pwsSettings.sshPort;
+        cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.appFolder + '"';
+        console.log(cmd);
+        const { exec } = require('child_process');
+        const child = exec(cmd, { detached: true }, (error, stdout, stderr) => {
+            if (error) {
+                let err = `Error executing command: ${error.message}`;
+                console.error(err);
+                self.invoke('startupError', { error: err });
+            }
+        });
+        child.unref();
+        let started = false;
+        for (let i = 0; i < 10; i++) {
+            if (this.getProcessID() != null) {
+                started = true;
+                break;
+            }else{
+                require('deasync').sleep(1000);
+            }
+        }
+        if (started == true) {
+            self.invoke('startupComplete');
+        }else{
+            let err = 'Starting VMS timed out.';
+            console.error(err);
+            self.invoke('startupError', { error: err });
+        }
+
+        // Prompt for authorization to start helper application
+        // const sudo = require('sudo-prompt');
+        // let options = {
+        //     name: 'CodeGarden'
+        // };
+        // sudo.exec(cmd, options, (error, stdout, stderr) => {
+        //     if (error) {
+        //         console.log('startHelper error: ' + error);
+        //         self.invoke('startupError', { error: error });
+        //     }else{
+        //         console.log('stdout: ' + stdout);
+        //         self.invoke('startupComplete');
+        //     }
+        // });
+    },
+    uuidv4: function() {
+        const crypto = require('crypto');
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    } 
 };
 module.exports = VMS;

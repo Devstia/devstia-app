@@ -85,7 +85,7 @@ var Settings = {
             webFolder: path.join(app.getPath('home'), 'Sites'),
             pwsPass: 'personal-web-server',
             sshPort: 8022,
-            cpPort: 8023,
+            cpPort: 8083,
             allowCG: true,
             debugMode: false,
             lanIP: this.getDefaultLocalIP(),

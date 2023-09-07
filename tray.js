@@ -9,10 +9,6 @@ var Tray = {
     qutting: false,
 
     // Methods
-    addEventListener: function(event, callback) {
-        this.listeners.push({event: event, callback: callback});
-    },
-
     create: function() {
         
         // Create the tray icon
@@ -34,7 +30,7 @@ var Tray = {
                 id: 'localhost',
                 enabled: false,
                 click: () => {
-                    this.invokeListeners('localhost');
+                    this.invoke('localhost');
                 }
             },
             {
@@ -42,7 +38,7 @@ var Tray = {
                 id: 'terminal',
                 enabled: false,
                 click: () => {
-                    this.invokeListeners('terminal');
+                    this.invoke('terminal');
                 }
             },
             {
@@ -50,7 +46,7 @@ var Tray = {
                 id: 'files',
                 enabled: false,
                 click: () => {
-                    this.invokeListeners('files');
+                    this.invoke('files');
                 }
             },
             {
@@ -61,7 +57,7 @@ var Tray = {
                 id: 'settings',
                 enabled: false,
                 click: () => {
-                    this.invokeListeners('settings');
+                    this.invoke('settings');
                 }
             },
             {
@@ -71,7 +67,7 @@ var Tray = {
                 label: 'Quit',
                 id: 'quit',
                 click: () => {
-                    this.quitting = this.invokeListeners('quit', true);
+                    this.quitting = this.invoke('quit', true);
                     app.quit();
                 }
             }
@@ -85,8 +81,7 @@ var Tray = {
             }
         });
     },
-
-    invokeListeners: function(event, arg) {
+    invoke: function(event, arg) {
         for (let i = 0; i < this.listeners.length; i++) {
             if (this.listeners[i].event === event) {
                 arg = this.listeners[i].callback(arg);
@@ -94,16 +89,9 @@ var Tray = {
         }
         return arg;
     },
-
-    removeEventListener: function(event, callback) {
-        for (let i = 0; i < this.listeners.length; i++) {
-            if (this.listeners[i].event === event && this.listeners[i].callback === callback) {
-                this.listeners.splice(i, 1);
-                break;
-            }
-        }
+    on: function(event, callback) {
+        this.listeners.push({event: event, callback: callback});
     },
-
     setMenuState: function(menuItem, enabled) {
         this.menu.getMenuItemById(menuItem).enabled = enabled;
     },
