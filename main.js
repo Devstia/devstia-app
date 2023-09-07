@@ -26,35 +26,38 @@ app.on('ready', () => {
     const VMS = require('./vms.js');
     VMS.pwsSettings = pwsSettings;
     const Tray = require('./tray.js');
-    Tray.create();
-    Tray.on('localhost', () => {
-        // Write trusted token for auto-login, this verifies the source of the request
-        const fs = require('fs');
-        const path = require('path');
-        const altFile = path.join(pwsSettings.appFolder, 'alt.txt');
-        const altContent = Util.uuidv4().toString();
-        fs.writeFileSync(altFile, altContent);
-        const shell = require('electron').shell;
-        shell.openExternal('http://localhost/?alt=' + altContent);
-    });
-    Tray.on('terminal', () => {
-        const { spawn } = require('child_process');
-        const path = require('path');
-        const scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
-        console.log(scriptTerminal);
-        const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
-            cwd: path.dirname(scriptTerminal),
-            detached: true,
-            stdio: 'ignore'
+    function createTray() {
+        Tray.create();
+        Tray.on('localhost', () => {
+            // Write trusted token for auto-login, this verifies the source of the request
+            const fs = require('fs');
+            const path = require('path');
+            const altFile = path.join(pwsSettings.appFolder, 'alt.txt');
+            const altContent = Util.uuidv4().toString();
+            fs.writeFileSync(altFile, altContent);
+            const shell = require('electron').shell;
+            shell.openExternal('http://localhost/?alt=' + altContent);
         });
-        p.unref();
-    });
-    Tray.on('quit', (quitting) => {
-        if (quitting == true) {
-            VMS.shutdown();
-        }
-        return quitting;
-    });
+        Tray.on('terminal', () => {
+            const { spawn } = require('child_process');
+            const path = require('path');
+            const scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
+            console.log(scriptTerminal);
+            const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
+                cwd: path.dirname(scriptTerminal),
+                detached: true,
+                stdio: 'ignore'
+            });
+            p.unref();
+        });
+        Tray.on('quit', (quitting) => {
+            if (quitting == true) {
+                VMS.shutdown();
+            }
+            return quitting;
+        });
+    }
+    createTray();
 
     // Show the main application window state
     function showWindow() {
