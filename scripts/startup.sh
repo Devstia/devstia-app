@@ -22,7 +22,5 @@ qemu-system-x86_64 \
         -fsdev local,id=virtfs0,path="$appFolder",security_model=mapped-xattr,fmode=0644,dmode=0755 \
         -device virtio-9p-pci,fsdev=virtfs0,mount_tag=appFolder \
         -device virtio-balloon-pci \
-        -display default,show-cursor=on
-        #-nographic
-        
-        
+        -nographic
+        #-display default,show-cursor=on

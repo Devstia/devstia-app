@@ -1,6 +1,7 @@
 /**
  * VMS object determines the state of our virtual machine server.
  */
+const Util = require('./util.js');
 var VMS = {
 
     // Properties
@@ -198,7 +199,7 @@ var VMS = {
     invoke: function(event, message = {}) {
         if (typeof message == 'object' && Array.isArray(message) == false) {
         }else{
-            message = { value: message, uuid: this.uuidv4() };
+            message = { value: message, uuid: Util.uuidv4() };
         }
         try {
             if (this.listeners[event] != undefined) {
@@ -226,8 +227,7 @@ var VMS = {
      * @param {object} pwsSettings - The PWS settings object.
      * @returns {string} - The state of our virtual machine server.
      */
-    state: function(pwsSettings) {
-        this.pwsSettings = pwsSettings;
+    state: function() {
         this.filename = null;
         if (process.arch == 'arm64') this.filename = 'pws-arm64';
         if (process.arch == 'x64') this.filename = 'pws-amd64';
@@ -237,8 +237,8 @@ var VMS = {
             }
             const path = require('path');
             const fs = require('fs');
-            const archiveFile = path.join(pwsSettings.appFolder, 'vms', this.filename + '.tar.xz');
-            const imageFile = path.join(pwsSettings.appFolder, 'vms', this.filename + '.img');
+            const archiveFile = path.join(this.pwsSettings.appFolder, 'vms', this.filename + '.tar.xz');
+            const imageFile = path.join(this.pwsSettings.appFolder, 'vms', this.filename + '.img');
             if (!fs.existsSync(archiveFile)) {
                 return 'download';              // Download
             }else{
@@ -253,28 +253,36 @@ var VMS = {
         }
     },
     /**
+     * sudo - Executes a command with root privleges on the VMS.
+     * @param {string} cmd - The shell command to execute.
+     */
+    sudo: function(cmd) {
+        const { execSync } = require('child_process');
+        let ssh = 'chmod 600 "' + this.pwsSettings.appFolder + '/security/ssh/debian_rsa' + '" && echo "';
+        ssh += this.pwsSettings.pwsPass + '" | ssh -q -o StrictHostKeyChecking=no -i "';
+        ssh += this.pwsSettings.appFolder + '/security/ssh/debian_rsa" debian@local.dev.cc -p ';
+        ssh += this.pwsSettings.sshPort + ' "sudo -S -p ' + "'' " + cmd + '"';
+        try {
+            const stdout = execSync(ssh, { encoding: 'utf8' });
+            return stdout.trim();
+        } catch (error) {
+            console.error(`Error executing command: ${error.message}`);
+            return null;
+        }
+    },
+    /**
+     * shutdown - Shuts down the virtual machine server.
+     */
+    shutdown: function() {
+        this.sudo('shutdown now');
+    },
+    /**
      * startup - Starts the virtual machine server.
      */
     startup: function() {
-        
-        // Copy over our user customizable scripts folder
-        const self = this;
-        const fs = require('fs');
-        const path = require('path');
-        const scriptsFolder = path.join(this.pwsSettings.appFolder, 'scripts');
-        if (!fs.existsSync(scriptsFolder)) {
-
-            // Copy over our default scripts
-            const defaultScriptsFolder = path.join(__dirname, 'scripts');
-            const fse = require('fs-extra');
-            try {
-                fse.copySync(defaultScriptsFolder, scriptsFolder);
-            } catch (err) {
-                console.error('Error copying folder:', err);
-            }
-        }
 
         // Startup doesn't require sudo, so we can just execute the script
+        const self = this;
         let cmd = '"' + this.pwsSettings.appFolder + '/scripts/startup.sh" ' + this.pwsSettings.sshPort;
         cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.appFolder + '"';
         console.log(cmd);
@@ -318,12 +326,6 @@ var VMS = {
         //         self.invoke('startupComplete');
         //     }
         // });
-    },
-    uuidv4: function() {
-        const crypto = require('crypto');
-        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) =>
-            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-        );
-    } 
+    }
 };
 module.exports = VMS;

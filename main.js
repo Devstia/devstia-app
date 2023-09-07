@@ -12,38 +12,44 @@ app.on('ready', () => {
     const Settings = require('./settings.js');
     const pwsSettings = Settings.read();
 
-    // Allow only one instance of our application
-    const fs = require('fs');
-    const path = require('path');
-    const lockFilePath = path.join(pwsSettings.appFolder, 'app.lock');
-    if (fs.existsSync(lockFilePath)) {
-      const lockFileContent = fs.readFileSync(lockFilePath, 'utf8');
-      const lockFilePID = parseInt(lockFileContent, 10);
-      if (lockFilePID && !process.kill(lockFilePID, 0)) {
-        console.log('Previous instance terminated.');
-      } else {
-        console.error('Another instance is already running.');
-        process.exit(1);
-      }
-    }
-    fs.writeFileSync(lockFilePath, process.pid.toString());
-    process.on('exit', () => {
-      fs.unlinkSync(lockFilePath);
-    });
+    // Copy over our user customizable scripts folder
+    const Util = require('./util.js');
+    Util.appFolder = pwsSettings.appFolder;
+    Util.allowOneInstance();
+    Util.copyScripts();
 
     // Hide pull down menus
     const Menu = require('electron').Menu;
     const customMenu = Menu.buildFromTemplate([]);
 
     // Create our tray icon
+    const VMS = require('./vms.js');
+    VMS.pwsSettings = pwsSettings;
     const Tray = require('./tray.js');
     Tray.create();
+    Tray.on('terminal', () => {
+        const { spawn } = require('child_process');
+        const path = require('path');
+        const scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
+        console.log(scriptTerminal);
+        const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
+            cwd: path.dirname(scriptTerminal),
+            detached: true,
+            stdio: 'ignore'
+        });
+        p.unref();
+    });
+    Tray.on('quit', (quitting) => {
+        if (quitting == true) {
+            VMS.shutdown();
+        }
+        return quitting;
+    });
 
     // Show the main application window state
     function showWindow() {
+        const state = VMS.state();
         const Window = require('./window.js');
-        const VMS = require('./vms.js'); 
-        const state = VMS.state(pwsSettings);
         Window.show('./web/' + state + '.html');
 
         // Download compatible VMS (virtual machine server) runtime
@@ -75,10 +81,10 @@ app.on('ready', () => {
             VMS.startup();
         }
 
-        // // Running state
-        // if (state == 'running') {
-        //     QuitOnClose();
-        // }
+        // Running state, enable menu items
+        if (state == 'running') {
+            Tray.setMenuState('terminal', true);
+        }
 
         // Allow quitting the application when window is closed
         function QuitOnClose() {

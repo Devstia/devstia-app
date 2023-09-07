@@ -2,6 +2,7 @@
  * Our preload script provides a bridge between the main process and the renderer process.
  */
 const { contextBridge, ipcRenderer } = require('electron');
+const Util = require('./util.js');
 const ipcMain = {
 
     // Properties
@@ -20,9 +21,9 @@ const ipcMain = {
         // Store callback and invoke it when we receive a response
         if (callback != null) {
             if (typeof message == 'object' && Array.isArray(message) == false) {
-                message.uuid = this.uuidv4();
+                message.uuid = Util.uuidv4();
             }else{
-                message = { value: message, uuid: this.uuidv4() };
+                message = { value: message, uuid: Util.uuidv4() };
             }
             this.callbacks[message.uuid] = callback;
             ipcRenderer.once(message.uuid, (event, response) => {
@@ -60,20 +61,14 @@ const ipcMain = {
     invoke: function(event, message = {}) {
         if (typeof message == 'object' && Array.isArray(message) == false) {
         }else{
-            message = { value: message, uuid: this.uuidv4() };
+            message = { value: message, uuid: Util.uuidv4() };
         }
         if (this.listeners[event] != undefined) {
             this.listeners[event].forEach(listener => {
                 listener(this, message);
             });
         }
-    },
-    uuidv4: function() {
-        const crypto = require('crypto');
-        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, (c) =>
-            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-        );
-    } 
+    }
 }
 contextBridge.exposeInMainWorld('ipcMain', ipcMain);
 
