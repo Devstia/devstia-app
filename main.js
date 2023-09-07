@@ -27,6 +27,16 @@ app.on('ready', () => {
     VMS.pwsSettings = pwsSettings;
     const Tray = require('./tray.js');
     Tray.create();
+    Tray.on('localhost', () => {
+        // Write trusted token for auto-login, this verifies the source of the request
+        const fs = require('fs');
+        const path = require('path');
+        const altFile = path.join(pwsSettings.appFolder, 'alt.txt');
+        const altContent = Util.uuidv4().toString();
+        fs.writeFileSync(altFile, altContent);
+        const shell = require('electron').shell;
+        shell.openExternal('http://localhost/?alt=' + altContent);
+    });
     Tray.on('terminal', () => {
         const { spawn } = require('child_process');
         const path = require('path');
@@ -83,6 +93,7 @@ app.on('ready', () => {
 
         // Running state, enable menu items
         if (state == 'running') {
+            Tray.setMenuState('localhost', true);
             Tray.setMenuState('terminal', true);
         }
 
