@@ -81,6 +81,8 @@ var Window = {
     
                 // Dynamically update the light/dark theme on OS settings change
                 nativeTheme.on('updated', () => {
+                    if (win == null) return;
+                    if (win.webContents == null) return;
                     if (nativeTheme.shouldUseDarkColors) {
                         win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('dark');");
                     } else {

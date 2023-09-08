@@ -50,8 +50,56 @@ app.on('ready', () => {
             });
             p.unref();
         });
+        Tray.on('files', () => {
+            const os = require('os');
+            if (os.platform() === 'darwin') {
+                // Samba mount for macOS, works well and is fast.
+                const { exec } = require('child_process');
+                let cmd = 'rm -rf /tmp/pws ; mkdir -p /tmp/pws ; mount -t smbfs //pws:' + pwsSettings.pwsPass;
+                cmd +='@local.dev.cc/PWS /tmp/pws ; open /tmp/pws';
+                exec(cmd, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error mounting samba: ${error.message}`);
+                        return;
+                    }
+                });
+            }else{
+
+            }
+// WebDAV mount for macOS (not working well, drops files)
+//                 const { exec } = require('child_process');
+//                 const pwsPass = pwsSettings.pwsPass;
+//                 const script = `osascript <<END
+//                     mount volume "https://webdav-pws.dev.cc" as user name "pws" with password "${pwsSettings.pwsPass}"
+//                     do shell script "open /Volumes/webdav-pws.dev.cc"
+// END`;
+//                 exec(script, (error, stdout, stderr) => {
+//                     if (error) {
+//                       console.error(`Error executing the script: ${error.message}`);
+//                       return;
+//                     }
+//                 });
+
+        });
+        Tray.on('settings', () => {
+            const Window = require('./window.js');
+            Window.show('./web/settings.html');
+        });
         Tray.on('quit', (quitting) => {
             if (quitting == true) {
+                const os = require('os');
+                if (os.platform() === 'darwin') {
+
+                    // Unmount Samba share for macOS
+                    const { exec } = require('child_process');
+                    let cmd = 'umount /tmp/pws && rm -rf /tmp/pws';
+                    exec(cmd, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`Error unmounting samba: ${error.message}`);
+                            return;
+                        }
+                    });
+                }
                 VMS.shutdown();
             }
             return quitting;
@@ -98,6 +146,8 @@ app.on('ready', () => {
         if (state == 'running') {
             Tray.setMenuState('localhost', true);
             Tray.setMenuState('terminal', true);
+            Tray.setMenuState('files', true);
+            Tray.setMenuState('settings', true);
         }
 
         // Allow quitting the application when window is closed
