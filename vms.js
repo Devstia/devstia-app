@@ -326,6 +326,15 @@ var VMS = {
         //         self.invoke('startupComplete');
         //     }
         // });
+    },
+    /**
+     * updatePassword - Updates the passwords in the VMS for debian, admin, pws, Samba, and WebDAV.
+     * @param {string} password - The new password to use.
+     */
+    updatePassword: function(password) {
+        const shellEscape = require('shell-escape');
+        const escapedPassword = shellEscape([password]);
+        this.sudo('/usr/local/bin/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
     }
 };
 module.exports = VMS;
