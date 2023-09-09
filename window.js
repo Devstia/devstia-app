@@ -62,36 +62,35 @@ var Window = {
                 }
             }
             this.win = new BrowserWindow(winOptions);
-            let win = this.win;
-            win.on('closed', () => {
+            this.win.on('closed', () => {
                 this.invoke('closed');
                 const app = require('electron').app;
                 app.dock.hide();
-                win = null;
+                this.win = null;
             });
-            win.webContents.on('did-finish-load', () => {
+            this.win.webContents.on('did-finish-load', () => {
     
                 // Set initial theme mode (light/dark)
                 const nativeTheme = require('electron').nativeTheme;
                 if (nativeTheme.shouldUseDarkColors) {
-                    win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('dark');");
+                    this.win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('dark');");
                 } else {
-                    win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('light');");
+                    this.win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('light');");
                 }
     
                 // Dynamically update the light/dark theme on OS settings change
                 nativeTheme.on('updated', () => {
-                    if (win == null) return;
-                    if (win.webContents == null) return;
+                    if (this.win == null) return;
+                    if (this.win.webContents == null) return;
                     if (nativeTheme.shouldUseDarkColors) {
-                        win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('dark');");
+                        this.win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('dark');");
                     } else {
-                        win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('light');");
+                        this.win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('light');");
                     }
                 });
                 const app = require('electron').app;
                 app.dock.show();
-                win.show();
+                this.win.show();
             });
         }
         this.win.loadFile(file);

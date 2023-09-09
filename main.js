@@ -6,6 +6,7 @@
 
 // Initialize our application
 const app = require('electron').app;
+const Window = require('./window.js');
 app.on('ready', () => {
 
     // Read our settings
@@ -110,7 +111,6 @@ app.on('ready', () => {
     // Show the main application window state
     function showWindow() {
         const state = VMS.state();
-        const Window = require('./window.js');
         Window.show('./web/' + state + '.html');
 
         // Download compatible VMS (virtual machine server) runtime
@@ -164,7 +164,7 @@ app.on('ready', () => {
         }
 
         // Quit the application if we're not in startup/running state
-        if (state != 'startup' && state != 'running') {
+        if (state != 'startup' && state != 'running' && state != 'settings') {
             QuitOnClose();
         };
         
@@ -191,3 +191,7 @@ app.on('ready', () => {
     //     // event.sender.send(arg.uuid, arg);
     // });
 });
+app.on('before-quit', () => {
+    Window.close();
+});
+

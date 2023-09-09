@@ -223,6 +223,12 @@ var VMS = {
         this.listeners[event].push(listener);
     },
     /**
+     * regenerateCertificates - Regenerates the certificates for the VMS.
+     */
+    regenerateCertificates: function() {
+        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin regenerate_certificates' );
+    },
+    /**
      * state - Determines the state of our virtual machine server.
      * @param {object} pwsSettings - The PWS settings object.
      * @returns {string} - The state of our virtual machine server.
