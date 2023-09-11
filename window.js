@@ -90,7 +90,7 @@ var Window = {
                 });
                 const app = require('electron').app;
                 app.dock.show();
-                this.win.show();
+                setTimeout(() => { this.win.show(); }, 300);
             });
         }
         this.win.loadFile(file);

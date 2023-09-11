@@ -1,3 +1,6 @@
+label.form-label {
+    margin-bottom: 2px;    
+}
 /* App Window */
 .card-body {
     height: 270px;
@@ -36,7 +39,6 @@
 .options-action {
     text-align: center;
 }
-
 /* System */
 #tabs-system-ex2 .mb-3 {
     padding: 0 30px;
@@ -49,14 +51,6 @@
 #cert-instructions span {
     display: block;
 }
-
-/* Security */
-/* #tabs-security-ex2 .mb-3 {
-    padding: 0 30px;
-}
-#hide-pw {
-    display: none;
-} */
 
 /* About */
 #tabs-about-ex2 .mb-3 {

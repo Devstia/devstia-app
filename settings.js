@@ -86,7 +86,6 @@ var Settings = {
             pwsPass: 'personal-web-server',
             sshPort: 8022,
             cpPort: 8083,
-            allowCG: true,
             debugMode: false,
             lanIP: this.getDefaultLocalIP(),
             appFolder: path.join(app.getPath('appData'), packageJson.name)

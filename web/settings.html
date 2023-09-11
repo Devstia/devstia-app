@@ -34,14 +34,6 @@
                 <path d="M7 16l0 .01"></path>
                 </svg> System</a>
             </li>
-            <!-- <li class="nav-item">
-                <a href="#tabs-security-ex2" class="nav-link" data-bs-toggle="tab"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-lock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"></path>
-                    <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"></path>
-                    <path d="M8 11v-4a4 4 0 1 1 8 0v4"></path>
-                    </svg> Security</a>
-            </li> -->
             <li class="nav-item">
                 <a href="#tabs-about-ex2" class="nav-link" data-bs-toggle="tab"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-info-circle" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -63,11 +55,9 @@
         </div>
         <div class="card-body">
             <div class="tab-content">
-                <div id="tabs-services-ex2" class="tab-pane active show">
+                <div id="tabs-options-ex2" class="tab-pane active show">
                 </div>
-                <div id="tabs-preferences-ex2" class="tab-pane">
-                </div>
-                <div id="tabs-security-ex2" class="tab-pane">
+                <div id="tabs-system-ex2" class="tab-pane">
                 </div>
                 <div id="tabs-about-ex2" class="tab-pane">
                 </div>
@@ -84,19 +74,18 @@
     <script>
         (function($) {
 
-        //     // Set light/dark theme mode
-        //     window.setThemeMode = function(mode) {
-        //         if (mode == 'dark') {
-        //             $('body').attr('data-bs-theme', 'dark');
-        //         } else {
-        //             $('body').attr('data-bs-theme', 'light');
-        //         }
-        //     }
+            // Set light/dark theme mode
+            window.setThemeMode = function(mode) {
+                if (mode == 'dark') {
+                    $('body').attr('data-bs-theme', 'dark');
+                } else {
+                    $('body').attr('data-bs-theme', 'light');
+                }
+            }
             
             // Load all tab content
-            //$("#tabs-options-ex2").load("options.html");
-            //$("#tabs-system-ex2").load("system.html");
-            // $("#tabs-security-ex2").load("security.html");
+            $("#tabs-options-ex2").load("options.html");
+            $("#tabs-system-ex2").load("system.html");
             $("#tabs-about-ex2").load("about.html");
             $("#tabs-license-ex2").load("license.html");
 
@@ -108,25 +97,25 @@
             ipcMain.send('openLink', 'https://code.gdn/pws/support');
         });
 
-        // // Save button
-        // const saveButton = document.getElementById('save-button');
-        // saveButton.addEventListener('click', () => {
-        //     pws.invokeEvent('saveSettings');
-        //     window.close();
-        // });
+        // Save button
+        const saveButton = document.getElementById('save-button');
+        saveButton.addEventListener('click', () => {
+            ipcMain.send('saveSettings');
+            window.close();
+        });
 
-        // // Cancel button
-        // const cancelButton = document.getElementById('cancel-button');
-        //     cancelButton.addEventListener('click', () => {
-        //     window.close();
-        // });
+        // Cancel button
+        const cancelButton = document.getElementById('cancel-button');
+            cancelButton.addEventListener('click', () => {
+            window.close();
+        });
 
-        // // Close window when ESC key is pressed
-        // document.addEventListener('keydown', event => {
-        //     if (event.key === 'Escape' || event.keyCode === 27) {
-        //         window.close();
-        //     }
-        // });
+        // Close window when ESC key is pressed
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' || event.keyCode === 27) {
+                window.close();
+            }
+        });
     </script>
 </body>
 </html>
