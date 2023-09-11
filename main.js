@@ -12,6 +12,7 @@ app.on('ready', () => {
     // Read our settings
     const Settings = require('./settings.js');
     const pwsSettings = Settings.read();
+    Settings.uiEvents();
 
     // Copy over our user customizable scripts folder
     const Util = require('./util.js');
@@ -179,17 +180,6 @@ app.on('ready', () => {
         VMS.on('startupError', VMSError);
     }
     showWindow();
-
-    // const ipcMain = require('electron').ipcMain;
-
-    // // Handle request for getSetting from renderer process
-    // ipcMain.on('test', (event, arg) => {
-    //     console.log('test');
-    //     // pwsSettings = readSettings();
-    //     // arg.method = 'reply_getSetting';
-    //     // arg.value = pwsSettings[arg.name];
-    //     // event.sender.send(arg.uuid, arg);
-    // });
 });
 app.on('before-quit', () => {
     Window.close();

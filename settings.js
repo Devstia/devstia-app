@@ -128,6 +128,19 @@ var Settings = {
         const path = require('path');
         const pwsFilePath = path.join(pwsCopy.appFolder, 'settings.json');
         fs.writeFileSync(pwsFilePath, JSON.stringify(pwsCopy, null, 2));
+    },
+
+    uiEvents: function() {
+        const ipcMain = require('electron').ipcMain;
+
+        // Handle request for opening external http/s links
+        ipcMain.on('openLink', (event, url) => {
+            if (typeof url != 'string') return;
+            const urlPattern = /^(https?|ftp):\/\//i; // sanitize
+            if ( urlPattern.test(url) ) {
+                require('electron').shell.openExternal(url);
+            }
+        });
     }
 };
 module.exports = Settings;

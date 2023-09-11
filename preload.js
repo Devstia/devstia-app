@@ -2,12 +2,36 @@
  * Our preload script provides a bridge between the main process and the renderer process.
  */
 const { contextBridge, ipcRenderer } = require('electron');
-const Util = require('./util.js');
-const ipcMain = {
+var ipcMain_callbacks = {};
+var ipcMain_listeners = {};
+function uuidv4() {
+    const cryptoObj = window.crypto || window.msCrypto; // Check for browser crypto support
+    if (!cryptoObj) {
+        console.error('Crypto API not available in this browser.');
+        return null;
+    }
 
-    // Properties
-    callbacks: {},
-    listeners: {},
+    const data = new Uint8Array(16);
+    cryptoObj.getRandomValues(data);
+
+    // Set the version (4) and reserved bits
+    data[6] = (data[6] & 0x0f) | 0x40; // version 4
+    data[8] = (data[8] & 0x3f) | 0x80; // variant RFC4122
+
+    // Convert the UUID bytes to a string representation
+    const hexDigits = '0123456789abcdef';
+    let uuid = '';
+    for (let i = 0; i < 16; i++) {
+        uuid += hexDigits.charAt(data[i] >> 4);
+        uuid += hexDigits.charAt(data[i] & 0xf);
+        if (i === 3 || i === 5 || i === 7 || i === 9) {
+            uuid += '-';
+        }
+    }
+
+    return uuid;
+}
+const ipcMain = {
 
     // Methods
     /**
@@ -21,15 +45,16 @@ const ipcMain = {
         // Store callback and invoke it when we receive a response
         if (callback != null) {
             if (typeof message == 'object' && Array.isArray(message) == false) {
-                message.uuid = Util.uuidv4();
+                message.uuid = uuidv4();
             }else{
-                message = { value: message, uuid: Util.uuidv4() };
+                message = { value: message, uuid: uuidv4() };
             }
-            this.callbacks[message.uuid] = callback;
+            
+            ipcMain_callbacks[message.uuid] = callback;
             ipcRenderer.once(message.uuid, (event, response) => {
-                if (typeof this.callbacks[message.uuid] === 'function') {
-                    this.callbacks[message.uuid](response);
-                    delete this.callbacks[message.uuid];
+                if (typeof ipcMain_callbacks[message.uuid] === 'function') {
+                    ipcMain_callbacks[message.uuid](response);
+                    delete ipcMain_callbacks[message.uuid];
                 }
             });
         }
@@ -42,11 +67,11 @@ const ipcMain = {
      */
     on: function(event, listener) {
         let initListener = false;
-        if (this.listeners[event] == undefined) {
-            this.listeners[event] = [];
+        if (ipcMain_listensers[event] == undefined) {
+            ipcMain_listensers[event] = [];
             initListener = true;
         }
-        this.listeners[event].push(listener);
+        ipcMain_listensers[event].push(listener);
         if (initListener) {
             ipcRenderer.on(event, (event, message) => {
                 this.invoke(event, message);
@@ -61,48 +86,13 @@ const ipcMain = {
     invoke: function(event, message = {}) {
         if (typeof message == 'object' && Array.isArray(message) == false) {
         }else{
-            message = { value: message, uuid: Util.uuidv4() };
+            message = { value: message, uuid: this.uuidv4() };
         }
-        if (this.listeners[event] != undefined) {
-            this.listeners[event].forEach(listener => {
+        if (ipcMain_listensers[event] != undefined) {
+            ipcMain_listensers[event].forEach(listener => {
                 listener(this, message);
             });
         }
     }
 }
 contextBridge.exposeInMainWorld('ipcMain', ipcMain);
-
-// const { ipcRenderer } = require('electron');
-// console.log('preload.js');
-// process.once('loaded', () => {
-//     window.addEventListener('message', event => {
-//         console.log('Got message in preload.js window.addEventListener');
-//         const msg = event.data;
-//         console.log('Got message in preload.js window.addEventListener msg: ' + msg);
-//         ipcRenderer.send('test');
-//     });
-//     window.xyz = "123";
-// });
-
-// const allowedMethods = [ 
-//   'getSetting', 
-//   'setSetting', 
-//   'invokeEvent' 
-// ];
-// process.once('loaded', () => {
-//   window.addEventListener('message', event => {
-//     const msg = event.data;
-//     if (msg.hasOwnProperty('method')) {
-//       if (allowedMethods.includes(msg.method)) {
-//         ipcRenderer.once(msg.uuid, (event, arg) => {
-
-//           // Pass reply back to renderer process window
-//           if (arg.method.startsWith('reply_')) {
-//             window.postMessage(arg, window.origin);
-//           }
-//         });
-//         ipcRenderer.send(msg.method, msg);
-//       }
-//     }
-//   });
-// });
