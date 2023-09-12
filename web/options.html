@@ -1,4 +1,4 @@
-<p>Note: Changing the CP Port will restart the server.</p>
+<p class="info">Note: Changing the CP Port will restart the server.</p>
 <div class="mb-2">
     <label class="form-label">PWS Password</label>
     <div class="row g-2">
@@ -53,6 +53,14 @@
     </select>
 </div>
 <script>
+    // Fill out the options values
+    window.fillOutSettings = function(pwsSettings) {
+            $('#pws-pass').val(pwsSettings.pwsPass);
+            $('#ssh-port').val(pwsSettings.sshPort);
+            $('#cp-port').val(pwsSettings.cpPort);
+            $('#fs-mode').val(pwsSettings.fsMode);
+    }
+
     // Prevent prohibited characters from being entered into the password field
     $('#pws-pass').on('keypress', function (event) {
         let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
@@ -75,36 +83,5 @@
             $('#pws-pass').attr('type', 'password');
         }
     });
-
-    // // Fill in current values of password and allow cg
-    // pws.getSetting('pwsPass', r => {
-    //     $('#pws-pass').val(r.value);
-    // });
-    // pws.getSetting('sshPort', r => {
-    //     $('#ssh-port').val(r.value);
-    // });
-    // pws.getSetting('allowCG', r => {
-    //     $('#allow-cg').prop('checked', r.value);
-    // });
-
-    // // Handle regenerate certificates button
-    // $('#regenerate-certificates').click( (r) => {
-    //     pws.invokeEvent('regenerateCertificates', (r) => {
-    //     });
-    // });
-
-    // // Process download master certificate link
-    // $('a#dlMasterCert').click( (r) => {
-    //     pws.invokeEvent('dlMasterCert', (r) => {
-    //     });
-    // });
-
-    // // Update settings when value changes
-    // $('#pws-pass').change(r => {
-    //     pws.setSetting('pwsPass', r.target.value);
-    // });
-    // $('#ssh-port').change(r => {
-    //     pws.setSetting('sshPort', r.target.value);
-    // });
 </script>
 <script src="links.js"></script>

@@ -1,0 +1,66 @@
+<div class="datagrid">
+    <div class="datagrid-item">
+        <div class="datagrid-title">Terminal / SSH Keys</div>
+        <div class="datagrid-content">
+            <a href="#showSSHKeys" id="showSSHKeys" class="btn btn-secondary w-100" aria-label="Show SSH Keys">Show SSH Keys</a>
+            <p> </p>
+            <a href="#regenKeys" id="regenKeys" class="btn btn-secondary w-100">Regenerate SSH Keys</a>
+        </div>
+    </div>
+    <div class="datagrid-item">
+        <div class="datagrid-title">Server</div>
+        <div class="datagrid-content">
+            <a href="#restartServer" id="restartServer" class="btn btn-secondary w-100">Restart Server</a>
+            <p> </p>
+            <a href="#reinstall" id="reinstall" class="btn btn-secondary w-100">Erase &amp; Re-install Server</a>
+        </div>
+    </div>
+    <div class="datagrid-item">
+        <div class="datagrid-title">SSL Certificates</div>
+        <div class="datagrid-content">
+            <a href="#showMasterCert" id="showMasterCert" class="btn btn-secondary w-100" aria-label="Show Master Certificate">Show Master Certificate</a>
+            <div id="cert-instructions">
+                <span>
+                    <a href="https://code.gdn/docs/install-master-cert" class="ms-1" aria-label="How to install master certificate">How to install master certificate
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 15l6 -6"></path><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"></path><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"></path></svg>
+                    </a>      
+                </span>
+            </div>
+            <p> </p>
+            <a href="#regenCerts" id="regenCerts" class="btn btn-secondary w-100" aria-label="Regenerate All Certificates">Regenerate All Certificates</a>
+        </div>
+    </div>
+</div>
+<script>
+    // Handle show SSH keys button
+    $('#showSSHKeys').click( (r) => {
+        ipcMain.send('showSSHKeys');
+    });
+
+    // Handle regenerate SSH keys button
+    $('#regenKeys').click( (r) => {
+        ipcMain.send('regenKeys');
+    });
+
+    // Handle restart server
+    $('#restartServer').click( (r) => {
+        ipcMain.send('restartServer');
+    });
+
+    // Handle reinstall server
+    $('#reinstall').click( (r) => {
+        ipcMain.send('reinstall');
+    });
+
+    // Handle download master certificate link
+    $('#showMasterCert').click( (r) => {
+        ipcMain.send('showMasterCert');
+    });
+
+    // Handle regenerate certificates button
+    $('#regenCerts').click( (r) => {
+        ipcMain.send('regenCerts');
+    });
+
+</script>
+<script src="links.js"></script>

@@ -19,6 +19,9 @@ label.form-label {
 }
 
 /* Options */
+.info {
+    margin-bottom: 8px;
+}
 #status-column {
     min-width:150px;
     padding-left:28px;
@@ -45,8 +48,7 @@ label.form-label {
 }
 #cert-instructions {
     padding-top: 4px;
-    font-size: smaller;
-    float: right;
+    /* font-size: smaller; */
 }
 #cert-instructions span {
     display: block;

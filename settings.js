@@ -166,6 +166,32 @@ var Settings = {
             VMS.pwsSettings = pwsSettings;
             if (restart) VMS.restart();
         });
+
+        // Handle system requests
+        ipcMain.on('showSSHKeys', function(event) {
+            let pwsSettings = self.read();
+            require('electron').shell.showItemInFolder(pwsSettings.appFolder + '/security/ssh/pws_rsa.pub');
+        });
+        ipcMain.on('regenKeys', function(event) {   
+            const VMS = require('./vms.js');
+            VMS.regenKeys();
+        });
+        ipcMain.on('restartServer', function(event) {
+            const VMS = require('./vms.js');
+            VMS.restart();
+        });
+        ipcMain.on('reinstall', function(event) {
+            const VMS = require('./vms.js');
+            VMS.reinstall();
+        });
+        ipcMain.on('showMasterCert', function(event) {
+            let pwsSettings = self.read();
+            require('electron').shell.showItemInFolder(pwsSettings.appFolder + '/security/ca/dev.cc.crt');
+        });
+        ipcMain.on('regenCerts', function(event) {
+            const VMS = require('./vms.js');
+            VMS.regenCerts();
+        });
     }
 };
 module.exports = Settings;
