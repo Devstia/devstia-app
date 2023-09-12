@@ -229,6 +229,26 @@ var VMS = {
         this.sudo( '/usr/local/hestia/bin/v-invoke-plugin regenerate_certificates' );
     },
     /**
+     * restart - Restarts the virtual machine server.
+     */
+    restart: function() {
+        this.shutdown();
+
+        // Wait up to 20 seconds for proper shutdown
+        let retries = 0;
+        let tiShutdown = setInterval(() => {
+            if (this.getProcessID() == null) {
+                clearInterval(tiShutdown);
+                this.startup();
+            }
+            retries++;
+            if (retries >= 20) {
+                clearInterval(tiShutdown);
+                console.log('Error. VMS restart timed out.');
+            }
+        }, 1000);
+    },
+    /**
      * state - Determines the state of our virtual machine server.
      * @param {object} pwsSettings - The PWS settings object.
      * @returns {string} - The state of our virtual machine server.
@@ -341,6 +361,14 @@ var VMS = {
         const shellEscape = require('shell-escape');
         const escapedPassword = shellEscape([password]);
         this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
+    },
+    /**
+     * updateCPPort - Updates the Control Panel port in the VMS.
+     * @param {number} port - The new port number.
+     */
+    updateCPPort: function(port) {
+        const shellEscape = require('shell-escape');
+        this.sudo('/usr/local/hestia/plugins/cg-pws/update-cp-port.sh ' + port.toString());
     }
 };
 module.exports = VMS;

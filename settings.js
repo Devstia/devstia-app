@@ -153,12 +153,18 @@ var Settings = {
         ipcMain.on('saveSettings', function(event, newSettings) {
             const VMS = require('./vms.js');
             let pwsSettings = self.read();
+            let restart = false;
             if (newSettings.pwsPass != pwsSettings.pwsPass) {
                 VMS.updatePassword(newSettings.pwsPass);
+            }
+            if (newSettings.cpPort != pwsSettings.cpPort) {
+                VMS.updateCPPort(newSettings.cpPort);
+                restart = true;
             }
             Object.assign(pwsSettings, newSettings);
             Settings.save(pwsSettings);
             VMS.pwsSettings = pwsSettings;
+            if (restart) VMS.restart();
         });
     }
 };
