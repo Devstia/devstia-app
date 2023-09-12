@@ -153,12 +153,10 @@ var Settings = {
         ipcMain.on('saveSettings', function(event, newSettings) {
             const VMS = require('./vms.js');
             let pwsSettings = self.read();
-            console.log(JSON.stringify(newSettings, null, 2));
             if (newSettings.pwsPass != pwsSettings.pwsPass) {
                 VMS.updatePassword(newSettings.pwsPass);
             }
             Object.assign(pwsSettings, newSettings);
-            console.log(JSON.stringify(pwsSettings, null, 2));
             Settings.save(pwsSettings);
             VMS.pwsSettings = pwsSettings;
         });
