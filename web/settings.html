@@ -100,7 +100,13 @@
         // Save button
         const saveButton = document.getElementById('save-button');
         saveButton.addEventListener('click', () => {
-            ipcMain.send('saveSettings');
+            let newSettings =  {
+                pwsPass: $('#pws-pass').val(),
+                sshPort: $('#ssh-port').val(),
+                cpPort: $('#cp-port').val(),
+                fsMode: $('#fs-mode').val()
+            };
+            ipcMain.send('saveSettings', newSettings);
             window.close();
         });
 
@@ -116,6 +122,12 @@
                 window.close();
             }
         });
+        window.fillOutSettings = function(pwsSettings) {
+            $('#pws-pass').val(pwsSettings.pwsPass);
+            $('#ssh-port').val(pwsSettings.sshPort);
+            $('#cp-port').val(pwsSettings.cpPort);
+            $('#fs-mode').val(pwsSettings.fsMode);
+        }
     </script>
 </body>
 </html>

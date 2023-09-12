@@ -1,3 +1,5 @@
+const { StringDecoder } = require('string_decoder');
+
 /**
  * Window object represent our main application window.
  */
@@ -39,16 +41,17 @@ var Window = {
         this.listeners.push({event: event, callback: callback});
     },
     /**
-     * show - Shows the main application window with the given file.
+     * show - Shows application window with the given file and optional dimensions.
      * @param {*} file contains the URL to load.
+     * @param {object} size optional size object with width and height properties.
      */
-    show: function(file = './web/index.html') {
+    show: function(file = './web/index.html', size = { width: 600, height: 400} ) {
         if (this.win == null) {
             const BrowserWindow = require('electron').BrowserWindow;
             const path = require('path');
             let winOptions = {
-                width: 600,
-                height: 400,
+                width: size.width,
+                height: size.height,
                 modal: true,
                 title: 'CodeGarden PWS',
                 maximizable: false,
@@ -66,6 +69,7 @@ var Window = {
                 this.invoke('closed');
                 const app = require('electron').app;
                 app.dock.hide();
+                this.listeners = [];
                 this.win = null;
             });
             this.win.webContents.on('did-finish-load', () => {
@@ -93,6 +97,7 @@ var Window = {
                 setTimeout(() => { this.win.show(); }, 300);
             });
         }
+        this.win.setSize(size.width, size.height);
         this.win.loadFile(file);
     },
 

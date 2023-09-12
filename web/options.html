@@ -1,4 +1,5 @@
-<div class="mb-1">
+<p>Note: Option changes may require system restart to take effect.</p>
+<div class="mb-2">
     <label class="form-label">PWS Password</label>
     <div class="row g-2">
         <div class="col">
@@ -18,7 +19,7 @@
                 </svg>
                 <svg id="hide-pw" xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eye" width="24"
                     height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                    stroke-linecap="round" stroke-linejoin="round">
+                    stroke-linecap="round" stroke-linejoin="round" style="display:none;">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                     <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
                     <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"></path>
@@ -27,7 +28,7 @@
         </div>
     </div>
 </div>
-<div class="mb-1">
+<div class="mb-2">
     <label class="form-label">SSH Port</label>
     <div class="row g-2">
         <div class="col">
@@ -35,7 +36,7 @@
         </div>
     </div>
 </div>
-<div class="mb-1">
+<div class="mb-2">
     <label class="form-label">CP Port</label>
     <div class="row g-2">
         <div class="col">
@@ -43,37 +44,37 @@
         </div>
     </div>
 </div>
-<div class="mb-1">
-    <label class="form-label">File Syetem Access</label>
-    <select class="form-select" id="fs-access" aria-label="File System Access">
-      <option value="none" selected="selected">None</option>
-      <option value="samba">Samba</option>
-      <option value="webdav">WebDAV</option>
+<div class="mb-2">
+    <label class="form-label">File System Mode</label>
+    <select class="form-select" id="fs-mode" aria-label="File System Mode">
+      <option value="None" selected="selected">None</option>
+      <option value="Samba">Samba</option>
+      <option value="WebDAV">WebDAV</option>
     </select>
 </div>
 <script>
-    // // Prevent prohibited characters from being entered into the password field
-    // $('#pw-pass').on('keypress', function (event) {
-    //     let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
-    //     let prohibitedChars = '\'"\\`'
-    //     if (prohibitedChars.indexOf(key) !== -1) {
-    //         event.preventDefault();
-    //         return false;
-    //     }
-    // });
+    // Prevent prohibited characters from being entered into the password field
+    $('#pws-pass').on('keypress', function (event) {
+        let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+        let prohibitedChars = '\'"\\`'
+        if (prohibitedChars.indexOf(key) !== -1) {
+            event.preventDefault();
+            return false;
+        }
+    });
 
-    // // Handle view password button
-    // $('#view-pass').click(r => {
-    //     if ($('#show-pw').is(':visible')) {
-    //         $('#show-pw').hide();
-    //         $('#hide-pw').show();
-    //         $('#pws-pass').attr('type', 'text');
-    //     } else {
-    //         $('#show-pw').show();
-    //         $('#hide-pw').hide();
-    //         $('#pws-pass').attr('type', 'password');
-    //     }
-    // });
+    // Handle view password button
+    $('#view-pass').click(r => {
+        if ($('#show-pw').is(':visible')) {
+            $('#show-pw').hide();
+            $('#hide-pw').show();
+            $('#pws-pass').attr('type', 'text');
+        } else {
+            $('#show-pw').show();
+            $('#hide-pw').hide();
+            $('#pws-pass').attr('type', 'password');
+        }
+    });
 
     // // Fill in current values of password and allow cg
     // pws.getSetting('pwsPass', r => {

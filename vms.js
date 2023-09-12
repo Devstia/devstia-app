@@ -340,7 +340,7 @@ var VMS = {
     updatePassword: function(password) {
         const shellEscape = require('shell-escape');
         const escapedPassword = shellEscape([password]);
-        this.sudo('/usr/local/bin/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
+        this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
     }
 };
 module.exports = VMS;

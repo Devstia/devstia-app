@@ -34,6 +34,7 @@ app.on('ready', () => {
             // Write trusted token for auto-login, this verifies the source of the request
             const fs = require('fs');
             const path = require('path');
+            const pwsSettings = Settings.read();
             const altFile = path.join(pwsSettings.appFolder, 'alt.txt');
             const altContent = Util.uuidv4().toString();
             fs.writeFileSync(altFile, altContent);
@@ -43,6 +44,7 @@ app.on('ready', () => {
         Tray.on('terminal', () => {
             const { spawn } = require('child_process');
             const path = require('path');
+            const pwsSettings = Settings.read();
             const scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
             console.log(scriptTerminal);
             const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
@@ -57,6 +59,7 @@ app.on('ready', () => {
             if (os.platform() === 'darwin') {
                 // Samba mount for macOS, works well and is fast.
                 const { exec } = require('child_process');
+                const pwsSettings = Settings.read();
                 let cmd = 'rm -rf /tmp/pws ; mkdir -p /tmp/pws ; mount -t smbfs //pws:' + pwsSettings.pwsPass;
                 cmd +='@local.dev.cc/PWS /tmp/pws ; open /tmp/pws';
                 exec(cmd, (error, stdout, stderr) => {
@@ -85,7 +88,8 @@ app.on('ready', () => {
         });
         Tray.on('settings', () => {
             const Window = require('./window.js');
-            Window.show('./web/settings.html');
+            Window.show('./web/settings.html', {width:600, height: 450});
+            Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
         });
         Tray.on('quit', (quitting) => {
             if (quitting == true) {

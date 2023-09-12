@@ -3,7 +3,7 @@ label.form-label {
 }
 /* App Window */
 .card-body {
-    height: 270px;
+    height: 320px;
 }
 .settings {
     padding: 8px;
@@ -55,12 +55,12 @@ label.form-label {
 /* About */
 #tabs-about-ex2 .mb-3 {
     text-align: center;
-    padding: 25px;
+    padding: 40px;
 }
 
 /* License */
 #license {
-    height: 252px;
+    height: 302px;
     margin: -5px -15px;
     padding: 8px;
     overflow-y: scroll;

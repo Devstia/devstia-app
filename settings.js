@@ -86,11 +86,18 @@ var Settings = {
             pwsPass: 'personal-web-server',
             sshPort: 8022,
             cpPort: 8083,
+            fsMode: 'Samba',
             debugMode: false,
             lanIP: this.getDefaultLocalIP(),
             appFolder: path.join(app.getPath('appData'), packageJson.name)
         };
 
+        // Default to WebDAV on Windows
+        const { platform } = require('os');
+        if (platform() === 'win32') {
+            pwsSettings.fsMode = 'WebDAV';
+        }
+        
         // Read settings file
         const pwsFile = path.join(pwsSettings.appFolder, 'settings.json');
         const fs = require('fs');
@@ -131,6 +138,7 @@ var Settings = {
 
     uiEvents: function() {
         const ipcMain = require('electron').ipcMain;
+        const self = this;
 
         // Handle request for opening external http/s links
         ipcMain.on('openLink', (event, url) => {
@@ -139,6 +147,20 @@ var Settings = {
             if ( urlPattern.test(url) ) {
                 require('electron').shell.openExternal(url);
             }
+        });
+
+        // Handle saving settings
+        ipcMain.on('saveSettings', function(event, newSettings) {
+            const VMS = require('./vms.js');
+            let pwsSettings = self.read();
+            console.log(JSON.stringify(newSettings, null, 2));
+            if (newSettings.pwsPass != pwsSettings.pwsPass) {
+                VMS.updatePassword(newSettings.pwsPass);
+            }
+            Object.assign(pwsSettings, newSettings);
+            console.log(JSON.stringify(pwsSettings, null, 2));
+            Settings.save(pwsSettings);
+            VMS.pwsSettings = pwsSettings;
         });
     }
 };
