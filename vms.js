@@ -151,6 +151,7 @@ var VMS = {
                     const urls = jsonData[filename];
                     const randomIndex = Math.floor(Math.random() * urls.length);
                     const dlURL = urls[randomIndex];
+                    console.log('Downloading from: ' + dlURL);
                     
                     // Download the given file to the appFolder/vms folder
                     const fs = require('fs');
