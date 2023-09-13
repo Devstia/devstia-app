@@ -172,25 +172,57 @@ var Settings = {
             let pwsSettings = self.read();
             require('electron').shell.showItemInFolder(pwsSettings.appFolder + '/security/ssh/pws_rsa.pub');
         });
-        ipcMain.on('regenKeys', function(event) {   
+        ipcMain.on('regenKeys', function(event, arg) {   
             const VMS = require('./vms.js');
-            VMS.regenKeys();
+            VMS.regenerateSSHKeys();
+            event.sender.send(arg.uuid);
         });
-        ipcMain.on('restartServer', function(event) {
+        ipcMain.on('restartServer', function(event, arg) {
             const VMS = require('./vms.js');
-            VMS.restart();
+            VMS.restart(function() {
+                event.sender.send(arg.uuid);
+            });
         });
-        ipcMain.on('reinstall', function(event) {
-            const VMS = require('./vms.js');
-            VMS.reinstall();
+        ipcMain.on('erase', function(event, arg) {
+            const prompt = require('electron-prompt');
+            prompt({
+                title: 'CodeGarden - WARNING',
+                label: '<div style="font-size:smaller;"><span style="font-weight: bold;">WARNING:</span> This will destroy all sites and reset the server installation. <br>Please type "ERASE" to confirm.</div>',
+                value: '',
+                inputAttrs: {
+                    type: 'text'
+                },
+                type: 'input',
+                useHtmlLabel: true,
+                width: 480,
+                height: 210
+            }).then((r) => {
+                if(r === null) {
+                    console.log('user cancelled');
+                } else {
+                    if (r === 'ERASE') {
+                        const Window = require('./window.js');
+                        Window.executeJavaScript("showWaiting('Erasing and re-installing server...');");
+                        const VMS = require('./vms.js');
+                        VMS.erase();
+                        setTimeout(function() {
+                            event.sender.send(arg.uuid);
+                        }, 10000);
+                    }else{
+                        const dialog = require('electron').dialog;
+                        dialog.showErrorBox('CodeGarden - Invalid Input', 'Please type "ERASE" to confirm.');
+                    }    
+                }
+            })
         });
         ipcMain.on('showMasterCert', function(event) {
             let pwsSettings = self.read();
             require('electron').shell.showItemInFolder(pwsSettings.appFolder + '/security/ca/dev.cc.crt');
         });
-        ipcMain.on('regenCerts', function(event) {
+        ipcMain.on('regenCerts', function(event, arg) {
             const VMS = require('./vms.js');
-            VMS.regenCerts();
+            VMS.regenerateCertificates();
+            event.sender.send(arg.uuid);
         });
     }
 };

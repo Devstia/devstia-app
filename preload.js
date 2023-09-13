@@ -42,6 +42,12 @@ const ipcMain = {
      */
     send: function(event, message = {}, callback = null) {
 
+        // Allow for optional message parameter
+        if (typeof message == 'function'){
+            callback = message;
+            message = {};
+        }
+        
         // Store callback and invoke it when we receive a response
         if (callback != null) {
             if (typeof message == 'object' && Array.isArray(message) == false) {

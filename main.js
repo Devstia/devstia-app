@@ -114,12 +114,13 @@ app.on('ready', () => {
     createTray();
 
     // Show the main application window state
+    var vms_state = '';
     function showWindow() {
-        const state = VMS.state();
-        Window.show('./web/' + state + '.html');
+        vms_state = VMS.state();
+        Window.show('./web/' + vms_state + '.html');
 
         // Download compatible VMS (virtual machine server) runtime
-        if (state == 'download') {
+        if (vms_state == 'download') {
             VMS.on('downloadProgress', (msg) => {
                 let percent = msg.value;
                 if (isNaN(percent)) percent = 0;
@@ -132,7 +133,7 @@ app.on('ready', () => {
         }
         
         // Extract the VMS archive runtime
-        if (state == 'extract') {
+        if (vms_state == 'extract') {
             VMS.on('extractComplete', () => {
                 showWindow(); // Done, re-check state, and start
             });
@@ -140,7 +141,7 @@ app.on('ready', () => {
         }
 
         // Start the VMS runtime
-        if (state == 'startup') {
+        if (vms_state == 'startup') {
             VMS.on('startupComplete', () => {
                 showWindow();
             });
@@ -148,7 +149,7 @@ app.on('ready', () => {
         }
 
         // Running state, enable menu items
-        if (state == 'running') {
+        if (vms_state == 'running') {
             Tray.setMenuState('localhost', true);
             Tray.setMenuState('terminal', true);
             Tray.setMenuState('files', true);
@@ -169,7 +170,7 @@ app.on('ready', () => {
         }
 
         // Quit the application if we're not in startup/running state
-        if (state != 'startup' && state != 'running' && state != 'settings') {
+        if (vms_state != 'startup' && vms_state != 'running' && vms_state != 'settings') {
             QuitOnClose();
         };
         
@@ -184,6 +185,12 @@ app.on('ready', () => {
         VMS.on('startupError', VMSError);
     }
     showWindow();
+
+    // Handle reinstall
+    const ipcMain = require('electron').ipcMain;
+    ipcMain.on('reinstall', function(event, arg) {
+        showWindow();
+    });
 });
 app.on('before-quit', () => {
     Window.close();

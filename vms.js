@@ -144,6 +144,37 @@ var VMS = {
         })();
     },
     /**
+     * erase - Erases the virtual machine server.
+     */
+    erase: function() {
+        this.shutdown();
+        
+        // Delete all img files in the VMS folder
+        setTimeout(() => {
+            const path = require('path');
+            const vmsFolder = path.join(this.pwsSettings.appFolder, 'vms');
+            const fs = require('fs');
+            fs.readdir(vmsFolder, (err, files) => {
+                if (err) {
+                    console.error('Error reading directory:', err);
+                    return;
+                }
+                files.forEach((file) => {
+                    const filePath = path.join(vmsFolder, file);
+                    if (fs.statSync(filePath).isFile() && file.endsWith('.img')) {
+                        fs.unlink(filePath, (err) => {
+                            if (err) {
+                                console.error('Error deleting file:', err);
+                                return;
+                            }
+                            console.log(`Deleted file: ${filePath}`);
+                        });
+                    }
+                });
+            });
+        }, 5000);
+    },
+    /**
      * extract - Extracts the VMS runtime from the downloaded archive.
      * @param {function} callback - The callback function to invoke after extraction completes.
      */
@@ -226,12 +257,19 @@ var VMS = {
      * regenerateCertificates - Regenerates the certificates for the VMS.
      */
     regenerateCertificates: function() {
-        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin regenerate_certificates' );
+        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin cg_pws_regenerate_certificates' );
+    },
+    /**
+     * regenerateSSHKeys - Regenerates the SSH keys for the VMS.
+     */
+    regenerateSSHKeys: function() {
+        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin cg_pws_regenerate_ssh_keys' );
     },
     /**
      * restart - Restarts the virtual machine server.
+     * @param {function} callback - The callback function to invoke after restart completes.
      */
-    restart: function() {
+    restart: function(cb) {
         this.shutdown();
 
         // Wait up to 20 seconds for proper shutdown
@@ -240,11 +278,13 @@ var VMS = {
             if (this.getProcessID() == null) {
                 clearInterval(tiShutdown);
                 this.startup();
+                cb();
             }
             retries++;
             if (retries >= 20) {
                 clearInterval(tiShutdown);
                 console.log('Error. VMS restart timed out.');
+                cb();
             }
         }, 1000);
     },
@@ -337,21 +377,6 @@ var VMS = {
             console.error(err);
             self.invoke('startupError', { error: err });
         }
-
-        // Prompt for authorization to start helper application
-        // const sudo = require('sudo-prompt');
-        // let options = {
-        //     name: 'CodeGarden'
-        // };
-        // sudo.exec(cmd, options, (error, stdout, stderr) => {
-        //     if (error) {
-        //         console.log('startHelper error: ' + error);
-        //         self.invoke('startupError', { error: error });
-        //     }else{
-        //         console.log('stdout: ' + stdout);
-        //         self.invoke('startupComplete');
-        //     }
-        // });
     },
     /**
      * updatePassword - Updates the passwords in the VMS for debian, admin, pws, Samba, and WebDAV.
