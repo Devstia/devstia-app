@@ -140,6 +140,23 @@ var Settings = {
         const ipcMain = require('electron').ipcMain;
         const self = this;
 
+        // Handle request for server status
+        ipcMain.on('checkStatus', function(event, arg) {
+            const VMS = require('./vms.js');
+            VMS.checkStatus().then((result) => {
+                console.log(`Command Result: ${result}`);
+                try {
+                    event.sender.send(arg.uuid, result);
+                }catch(error) {
+                    console.error(error);
+                }
+            })
+            .catch((error) => {
+                event.sender.send(arg.uuid, []);
+                console.error(`Error executing command: ${error}`);
+            });
+        });
+
         // Handle request for opening external http/s links
         ipcMain.on('openLink', (event, url) => {
             if (typeof url != 'string') return;
@@ -164,7 +181,9 @@ var Settings = {
             Object.assign(pwsSettings, newSettings);
             Settings.save(pwsSettings);
             VMS.pwsSettings = pwsSettings;
-            if (restart) VMS.restart();
+            if (restart) VMS.restart(function() {
+
+            });
         });
 
         // Handle system requests

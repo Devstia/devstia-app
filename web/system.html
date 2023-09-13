@@ -12,19 +12,40 @@
     </div>
     <div class="datagrid" id="dg-system">
         <div class="datagrid-item">
-            <div class="datagrid-title">Terminal / SSH Keys</div>
-            <div class="datagrid-content">
-                <a href="#showSSHKeys" id="showSSHKeys" class="btn btn-secondary w-100" aria-label="Show SSH Keys">Show SSH Keys</a>
-                <p> </p>
-                <a href="#regenKeys" id="regenKeys" class="btn btn-secondary w-100">Regenerate SSH Keys</a>
-            </div>
-        </div>
-        <div class="datagrid-item">
             <div class="datagrid-title">Server</div>
             <div class="datagrid-content">
                 <a href="#restartServer" id="restartServer" class="btn btn-secondary w-100">Restart Server</a>
                 <p> </p>
                 <a href="#reinstall" id="reinstall" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
+            </div>
+        </div>
+        <div class="datagrid-item">
+            <div class="datagrid-title">Status</div>
+            <div class="datagrid-content" id="status-parent">
+                <div id="status-server">
+                    <span class="badge badge-outline bg-green-lt" id="apache2">Apache2</span>
+                    <span class="badge badge-outline bg-green-lt" id="cron">CRON</span>
+                    <span class="badge badge-outline bg-green-lt" id="hestia">HestiaCP</span>
+                    <span class="badge badge-outline bg-green-lt" id="mariadb">MariaDB</span>
+                    <span class="badge badge-outline bg-green-lt" id="nginx">NGINX</span>
+                    <span class="badge badge-outline bg-green-lt" id="php-fpm">PHP-FPM</span>
+                    <span class="badge badge-outline bg-green-lt" id="postgresql">PostgreSQL</span>
+                    <span class="badge badge-outline bg-green-lt" id="smbd">Samba</span>
+                    <span class="badge badge-outline bg-green-lt" id="vsftpd">VSFTP</span>
+                </div>
+                <div id="status-waiting">
+                    <div class="page page-center" id="waiting">
+                        <div class="container container-slim py-4">
+                        <div class="text-center">
+                            <br /><br /><br />
+                            <div class="text-secondary mb-3" id="message"></div>
+                            <div class="progress progress-sm">
+                            <div class="progress-bar progress-bar-indeterminate"></div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="datagrid-item">
@@ -42,9 +63,47 @@
                 <a href="#regenCerts" id="regenCerts" class="btn btn-secondary w-100" aria-label="Regenerate All Certificates">Regenerate All Certificates</a>
             </div>
         </div>
+        <div class="datagrid-item">
+            <div class="datagrid-title">Terminal / SSH Keys</div>
+            <div class="datagrid-content">
+                <a href="#showSSHKeys" id="showSSHKeys" class="btn btn-secondary w-100" aria-label="Show SSH Keys">Show SSH Keys</a>
+                <p> </p>
+                <a href="#regenKeys" id="regenKeys" class="btn btn-secondary w-100">Regenerate SSH Keys</a>
+            </div>
+        </div>
     </div>
 </div>
 <script>
+    // Make status initially unknown
+    $('.badge').css('opacity', '20%');
+
+    // Check status
+    function checkStatus() {
+        ipcMain.send('checkStatus', function(stats) {
+            $('.badge').css('opacity', '100%');
+            setStatus('apache2', stats.indexOf('[ + ]  apache2') > -1);
+            setStatus('cron', stats.indexOf('[ + ]  cron') > -1);
+            setStatus('hestia', stats.indexOf('[ + ]  hestia') > -1);
+            setStatus('mariadb', stats.indexOf('[ + ]  mariadb') > -1);
+            setStatus('nginx', stats.indexOf('[ + ]  nginx') > -1);
+            setStatus('postgresql', stats.indexOf('[ + ]  postgresql') > -1);
+            setStatus('smbd', stats.indexOf('[ + ]  smbd') > -1);
+            setStatus('vsftpd', stats.indexOf('[ + ]  vsftpd') > -1);
+            setStatus('php-fpm', (stats.indexOf('[ - ]  php') > -1) == false);
+            $('#status-waiting').hide();
+            console.log(stats);
+        });
+    }
+    function setStatus(service, online) {
+        if (online) {
+            $('#' + service).removeClass('bg-red').addClass('bg-green-lt');
+        } else {
+            $('#' + service).removeClass('bg-green-lt').addClass('bg-red');
+        }
+    }
+    var csInterval = setInterval(checkStatus, 10000);
+    checkStatus();
+
     // Show/hide waiting screen
     function showWaiting(message) {
         $('#message').html(message);

@@ -12,6 +12,33 @@ var VMS = {
 
     // Methods
     /**
+     * checkStatus - Checks the status of the virtual machine server.
+     * @returns {object} - Promise with server stats.
+     */
+    checkStatus: function() {
+        return new Promise((resolve, reject) => {
+            const { spawn } = require('child_process');
+            const ssh = spawn('bash', [
+                '-c', `cd "${this.pwsSettings.appFolder}/scripts/" && ./status.sh ${this.pwsSettings.sshPort}`
+            ]);
+            let output = '';
+            ssh.stdout.on('data', (data) => {
+                output += data.toString();
+            });
+            ssh.stderr.on('data', (data) => {
+                console.error(`Error: ${data.toString()}`);
+            });
+            ssh.on('close', (code) => {
+                if (code === 0) {
+                    resolve(output.trim());
+                } else {
+                    reject(`Command failed with code ${code}`);
+                }
+            });
+            ssh.stdin.end();
+        });
+    },
+    /**
      * download - Locates the compatible VMS runtime at virtuosoft.com/downloads/cg-pws.
      * @param {function} callback - The callback function to furnish the download progress.
      */

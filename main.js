@@ -88,7 +88,7 @@ app.on('ready', () => {
         });
         Tray.on('settings', () => {
             const Window = require('./window.js');
-            Window.show('./web/settings.html', {width:600, height: 450});
+            Window.show('./web/settings.html', {width:620, height: 450});
             Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
         });
         Tray.on('quit', (quitting) => {
