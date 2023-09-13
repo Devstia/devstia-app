@@ -73,7 +73,9 @@
     $('#restartServer').click( (r) => {
         showWaiting('Restarting server...');
         ipcMain.send('restartServer', function() {
-            hideWaiting();
+            setTimeout(() => {
+                hideWaiting();
+            }, 5000);
         });
     });
 
