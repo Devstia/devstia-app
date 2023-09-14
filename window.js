@@ -139,13 +139,14 @@ var Window = {
      */
     setElmTextById: function(id, text) {
         if (this.win == null) return;
+        text = JSON.stringify(text);
         try {
             let script = "if (document.getElementById('" + id + "') != null) {\n";
-            script += "    document.getElementById('" + id + "').innerText = '" + text + "';\n";
+            script += "    document.getElementById('" + id + "').innerText = " + text + ";\n";
             script += "}else{\n"; // Retry in 1 second if element not found
             script += "    setTimeout(() => {\n";
             script += "        if (document.getElementById('" + id + "') != null) {\n";
-            script += "            document.getElementById('" + id + "').innerText = '" + text + "';\n";
+            script += "            document.getElementById('" + id + "').innerText = " + text + ";\n";
             script += "        }\n";
             script += "    }, 1000);\n";
             script += "}\n";
