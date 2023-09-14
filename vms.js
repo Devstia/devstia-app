@@ -379,18 +379,26 @@ var VMS = {
         const self = this;
         let cmd = '"' + this.pwsSettings.appFolder + '/scripts/startup.sh" ' + this.pwsSettings.sshPort;
         cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.appFolder + '"';
-        if (this.pwsSettings.fsMode == 'Samba') {
+        if (this.pwsSettings.fsMode.toLowerCase() == 'samba') {
             cmd += ' ",hostfwd=tcp::445-:445"';
         }else{
             cmd += ' ""';
         }
         console.log(cmd);
         const { exec } = require('child_process');
+        var exec_error = "";
         const child = exec(cmd, { detached: true }, (error, stdout, stderr) => {
             if (error) {
-                let err = `Error executing command: ${error.message}`;
-                console.error(err);
-                self.invoke('startupError', { error: err });
+                exec_error = error.message;
+                console.error(exec_error);
+
+                // Automatically turn off Samba if host forward error detected
+                if (exec_error.indexOf("Could not set up host forwarding rule 'tcp::445-:445'") > -1) {
+                    const Settings = require('./settings.js');
+                    let pwsSettings = Settings.read();
+                    pwsSettings.fsMode = 'None';
+                    Settings.save(pwsSettings);
+                }
             }
         });
         child.unref();
@@ -402,13 +410,16 @@ var VMS = {
             }else{
                 require('deasync').sleep(1000);
             }
+            if (exec_error != "") {
+                break;
+            }
         }
         if (started == true) {
             self.invoke('startupComplete');
         }else{
-            let err = 'Starting VMS timed out.';
-            console.error(err);
-            self.invoke('startupError', { error: err });
+            if (exec_error == "") exec_error = 'Starting VMS timed out.';
+            console.error(exec_error);
+            self.invoke('startupError', { error: exec_error });
         }
     },
     /**

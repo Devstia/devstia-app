@@ -97,14 +97,16 @@ app.on('ready', () => {
                 if (os.platform() === 'darwin') {
 
                     // Unmount Samba share for macOS
-                    const { exec } = require('child_process');
-                    let cmd = 'umount /tmp/pws && rm -rf /tmp/pws';
-                    exec(cmd, (error, stdout, stderr) => {
-                        if (error) {
-                            console.error(`Error unmounting samba: ${error.message}`);
-                            return;
-                        }
-                    });
+                    if (pwsSettings.fsMode.toLowerCase() == 'samba') {
+                        const { exec } = require('child_process');
+                        let cmd = 'umount /tmp/pws && rm -rf /tmp/pws';
+                        exec(cmd, (error, stdout, stderr) => {
+                            if (error) {
+                                console.error(`Error unmounting samba: ${error.message}`);
+                                return;
+                            }
+                        });
+                    }
                 }
                 VMS.shutdown();
             }
@@ -130,7 +132,9 @@ app.on('ready', () => {
     function VMSError(msg) {
         Window.show('./web/error.html');
         Window.setElmTextById('error', msg.error);
-        QuitOnClose();
+        setTimeout(() => {
+            QuitOnClose();
+        }, 500);
     }
     VMS.on('downloadError', VMSError);
     VMS.on('extractError', VMSError);
@@ -175,7 +179,7 @@ app.on('ready', () => {
         if (vms_state == 'running') {
             Tray.setMenuState('localhost', true);
             Tray.setMenuState('terminal', true);
-            Tray.setMenuState('files', true);
+            Tray.setMenuState('files', (pwsSettings.fsMode.toLowerCase() != 'none'));
             Tray.setMenuState('settings', true);
         }
 

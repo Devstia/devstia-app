@@ -86,16 +86,18 @@ var Settings = {
             pwsPass: 'personal-web-server',
             sshPort: 8022,
             cpPort: 8083,
-            fsMode: 'Samba',
+            fsMode: 'None',
             debugMode: false,
             lanIP: this.getDefaultLocalIP(),
             appFolder: path.join(app.getPath('appData'), packageJson.name)
         };
 
-        // Default to WebDAV on Windows
+        // Default to WebDAV on Windows and Samba on Linux/Darwin
         const { platform } = require('os');
         if (platform() === 'win32') {
             pwsSettings.fsMode = 'WebDAV';
+        }else{
+            pwsSettings.fsMode = 'Samba';
         }
         
         // Read settings file
@@ -178,12 +180,16 @@ var Settings = {
                 VMS.updateCPPort(newSettings.cpPort);
                 restart = true;
             }
+            if (newSettings.fsMode != pwsSettings.fsMode) {
+                restart = true;
+            }
             Object.assign(pwsSettings, newSettings);
             Settings.save(pwsSettings);
             VMS.pwsSettings = pwsSettings;
-            if (restart) VMS.restart(function() {
-
-            });
+            if (restart) {
+                const Window = require('./window.js');
+                Window.alert("Notice", "Please quit and restart CodeGarden for changes to take effect.");
+            }
         });
 
         // Handle system requests
