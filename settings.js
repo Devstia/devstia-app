@@ -154,7 +154,6 @@ var Settings = {
                 }
             })
             .catch((error) => {
-                event.sender.send(arg.uuid, []);
                 console.error(`Error executing command: ${error}`);
             });
         });
