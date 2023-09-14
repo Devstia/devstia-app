@@ -113,6 +113,29 @@ app.on('ready', () => {
     }
     createTray();
 
+    // Allow quitting the application when window is closed
+    function QuitOnClose() {
+        Window.on('closed', () => {
+            Tray.quitting = true;
+            VMS.quitting = true;
+            
+            // Give a second for pending dl/extract to quit
+            setTimeout(() => {
+                app.quit();
+            }, 1000);
+        });
+    }
+
+    // Respond to VMS errors and quit
+    function VMSError(msg) {
+        Window.show('./web/error.html');
+        Window.setElmTextById('error', msg.error);
+        QuitOnClose();
+    }
+    VMS.on('downloadError', VMSError);
+    VMS.on('extractError', VMSError);
+    VMS.on('startupError', VMSError);
+
     // Show the main application window state
     var vms_state = '';
     function showWindow() {
@@ -156,33 +179,12 @@ app.on('ready', () => {
             Tray.setMenuState('settings', true);
         }
 
-        // Allow quitting the application when window is closed
-        function QuitOnClose() {
-            Window.on('closed', () => {
-                Tray.quitting = true;
-                VMS.quitting = true;
-                
-                // Give a second for pending dl/extract to quit
-                setTimeout(() => {
-                    app.quit();
-                }, 1000);
-            });
-        }
-
         // Quit the application if we're not in startup/running state
-        if (vms_state != 'startup' && vms_state != 'running' && vms_state != 'settings') {
+        if (vms_state == 'download' || vms_state == 'extract' || vms_state == 'error') {
             QuitOnClose();
+        }else{
+            Window.off('closed');
         };
-        
-        // Respond to VMS errors and quit
-        function VMSError(msg) {
-            Window.show('./web/error.html');
-            Window.setElmTextById('error', msg.error);
-            QuitOnClose();
-        }
-        VMS.on('downloadError', VMSError);
-        VMS.on('extractError', VMSError);
-        VMS.on('startupError', VMSError);
     }
     showWindow();
 

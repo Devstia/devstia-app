@@ -37,6 +37,18 @@ var Window = {
         }
         return arg;
     },
+    /**
+     * off - Unregisters a listener for the given event.
+     * @param {string} event 
+     */
+    off: function(event) {
+        this.listeners = this.listeners.filter(listener => listener.event !== event);
+    },
+    /**
+     * on - Registers a listener for the given event.
+     * @param {string} event 
+     * @param {function} callback 
+     */
     on: function(event, callback) {
         this.listeners.push({event: event, callback: callback});
     },
