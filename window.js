@@ -11,6 +11,25 @@ var Window = {
 
     // Methods
     /**
+     * alert - Displays an alert dialog with the given title and message.
+     * @param {string} title - the title of the alert dialog.
+     * @param {string} message - the message to display in the alert dialog.
+     */
+    alert: function(title, message) {
+        const dialog = require('electron').dialog;
+        const nativeImage = require('electron').nativeImage;
+        const app = require('electron').app;
+        if (process.platform === 'darwin') {
+            app.dock.show();
+        }
+        dialog.showMessageBoxSync({
+            type: 'info',
+            message: message,
+            title: 'CodeGarden - ' + title,
+            icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
+        });
+    },
+    /**
      * close - Closes the main application window.
      */
     close: function() {
