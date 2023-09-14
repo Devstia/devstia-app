@@ -379,6 +379,11 @@ var VMS = {
         const self = this;
         let cmd = '"' + this.pwsSettings.appFolder + '/scripts/startup.sh" ' + this.pwsSettings.sshPort;
         cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.appFolder + '"';
+        if (this.pwsSettings.fsMode == 'Samba') {
+            cmd += ' ",hostfwd=tcp::445-:445"';
+        }else{
+            cmd += ' ""';
+        }
         console.log(cmd);
         const { exec } = require('child_process');
         const child = exec(cmd, { detached: true }, (error, stdout, stderr) => {
