@@ -82,6 +82,7 @@ var Settings = {
         const path = require('path');
         const packageJson = require('./package.json');
         let pwsSettings = {
+            version: packageJson.version,
             webFolder: path.join(app.getPath('home'), 'Sites'),
             pwsPass: 'personal-web-server',
             sshPort: 8022,
