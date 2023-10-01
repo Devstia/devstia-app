@@ -240,11 +240,20 @@ var VMS = {
     getProcessID: function() {
         const { execSync } = require('child_process');
         try {
-            const stdout = execSync('ps -ax | grep "qemu.*file=' + this.filename + '.img" | grep -v grep | awk \'{print $1}\'');
-            const processIds = stdout.toString().trim().split('\n');
-            if (isNaN(processIds[0]) || processIds == '') return null;
-            if (processIds.length == 0) return null;
-            return processIds[0];
+            if (process.platform === 'win32') {
+                const stdout = execSync('wmic process get ProcessId,CommandLine | findstr ' + this.filename + '.img | findstr qemu.exe');
+                const processIds = stdout.toString().trim().split('\n');
+                const filteredIds = processIds.filter(str => !str.includes('findstr')).map(str => parseInt(str.trim().slice(-25)));
+                if (isNaN(processIds[0]) || processIds == '') return null;
+                if (processIds.length == 0) return null;
+                return processIds[0];
+            }else{
+                const stdout = execSync('ps -ax | grep "qemu.*file=' + this.filename + '.img" | grep -v grep | awk \'{print $1}\'');
+                const processIds = stdout.toString().trim().split('\n');
+                if (isNaN(processIds[0]) || processIds == '') return null;
+                if (processIds.length == 0) return null;
+                return processIds[0];
+            }
         } catch (error) {
             console.error(`Error executing command: ${error.message}`);
             return null;

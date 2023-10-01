@@ -99,7 +99,9 @@ var Window = {
             this.win.on('closed', () => {
                 this.invoke('closed');
                 const app = require('electron').app;
-                app.dock.hide();
+                if (process.platform === 'darwin') {
+                    app.dock.hide();
+                }
                 this.listeners = [];
                 this.win = null;
             });
@@ -123,8 +125,10 @@ var Window = {
                         this.win.webContents.executeJavaScript("if (window.setThemeMode != null) setThemeMode('light');");
                     }
                 });
-                const app = require('electron').app;
-                app.dock.show();
+                if (process.platform === 'darwin') {
+                    const app = require('electron').app;
+                    app.dock.show();
+                }
                 setTimeout(() => { this.win.show(); }, 300);
             });
         }

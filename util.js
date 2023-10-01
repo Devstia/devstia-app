@@ -16,8 +16,16 @@ var Util = {
             const lockFilePID = parseInt(lockFileContent, 10);
             const { execSync } = require('child_process');
             try {
-                const stdout = execSync('ps -ax -o pid', { encoding: 'utf8' });
-                const runningPIDs = stdout.trim().split('\n').map(pid => parseInt(pid, 10));
+                const { platform } = require('os');
+                if (platform() === 'win32') {
+                    const stdout = execSync('tasklist', { encoding: 'utf8' });
+                    const lines = stdout.split('\n');
+                    const runningPIDs = lines.slice(3).map(line => parseInt(line.substr(28, 5)));
+                }else{
+                    const stdout = execSync('ps -ax -o pid', { encoding: 'utf8' });
+                    const runningPIDs = stdout.trim().split('\n').map(pid => parseInt(pid, 10));
+                }
+
                 if (runningPIDs.includes(lockFilePID)) {
                     console.log(`PID ${lockFilePID} exists and is running.`);
                     process.exit();
