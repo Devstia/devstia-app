@@ -214,7 +214,7 @@ var VMS = {
         let pathAddendum = '';
         if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
             const path = require('path');
-            pathAddendum = path.join(__dirname, 'runtime', 'win_x64') + ';';
+            pathAddendum = path.join(__dirname, 'runtime', 'win32_x64') + ';';
         }
         const tarProcess = require('child_process').spawn('tar', ['-xf', path.basename(archiveFile)], {
             cwd: path.dirname(archiveFile),
@@ -385,8 +385,23 @@ var VMS = {
     startup: function() {
 
         // Startup doesn't require sudo, so we can just execute the script
+        const path = require('path');
         const self = this;
-        let cmd = '"' + this.pwsSettings.appFolder + '/scripts/startup.sh" ' + this.pwsSettings.sshPort;
+        let pathAddendum = '';
+        
+        // Add runtime binaries to path for the given platform
+        const path = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch);
+        const options = {
+            env: {
+                PATH: pathAddendum + `${process.env.PATH}${path.delimiter}`
+            },
+            detached: true
+        };
+        let startup = 'startup.sh';
+        if (process.platform === 'win32') {
+            startup = 'startup.bat';
+        }
+        let cmd = '"' + this.pwsSettings.appFolder + '/scripts/' + startup + '" ' + this.pwsSettings.sshPort;
         cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.appFolder + '"';
         if (this.pwsSettings.fsMode.toLowerCase() == 'samba') {
             cmd += ' ",hostfwd=tcp::445-:445"';
@@ -396,7 +411,7 @@ var VMS = {
         console.log(cmd);
         const { exec } = require('child_process');
         var exec_error = "";
-        const child = exec(cmd, { detached: true }, (error, stdout, stderr) => {
+        const child = exec(cmd, options, (error, stdout, stderr) => {
             if (error) {
                 exec_error = error.message;
                 console.error(exec_error);

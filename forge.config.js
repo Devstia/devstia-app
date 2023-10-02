@@ -24,14 +24,14 @@ module.exports = {
     ],
     hooks: {
         postPackage: async (forgeConfig, options) => {
-            // Remove win_x64 directory from macOS build
+            // Remove win32_x64 directory from macOS build
             if (options.platform === 'darwin') {
                 const path = require('path');
                 const assetsDir = path.resolve(options.outputPaths[0], 'CodeGarden.app', 'Contents', 'Resources', 'app');
-                const win_x64 = path.resolve(assetsDir, 'runtime', 'win_x64');
+                const win32_x64 = path.resolve(assetsDir, 'runtime', 'win32_x64');
                 const fs = require('fs');
-                await fs.promises.rmdir(win_x64, { recursive: true });
-                console.log(`Excluded win_x64 directory for macOS build.`);
+                await fs.promises.rmdir(win32_x64, { recursive: true });
+                console.log(`Excluded win32_x64 directory for macOS build.`);
             }
         }
     }
