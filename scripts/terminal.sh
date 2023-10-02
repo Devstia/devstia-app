@@ -6,16 +6,20 @@
 port=$1
 private_key="$(pwd)/../security/ssh/pws_rsa"
 
-osascript <<EOF
-tell application "Terminal"
-    activate
-    
-    -- Open a new window and execute SSH command
-    set newTab to do script ""
-    do script "chmod 600 \"$private_key\" && ssh -q -o StrictHostKeyChecking=no -i \"$private_key\" pws@local.dev.cc -p \"$port\" && exit" in newTab
-    repeat while newTab is not missing value
-        delay 1
-        set custom title of newTab to "CodeGarden\n"
-    end repeat
-end tell
+if [[ $(uname) == "Darwin" ]]; then
+  osascript <<EOF
+  tell application "Terminal"
+      activate
+      
+      -- Open a new window and execute SSH command
+      set newTab to do script ""
+      do script "chmod 600 \"$private_key\" && ssh -q -o StrictHostKeyChecking=no -i \"$private_key\" pws@local.dev.cc -p \"$port\" && exit" in newTab
+      repeat while newTab is not missing value
+          delay 1
+          set custom title of newTab to "CodeGarden\n"
+      end repeat
+  end tell
 EOF
+else
+  echo "This script is only supported on macOS."
+fi
