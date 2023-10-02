@@ -387,10 +387,9 @@ var VMS = {
         // Startup doesn't require sudo, so we can just execute the script
         const path = require('path');
         const self = this;
-        let pathAddendum = '';
         
         // Add runtime binaries to path for the given platform
-        const path = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch);
+        const pathAddendum = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch);
         const options = {
             env: {
                 PATH: pathAddendum + `${process.env.PATH}${path.delimiter}`
