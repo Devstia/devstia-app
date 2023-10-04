@@ -430,7 +430,12 @@ var VMS = {
                 started = true;
                 break;
             }else{
-                require('deasync').sleep(1000);
+                const { execSync } = require('child_process');
+                if (process.platform === 'win32') { 
+                    exec('timeout /t 1 /nobreak')
+                }else{
+                    execSync('sleep 1');
+                }
             }
             if (exec_error != "") {
                 break;
