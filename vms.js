@@ -5,6 +5,7 @@ const Util = require('./util.js');
 var VMS = {
 
     // Properties
+    rcloneProcess: null,
     pwsSettings: null,
     filename: null,
     quitting: false,
@@ -373,28 +374,34 @@ var VMS = {
         }
     },
     /**
-     * shutdown - Shuts down the virtual machine server.
+     * shutdown - Shuts down the virtual machine server and rclone.
      */
     shutdown: function() {
         this.sudo('shutdown now');
+
+        // Kill the rclone process
+        rcloneProcess.kill();
     },
     /**
      * startup - Starts the virtual machine server.
      */
     startup: function() {
+        // Add runtime binaries to path for the given platform
+        const self = this;
+        const path = require('path');
+        const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
+                            + path.delimiter `${process.env.PATH}${path.delimiter}`;
+
+        // Startup rclone webdav service for Host -> VM settings sharing
+        if ( this.rcloneProcess != null ) {
+            const { spawn } = require('child_process');
+            let args = ['serve', 'webdav', this.pwsSettings.appFolder, '--baseurl', '/appFolder', 
+                        '--user', 'pws', '--pass', this.pwsSettings.pwsPass, '--addr',
+                        'localhost:8088', '--config', '""'];
+            this.rcloneProcess = spawn( 'rclone', args, { env: { PATH: runtimePath } } );
+        }
 
         // Startup doesn't require sudo, so we can just execute the script
-        const path = require('path');
-        const self = this;
-        
-        // Add runtime binaries to path for the given platform
-        const pathAddendum = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch) + path.delimiter;
-        const options = {
-            env: {
-                PATH: pathAddendum + `${process.env.PATH}${path.delimiter}`
-            },
-            detached: true
-        };
         let startup = 'startup.sh';
         if (process.platform === 'win32') {
             startup = 'startup.bat';
@@ -409,7 +416,7 @@ var VMS = {
         console.log(cmd);
         const { exec } = require('child_process');
         var exec_error = "";
-        const child = exec(cmd, options, (error, stdout, stderr) => {
+        const child = exec(cmd, { env: { PATH: runtimePath }, detached: true }, (error, stdout, stderr) => {
             if (error) {
                 exec_error = error.message;
                 console.error(exec_error);
