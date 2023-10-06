@@ -20,6 +20,25 @@ app.on('ready', () => {
     Util.allowOneInstance();
     Util.copyScripts();
 
+// TODO: implement rclone webdav services on 8088 in lieu of fsdev local 
+// const { spawn } = require('child_process');
+
+// // Spawn the rclone process
+// const rcloneProcess = spawn('rclone', ['serve', 'webdav', 'C:\\tmp', '--baseurl', '/appFolder', '--user', 'pws', '--pass', 'personal-web-server', '--addr', 'localhost:8088']);
+
+// // Handle the exit event
+// function handleExit() {
+//   // Kill the rclone process
+//   rcloneProcess.kill();
+//   // Exit the app
+//   process.exit();
+// }
+
+// // Handle the app exit event
+// app.on('before-quit', handleExit);
+// app.on('window-all-closed', handleExit);
+
+
     // Hide pull down menus
     const Menu = require('electron').Menu;
     const customMenu = Menu.buildFromTemplate([]);
