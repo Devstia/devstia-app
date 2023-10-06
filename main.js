@@ -24,7 +24,7 @@ app.on('ready', () => {
 // const { spawn } = require('child_process');
 
 // // Spawn the rclone process
-// const rcloneProcess = spawn('rclone', ['serve', 'webdav', 'C:\\tmp', '--baseurl', '/appFolder', '--user', 'pws', '--pass', 'personal-web-server', '--addr', 'localhost:8088']);
+// const rcloneProcess = spawn('rclone', ['serve', 'webdav', 'C:\\tmp', '--baseurl', '/appFolder', '--user', 'pws', '--pass', 'personal-web-server', '--addr', 'localhost:8088', '--config', '""']);
 
 // // Handle the exit event
 // function handleExit() {
