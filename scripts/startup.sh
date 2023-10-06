@@ -19,10 +19,10 @@ qemu-system-x86_64 \
         -device virtio-net-pci,netdev=net0 \
         -netdev user,id=net0,hostfwd=tcp::"$sshPort"-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::"$cpPort"-:"$cpPort"$samba \
         -drive if=virtio,format=qcow2,file=pws-amd64.img \
-        -fsdev local,id=virtfs0,path="$appFolder",security_model=mapped-xattr,fmode=0644,dmode=0755 \
-        -device virtio-9p-pci,fsdev=virtfs0,mount_tag=appFolder \
         -device virtio-balloon-pci \
         -nographic
+        # -fsdev local,id=virtfs0,path="$appFolder",security_model=mapped-xattr,fmode=0644,dmode=0755 \
+        # -device virtio-9p-pci,fsdev=virtfs0,mount_tag=appFolder \
         # -drive if=pflash,format=raw,file=efi_amd64.img,readonly=on \
         # -drive if=pflash,format=raw,file=efi_amd64_vars.img,readonly=on \
         #-display default,show-cursor=on
