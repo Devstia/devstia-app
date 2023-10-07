@@ -380,7 +380,7 @@ var VMS = {
         this.sudo('shutdown now');
 
         // Kill the rclone process
-        rcloneProcess.kill();
+        this.rcloneProcess.kill();
     },
     /**
      * startup - Starts the virtual machine server.
@@ -390,7 +390,7 @@ var VMS = {
         const self = this;
         const path = require('path');
         const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
-                            + path.delimiter `${process.env.PATH}${path.delimiter}`;
+                            + path.delimiter + `${process.env.PATH}${path.delimiter}`;
 
         // Startup rclone webdav service for Host -> VM settings sharing
         if ( this.rcloneProcess != null ) {

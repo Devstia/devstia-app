@@ -17,13 +17,14 @@ var Util = {
             const { execSync } = require('child_process');
             try {
                 const { platform } = require('os');
+                let runningPIDs = null;
                 if (platform() === 'win32') {
                     const stdout = execSync('tasklist', { encoding: 'utf8' });
                     const lines = stdout.split('\n');
-                    const runningPIDs = lines.slice(3).map(line => parseInt(line.substr(28, 5)));
+                    runningPIDs = lines.slice(3).map(line => parseInt(line.substr(28, 5)));
                 }else{
                     const stdout = execSync('ps -ax -o pid', { encoding: 'utf8' });
-                    const runningPIDs = stdout.trim().split('\n').map(pid => parseInt(pid, 10));
+                    runningPIDs = stdout.trim().split('\n').map(pid => parseInt(pid, 10));
                 }
 
                 if (runningPIDs.includes(lockFilePID)) {
