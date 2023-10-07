@@ -381,6 +381,7 @@ var VMS = {
 
         // Kill the rclone process
         this.rcloneProcess.kill();
+        this.rcloneProcess = null;
     },
     /**
      * startup - Starts the virtual machine server.
@@ -393,7 +394,7 @@ var VMS = {
                             + path.delimiter + `${process.env.PATH}${path.delimiter}`;
 
         // Startup rclone webdav service for Host -> VM settings sharing
-        if ( this.rcloneProcess != null ) {
+        if ( this.rcloneProcess == null ) {
             const { spawn } = require('child_process');
             let args = ['serve', 'webdav', this.pwsSettings.appFolder, '--baseurl', '/appFolder', 
                         '--user', 'pws', '--pass', this.pwsSettings.pwsPass, '--addr',
