@@ -15,7 +15,8 @@ qemu-system-x86_64 ^
         -display default,show-cursor=on ^
         -drive if=virtio,format=qcow2,file=pws-amd64.img ^
         -net nic -net user,hostfwd=tcp::%sshPort%-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::%cpPort%-:%cpPort%%samba% ^
-        -device virtio-balloon-pci
+        -device virtio-balloon-pci ^
+        -nographic
         REM sudo mount -t 9p -o trans=virtio,version=9p2000.L,access=any,msize=65536 shared /mnt/shared
         REM -virtfs local,path=C:\tmp,mount_tag=foo,security_model=mapped-xattr
         REM -netdev user,id=net0,hostfwd=tcp::%sshPort%-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::%cpPort%-%cpPort%%samba%
