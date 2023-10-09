@@ -19,8 +19,9 @@ var VMS = {
     checkStatus: function() {
         return new Promise((resolve, reject) => {
             const { spawn } = require('child_process');
+            const cmd = `cd "${this.pwsSettings.appFolder}/scripts/" && ./status.sh ${this.pwsSettings.sshPort}`;
             const ssh = spawn('bash', [
-                '-c', `cd "${this.pwsSettings.appFolder}/scripts/" && ./status.sh ${this.pwsSettings.sshPort}`
+                '-c', cmd
             ]);
             let output = '';
             ssh.stdout.on('data', (data) => {
@@ -365,6 +366,7 @@ var VMS = {
         ssh += this.pwsSettings.pwsPass + '" | ssh -q -o StrictHostKeyChecking=no -i "';
         ssh += this.pwsSettings.appFolder + '/security/ssh/debian_rsa" debian@local.dev.cc -p ';
         ssh += this.pwsSettings.sshPort + ' "sudo -S -p ' + "'' " + cmd + '"';
+        console.log( 'vms.sudo: ' + ssh);
         try {
             const stdout = execSync(ssh, { encoding: 'utf8' });
             return stdout.trim();

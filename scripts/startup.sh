@@ -17,7 +17,7 @@ qemu-system-x86_64 \
         -bios bios.img \
         -display default,show-cursor=on \
         -drive if=virtio,format=qcow2,file=pws-amd64.img \
-        -net nic -net user,id=net0,hostfwd=tcp::"$sshPort"-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::"$cpPort"-:"$cpPort"$samba \
+        -net nic -net user,hostfwd=tcp::"$sshPort"-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::"$cpPort"-:"$cpPort"$samba \
         -device virtio-balloon-pci \
         -nographic
         # -device virtio-net-pci,netdev=net0 \
