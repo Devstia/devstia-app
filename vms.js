@@ -256,7 +256,7 @@ var VMS = {
                 return processIds[0];
             }
         } catch (error) {
-            console.error(`Error executing command: ${error.message}`);
+            console.error(`Error executing VMS.getProcessID command: ${error.message}`);
             return null;
         }
     },
@@ -366,12 +366,12 @@ var VMS = {
         ssh += this.pwsSettings.pwsPass + '" | ssh -q -o StrictHostKeyChecking=no -i "';
         ssh += this.pwsSettings.appFolder + '/security/ssh/debian_rsa" debian@local.dev.cc -p ';
         ssh += this.pwsSettings.sshPort + ' "sudo -S -p ' + "'' " + cmd + '"';
-        console.log( 'vms.sudo: ' + ssh);
+        console.log( 'VMS.sudo: ' + ssh);
         try {
             const stdout = execSync(ssh, { encoding: 'utf8' });
             return stdout.trim();
         } catch (error) {
-            console.error(`Error executing command: ${error.message}`);
+            console.error(`Error executing VMS.sudo command: ${error.message}`);
             return null;
         }
     },

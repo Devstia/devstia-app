@@ -155,7 +155,7 @@ var Settings = {
                 }
             })
             .catch((error) => {
-                console.error(`Error executing command: ${error}`);
+                console.error(`Error executing Settings.checkStatus command: ${error}`);
             });
         });
 

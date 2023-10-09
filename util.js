@@ -35,7 +35,7 @@ var Util = {
                     fs.unlinkSync(lockFilePath);
                 }
             } catch (error) {
-                console.error(`Error executing command: ${error.message}`);
+                console.error(`Error executing Utils.allowOneInstance command: ${error.message}`);
                 process.exit();
             }
         }
