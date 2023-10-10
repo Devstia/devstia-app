@@ -1,8 +1,9 @@
 #!/bin/bash
 #
-# This script is executed by the Settings window to obtain
-# system server status.
+# Execute the given command as root on the remote vm.
 sshPort=$1
+password=$2
+command=$3
 private_key="$(pwd)/../security/ssh/debian_rsa"
 cache_key="$(pwd)/../cache_key"
 
@@ -12,8 +13,8 @@ if [ -f "$private_key" ]; then
     chmod 600 "$cache_key"
 fi
 if [ -f "$cache_key" ]; then   
-    ssh -q -o StrictHostKeyChecking=no -i "$cache_key" -p "$sshPort" debian@local.dev.cc /usr/sbin/service --status-all
+    echo "$password" | ssh -q -o StrictHostKeyChecking=no -i "$cache_key" debian@local.dev.cc -p "$sshPort" "sudo -S -p '' $command"
 else
-    echo "No cache key found for status"
+    echo "No cache key found for sudo"
     exit 1
 fi

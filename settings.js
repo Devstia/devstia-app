@@ -90,7 +90,8 @@ var Settings = {
             fsMode: 'None',
             debugMode: false,
             lanIP: this.getDefaultLocalIP(),
-            appFolder: path.join(app.getPath('appData'), packageJson.name)
+            appFolder: path.join(app.getPath('appData'), packageJson.name, 'app' ),
+            vmsFolder: path.join(app.getPath('appData'), packageJson.name, 'vms' ),
         };
 
         // Default to WebDAV on Windows and Samba on Linux/Darwin

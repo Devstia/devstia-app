@@ -51,7 +51,7 @@ var VMS = {
         const path = require('path');
         const jsonUrl = 'https://virtuosoft.com/downloads/cg-pws';
         const filename = this.filename;
-        const archiveFile = path.join(this.pwsSettings.appFolder, 'vms', filename + '.tar.xz');
+        const archiveFile = path.join(this.pwsSettings.vmsFolder, filename + '.tar.xz');
         const directoryPath = path.dirname(archiveFile);
         if (!fs.existsSync(directoryPath)) {
             try {
@@ -155,7 +155,7 @@ var VMS = {
                     const dlURL = urls[randomIndex];
                     console.log('Downloading from: ' + dlURL);
                     
-                    // Download the given file to the appFolder/vms folder
+                    // Download the given file to the vmsFolder
                     const fs = require('fs');
                     if (fs.existsSync(archiveFile + '.download')) {
                         fs.unlinkSync(archiveFile + '.download');
@@ -182,7 +182,7 @@ var VMS = {
         // Delete all img files in the VMS folder
         setTimeout(() => {
             const path = require('path');
-            const vmsFolder = path.join(this.pwsSettings.appFolder, 'vms');
+            const vmsFolder = path.join(this.pwsSettings.vmsFolder, 'vms');
             const fs = require('fs');
             fs.readdir(vmsFolder, (err, files) => {
                 if (err) {
@@ -212,7 +212,7 @@ var VMS = {
         let self = this;
         const path = require('path');
         const filename = this.filename;
-        const archiveFile = path.join(self.pwsSettings.appFolder, 'vms', filename + '.tar.xz');
+        const archiveFile = path.join(self.pwsSettings.vmsFolder, filename + '.tar.xz');
         let pathAddendum = '';
         if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
             pathAddendum = path.join(__dirname, 'runtime', 'win32_x64') + ';';
@@ -341,8 +341,8 @@ var VMS = {
             }
             const path = require('path');
             const fs = require('fs');
-            const archiveFile = path.join(this.pwsSettings.appFolder, 'vms', this.filename + '.tar.xz');
-            const imageFile = path.join(this.pwsSettings.appFolder, 'vms', this.filename + '.img');
+            const archiveFile = path.join(this.pwsSettings.vmsFolder, this.filename + '.tar.xz');
+            const imageFile = path.join(this.pwsSettings.vmsFolder, this.filename + '.img');
             if (!fs.existsSync(archiveFile)) {
                 return 'download';              // Download
             }else{
@@ -357,17 +357,15 @@ var VMS = {
         }
     },
     /**
-     * sudo - Executes a command with root privleges on the VMS.
+     * sudo - Executes a command with root privleges on the remote VMS.
      * @param {string} cmd - The shell command to execute.
      */
     sudo: function(cmd) {
         const { execSync } = require('child_process');
-        let ssh = 'chmod 600 "' + this.pwsSettings.appFolder + '/security/ssh/debian_rsa' + '" && echo "';
-        ssh += this.pwsSettings.pwsPass + '" | ssh -q -o StrictHostKeyChecking=no -i "';
-        ssh += this.pwsSettings.appFolder + '/security/ssh/debian_rsa" debian@local.dev.cc -p ';
-        ssh += this.pwsSettings.sshPort + ' "sudo -S -p ' + "'' " + cmd + '"';
-        console.log( 'VMS.sudo: ' + ssh);
+        let ssh = `cd "${this.pwsSettings.appFolder}/scripts/" && ./sudo.sh ${this.pwsSettings.sshPort}`;
+        ssh += ` "${this.pwsSettings.pwsPass}" "${cmd}"`;
         try {
+            console.log(ssh);
             const stdout = execSync(ssh, { encoding: 'utf8' });
             return stdout.trim();
         } catch (error) {
@@ -379,11 +377,13 @@ var VMS = {
      * shutdown - Shuts down the virtual machine server and rclone.
      */
     shutdown: function() {
-        this.sudo('shutdown now');
+        this.sudo("bash -c 'umount -q -f /media/appFolder ; shutdown now'");
 
         // Kill the rclone process
-        this.rcloneProcess.kill();
-        this.rcloneProcess = null;
+        if (this.rcloneProcess != null){
+            this.rcloneProcess.kill();
+            this.rcloneProcess = null;
+        }
     },
     /**
      * startup - Starts the virtual machine server.
@@ -410,7 +410,7 @@ var VMS = {
             startup = 'startup.bat';
         }
         let cmd = '"' + this.pwsSettings.appFolder + '/scripts/' + startup + '" ' + this.pwsSettings.sshPort;
-        cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.appFolder + '"';
+        cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.vmsFolder + '"';
         if (this.pwsSettings.fsMode.toLowerCase() == 'samba') {
             cmd += ' ",hostfwd=tcp::445-:445"';
         }else{
