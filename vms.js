@@ -442,7 +442,7 @@ var VMS = {
                                         self.receivedInitSecurity = true;
                                         const Settings = require('./settings.js');
                                         const password = Settings.encrypt(self.pwsSettings.pwsPass);
-                                        self.sudo(`echo "${password}" > /home/admin/.pwsPass`);
+                                        self.sudo(`bash -c 'echo "${password}" > /home/admin/.pwsPass'`);
                                     }
                                     res.writeHead(200, { 'Content-Type': 'text/plain' });
                                     res.end('OK');                                    
