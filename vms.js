@@ -460,6 +460,10 @@ var VMS = {
                 res.end('Unauthorized');
             }
         });
+        this.securityServer.on('error', (err) => {
+            console.error(`Error starting security server: ${err}`);
+        });
+        this.securityServer.listen(8088);
 
         // Startup doesn't require sudo, so we can just execute the script
         let startup = 'startup.sh';
