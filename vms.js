@@ -5,7 +5,8 @@ const Util = require('./util.js');
 var VMS = {
 
     // Properties
-    rcloneProcess: null,
+    receivedInitSecurity: false,
+    securityServer: null,
     pwsSettings: null,
     filename: null,
     quitting: false,
@@ -380,9 +381,9 @@ var VMS = {
         this.sudo("bash -c 'umount -q -f /media/appFolder ; shutdown now'");
 
         // Kill the rclone process
-        if (this.rcloneProcess != null){
-            this.rcloneProcess.kill();
-            this.rcloneProcess = null;
+        if (this.securityServer != null) {
+            this.securityServer.close();
+            this.securityServer = null;
         }
     },
     /**
@@ -395,14 +396,70 @@ var VMS = {
         const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
                             + path.delimiter + `${process.env.PATH}${path.delimiter}`;
 
-        // Startup rclone webdav service for Host -> VM settings sharing
-        if ( this.rcloneProcess == null ) {
-            const { spawn } = require('child_process');
-            let args = ['serve', 'webdav', this.pwsSettings.appFolder, '--baseurl', '/appFolder', 
-                        '--user', 'pws', '--pass', this.pwsSettings.pwsPass, '--addr',
-                        'localhost:8088', '--config', '""'];
-            this.rcloneProcess = spawn( 'rclone', args, { env: { PATH: runtimePath } } );
+        // Allowed security server cert and key files to obtain from the VMS
+        const allowedFilenames = ['ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
+            'ssh/pws_rsa','ssh/pws_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
+        
+        // Create app security folders
+        const fs = require('fs');
+        const securityFolder = path.join(self.pwsSettings.appFolder, 'security');
+        if (!fs.existsSync(path.join(securityFolder, 'ca'))) {
+            fs.mkdirSync(path.join(securityFolder, 'ca'), { recursive: true });
         }
+        if (!fs.existsSync(path.join(securityFolder, 'ssh'))) {
+            fs.mkdirSync(path.join(securityFolder, 'ssh'), { recursive: true });
+        }
+
+        // Start the security server
+        const http = require('http');
+        this.securityServer = http.createServer((req, res) => {
+            if (req.method === 'POST') {
+                let body = '';
+                req.on('data', (chunk) => {
+                    body += chunk;
+                });
+                req.on('end', () => {
+                    try {
+                        const data = JSON.parse(body);
+                        for (const [filename, content] of Object.entries(data)) {
+                            if (!allowedFilenames.includes(filename)) {
+                                continue;
+                            }
+                            const filePath = path.join(securityFolder, filename);
+                            fs.writeFile(filePath, content, (err) => {
+                                if (err) {
+                                    res.writeHead(500, { 'Content-Type': 'text/plain' });
+                                    res.end('Internal Server Error');
+                                } else {
+                                    fs.chmod(filePath, 0o600, (err) => {
+                                        if (err) {
+                                            console.error(`Error setting file mode: ${err}`);
+                                        }
+                                    });
+                                    if (filename == 'ssh/debian_rsa' && self.receivedInitSecurity == false) {
+
+                                        // Respond with the encrypted password, only the first time
+                                        self.receivedInitSecurity = true;
+                                        const Settings = require('./settings.js');
+                                        const password = Settings.encrypt(self.pwsSettings.pwsPass);
+                                        self.sudo(`echo "${password}" > /home/admin/.pwsPass`);
+                                    }
+                                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                                    res.end('OK');                                    
+                                }
+                            });
+                        }
+                    }catch(error) {
+                        console.error(`Error parsing JSON data: ${error}`);
+                        res.writeHead(500, {'Content-Type': 'text/plain'});
+                        res.end('Internal Server Error');
+                    }
+                });
+            }else{
+                res.writeHead(401, {'Content-Type': 'text/plain'});
+                res.end('Unauthorized');
+            }
+        });
 
         // Startup doesn't require sudo, so we can just execute the script
         let startup = 'startup.sh';
