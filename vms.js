@@ -183,15 +183,14 @@ var VMS = {
         // Delete all img files in the VMS folder
         setTimeout(() => {
             const path = require('path');
-            const vmsFolder = path.join(this.pwsSettings.vmsFolder, 'vms');
             const fs = require('fs');
-            fs.readdir(vmsFolder, (err, files) => {
+            fs.readdir(this.pwsSettings.vmsFolder, (err, files) => {
                 if (err) {
                     console.error('Error reading directory:', err);
                     return;
                 }
                 files.forEach((file) => {
-                    const filePath = path.join(vmsFolder, file);
+                    const filePath = path.join(this.pwsSettings.vmsFolder, file);
                     if (fs.statSync(filePath).isFile() && file.endsWith('.img')) {
                         fs.unlink(filePath, (err) => {
                             if (err) {
