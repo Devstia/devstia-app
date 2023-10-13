@@ -20,7 +20,14 @@ var VMS = {
     checkStatus: function() {
         return new Promise((resolve, reject) => {
             const { spawn } = require('child_process');
-            const cmd = `cd "${this.pwsSettings.appFolder}/scripts/" && ./status.sh ${this.pwsSettings.sshPort}`;
+            let status = null;
+            if (process.platform === 'win32') {
+                status = 'status.bat';
+            }else{
+                status = './status.sh';
+            }
+            const scriptsFolder = require('path').join(this.pwsSettings.appFolder, 'scripts');
+            const cmd = `cd "${scriptsFolder}" && ${status} ${this.pwsSettings.sshPort}`;
             const ssh = spawn('bash', [
                 '-c', cmd
             ]);
@@ -361,15 +368,16 @@ var VMS = {
      * @param {string} cmd - The shell command to execute.
      */
     sudo: function(cmd) {
-        const { execSync } = require('child_process');
+        const { execSync } = require('child_process');\
+        let sudo = null;
         if (process.platform === 'win32') {
             sudo = 'sudo.bat';
             cmd = cmd.replace(/\^/g, '^^').replace(/&/g, '^&').replace(/</g, '^<').replace(/>/g, '^>').replace(/\|/g, '^|');
         }else{
             sudo = './sudo.sh';
         }
-        const scriptFolder = require('path').join(this.pwsSettings.appFolder, 'scripts');
-        let ssh = `cd "${scriptFolder}" && ${sudo} ${this.pwsSettings.sshPort}`;
+        const scriptsFolder = require('path').join(this.pwsSettings.appFolder, 'scripts');
+        let ssh = `cd "${scriptsFolder}" && ${sudo} ${this.pwsSettings.sshPort}`;
         ssh += ` "${this.pwsSettings.pwsPass}" "${cmd}"`;
         let stdout = null;
         try {
