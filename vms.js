@@ -368,7 +368,7 @@ var VMS = {
      * @param {string} cmd - The shell command to execute.
      */
     sudo: function(cmd) {
-        const { execSync } = require('child_process');\
+        const { execSync } = require('child_process');
         let sudo = null;
         if (process.platform === 'win32') {
             sudo = 'sudo.bat';
