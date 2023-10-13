@@ -362,11 +362,18 @@ var VMS = {
      */
     sudo: function(cmd) {
         const { execSync } = require('child_process');
-        let ssh = `cd "${this.pwsSettings.appFolder}/scripts/" && ./sudo.sh ${this.pwsSettings.sshPort}`;
+        if (process.platform === 'win32') {
+            sudo = 'sudo.bat';
+            cmd = cmd.replace(/\^/g, '^^').replace(/&/g, '^&').replace(/</g, '^<').replace(/>/g, '^>').replace(/\|/g, '^|');
+        }else{
+            sudo = './sudo.sh';
+        }
+        const scriptFolder = require('path').join(this.pwsSettings.appFolder, 'scripts');
+        let ssh = `cd "${scriptFolder}" && ${sudo} ${this.pwsSettings.sshPort}`;
         ssh += ` "${this.pwsSettings.pwsPass}" "${cmd}"`;
+        let stdout = null;
         try {
-            console.log(ssh);
-            const stdout = execSync(ssh, { encoding: 'utf8' });
+            stdout = execSync(ssh, { encoding: 'utf8' });
             return stdout.trim();
         } catch (error) {
             console.error(`Error executing VMS.sudo command: ${error.message}`);
@@ -441,7 +448,7 @@ var VMS = {
                                         self.receivedInitSecurity = true;
                                         const Settings = require('./settings.js');
                                         const password = Settings.encrypt(self.pwsSettings.pwsPass);
-                                        self.sudo(`bash -c 'echo "${password}" > /home/admin/.pwsPass'`);
+                                        self.sudo(`bash -c 'echo '${password}' > /home/admin/.pwsPass'`);
                                     }
                                     res.writeHead(200, { 'Content-Type': 'text/plain' });
                                     res.end('OK');                                    
