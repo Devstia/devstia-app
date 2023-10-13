@@ -242,11 +242,11 @@ var VMS = {
         const { execSync } = require('child_process');
         try {
             if (process.platform === 'win32') {
-                const stdout = execSync('wmic process get ProcessId,CommandLine | findstr ' + this.filename + '.img | findstr qemu.exe');
+                const stdout = execSync('wmic process get ProcessId,CommandLine | findstr ' + this.filename + '.img | findstr qemu-system');
                 const processIds = stdout.toString().trim().split('\n');
                 const filteredIds = processIds.filter(str => !str.includes('findstr')).map(str => parseInt(str.trim().slice(-25)));
-                if (isNaN(processIds[0]) || processIds == '') return null;
-                if (processIds.length == 0) return null;
+                if (isNaN(filteredIds[0]) || filteredIds == '') return null;
+                if (filteredIds.length == 0) return null;
                 return processIds[0];
             }else{
                 const stdout = execSync('ps -ax | grep "qemu.*file=' + this.filename + '.img" | grep -v grep | awk \'{print $1}\'');
@@ -494,15 +494,17 @@ var VMS = {
             }
         });
         child.unref();
+
+        // Wait up to 20 seconds for the VMS to start
         let started = false;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 20; i++) {
             if (this.getProcessID() != null) {
                 started = true;
                 break;
             }else{
                 const { execSync } = require('child_process');
                 if (process.platform === 'win32') { 
-                    exec('timeout /t 1 /nobreak')
+                    execSync('ping 127.0.0.1 -n 2 > nul');
                 }else{
                     execSync('sleep 1');
                 }
