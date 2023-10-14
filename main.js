@@ -31,6 +31,7 @@ app.on('ready', () => {
     function createTray() {
         Tray.create();
         Tray.on('localhost', () => {
+
             // Write trusted token for auto-login, this verifies the source of the request
             const altContent = Util.uuidv4().toString();
             VMS.sudo("echo '" + altContent + "' > /tmp/alt.txt");
