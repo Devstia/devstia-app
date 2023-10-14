@@ -19,10 +19,6 @@ label.form-label {
 }
 
 /* Options */
-.badge {
-    margin: 2px 0;
-    width: 88px;
-}
 .info {
     margin-bottom: 8px;
 }
@@ -36,6 +32,10 @@ label.form-label {
 }
 
 /* System */
+.badge {
+    margin: 2px 0;
+    width: 86px;
+}
 #system, #status-parent {
     position: relative;
 }
