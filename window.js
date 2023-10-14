@@ -96,6 +96,7 @@ var Window = {
                 }
             }
             this.win = new BrowserWindow(winOptions);
+            this.win.setMenu(null);
             this.win.on('closed', () => {
                 this.invoke('closed');
                 const app = require('electron').app;
