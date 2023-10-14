@@ -1,5 +1,7 @@
 @echo off
-REM Execute the given command as root on the remote vm.
+:: 
+:: Execute the given command as root on the remote vm.
+:: 
 set sshPort=%1
 set password=%2
 set command=%3

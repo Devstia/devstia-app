@@ -1,5 +1,8 @@
 @echo off
-REM This script is executed by the startup routine in our CodeGarden app.
+:: 
+:: This script is executed by the startup routine in our CodeGarden app.
+:: Optimized for Windows 10 with Hyper-V
+:: 
 set sshPort=%1
 set cpPort=%2
 set vmsFolder=%3

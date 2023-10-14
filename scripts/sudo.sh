@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Execute the given command as root on the remote vm.
+# 
 sshPort=$1
 password=$2
 command=$3

@@ -1,8 +1,9 @@
 #!/bin/bash
-#
-# This script is executed by the Terminal menu in the system/tray icon.
-# It expects two parameters: the password and the port number.
-#
+# 
+# This script is executed by the Terminal menu on the system/tray
+# icon. It opens a Terminal window and connects to the VM via
+# SSH on the given port number.
+# 
 port=$1
 private_key="$(pwd)/../security/ssh/pws_rsa"
 
