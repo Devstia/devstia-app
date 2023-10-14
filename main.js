@@ -42,12 +42,20 @@ app.on('ready', () => {
             const { spawn } = require('child_process');
             const path = require('path');
             const pwsSettings = Settings.read();
-            const scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
+            const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
+                    + path.delimiter + `${process.env.PATH}${path.delimiter}`;
+            let scriptTerminal = null;
+            if (process.platform === 'win32') {
+                scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.bat');
+            }else{
+                scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
+            }
             console.log(scriptTerminal);
             const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
                 cwd: path.dirname(scriptTerminal),
                 detached: true,
-                stdio: 'ignore'
+                stdio: 'ignore',
+                env: { PATH: runtimePath }
             });
             p.unref();
         });
