@@ -196,7 +196,8 @@ var Settings = {
         // Handle system requests
         ipcMain.on('showSSHKeys', function(event) {
             let pwsSettings = self.read();
-            require('electron').shell.showItemInFolder(pwsSettings.appFolder + '/security/ssh/pws_rsa.pub');
+            const sshKey = require('path').join(pwsSettings.appFolder, 'security', 'ssh', 'pws_rsa.pub');
+            require('electron').shell.showItemInFolder(sshKey);
         });
         ipcMain.on('regenKeys', function(event, arg) {   
             const VMS = require('./vms.js');
@@ -243,7 +244,8 @@ var Settings = {
         });
         ipcMain.on('showMasterCert', function(event) {
             let pwsSettings = self.read();
-            require('electron').shell.showItemInFolder(pwsSettings.appFolder + '/security/ca/dev.cc.crt');
+            const masterCert = require('path').join(pwsSettings.appFolder, 'security', 'ca', 'dev.cc.crt');
+            require('electron').shell.showItemInFolder(masterCert);
         });
         ipcMain.on('regenCerts', function(event, arg) {
             const VMS = require('./vms.js');
