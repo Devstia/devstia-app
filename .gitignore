@@ -3,12 +3,4 @@ build
 temp
 node_modules
 out
-runtime/win32_x64/*
-!runtime/win32_x64/libiconv-2.dll
-!runtime/win32_x64/libintl-8.dll
-!runtime/win32_x64/liblzma-5.dll
-!runtime/win32_x64/msys-2.0.dll
-!runtime/win32_x64/msys-iconv-2.dll
-!runtime/win32_x64/msys-intl-8.dll
-!runtime/win32_x64/tar.exe
-!runtime/win32_x64/xz.exe
+
