@@ -392,7 +392,7 @@ var VMS = {
      * shutdown - Shuts down the virtual machine server and rclone.
      */
     shutdown: function() {
-        this.sudo("bash -c 'umount -q -f /media/appFolder ; shutdown now'");
+        this.sudo("shutdown now");
 
         // Kill the rclone process
         if (this.securityServer != null) {
