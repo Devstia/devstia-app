@@ -411,7 +411,7 @@ var VMS = {
                             + path.delimiter + `${process.env.PATH}${path.delimiter}`;
 
         // Allowed security server cert and key files to obtain from the VMS
-        const allowedFilenames = ['ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
+        const allowedFilenames = ['pwsPass','ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
             'ssh/pws_rsa','ssh/pws_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
         
         // Create app security folders
@@ -437,6 +437,12 @@ var VMS = {
                         const data = JSON.parse(body);
                         for (const [filename, content] of Object.entries(data)) {
                             if (!allowedFilenames.includes(filename)) {
+                                continue;
+                            }
+                            if (filename == 'pwsPass') {
+                                self.pwsSettings.pwsPass = content;
+                                const Settings = require('./settings.js');
+                                Settings.save(self.pwsSettings);
                                 continue;
                             }
                             const filePath = path.join(securityFolder, filename);
