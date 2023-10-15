@@ -9,6 +9,8 @@ const app = require('electron').app;
 const Window = require('./window.js');
 app.on('ready', () => {
 
+    // TODO: On Windows, check for Hyper-V, if not enabled ask to enable/reboot
+
     // Read our settings
     const Settings = require('./settings.js');
     const pwsSettings = Settings.read();
