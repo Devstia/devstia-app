@@ -62,6 +62,7 @@ app.on('ready', () => {
         Tray.on('files', () => {
             const os = require('os');
             if (os.platform() === 'darwin') {
+                
                 // Samba mount for macOS, works well and is fast.
                 const { exec } = require('child_process');
                 const pwsSettings = Settings.read();
@@ -74,19 +75,17 @@ app.on('ready', () => {
                     }
                 });
             }else if (os.platform() === 'win32') {
+
                 // WebDAV mount for Windows, works well and is fast.
-                const { exec } = require('child_process');
+                const { execSync } = require('child_process');
                 const pwsSettings = Settings.read();
-                let cmd = 'net use P: https://webdav-pws.dev.cc /user:pws ' + pwsSettings.pwsPass;
-                cmd += ` && powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'PWS'"`;
-                cmd += ' && start P: && exit';
-                exec(cmd, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`Error setting drive label: ${error.message}`);
-                        return;
-                    }
-                    console.log(`Drive P: labeled as "PWS".`);
-                });
+                try {
+                    execSync('net use P: https://webdav-pws.dev.cc /user:pws "' + pwsSettings.pwsPass + '"');
+                    execSync(`powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'PWS'"`);
+                }catch(err) {
+                    console.error(`Error mounting webdav: ${err.message}`);
+                }
+                execSync("IF EXIST P:\\ (start P:)");
             }else{
                 // TODO: Support for Linux
             }
