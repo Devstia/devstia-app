@@ -73,9 +73,24 @@ app.on('ready', () => {
                         return;
                     }
                 });
+            }else if (os.platform() === 'win32') {
+                // WebDAV mount for Windows, works well and is fast.
+                const { exec } = require('child_process');
+                const pwsSettings = Settings.read();
+                let cmd = 'net use P: https://webdav-pws.dev.cc /user:pws ' + pwsSettings.pwsPass;
+                cmd += ` && powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'PWS'"`;
+                cmd += ' && start P: && exit';
+                exec(cmd, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error setting drive label: ${error.message}`);
+                        return;
+                    }
+                    console.log(`Drive P: labeled as "PWS".`);
+                });
             }else{
-
+                // TODO: Support for Linux
             }
+
 // WebDAV mount for macOS (not working well, drops files)
 //                 const { exec } = require('child_process');
 //                 const pwsPass = pwsSettings.pwsPass;
@@ -112,6 +127,21 @@ app.on('ready', () => {
                             }
                         });
                     }
+                }else if (os.platform() === 'win32') {
+
+                    // Unmount WebDAV share for Windows
+                    if (pwsSettings.fsMode.toLowerCase() == 'webdav') {
+                        const { exec } = require('child_process');
+                        let cmd = 'net use P: /delete';
+                        exec(cmd, (error, stdout, stderr) => {
+                            if (error) {
+                                console.error(`Error unmounting webdav: ${error.message}`);
+                                return;
+                            }
+                        });
+                    }
+                }else{
+                    // TODO: Support for Linux
                 }
                 VMS.shutdown();
             }
