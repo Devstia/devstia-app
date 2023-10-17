@@ -140,6 +140,9 @@ var Settings = {
         fs.writeFileSync(pwsFilePath, JSON.stringify(pwsCopy, null, 2));
     },
 
+    /**
+     * uiEvents - Handles user interface events from the settings window.
+     */
     uiEvents: function() {
         const Window = require('./window.js');
         const VMS = require('./vms.js');
@@ -170,29 +173,17 @@ var Settings = {
             }
         });
 
-        // // Handle saving settings
-        // ipcMain.on('saveSettings', function(event, newSettings) {
-        //     const VMS = require('./vms.js');
-        //     let pwsSettings = self.read();
-        //     let restart = false;
-        //     if (newSettings.pwsPass != pwsSettings.pwsPass) {
-        //         VMS.updatePassword(newSettings.pwsPass);
-        //     }
-        //     if (newSettings.cpPort != pwsSettings.cpPort) {
-        //         VMS.updateCPPort(newSettings.cpPort);
-        //         restart = true;
-        //     }
-        //     if (newSettings.fsMode != pwsSettings.fsMode) {
-        //         restart = true;
-        //     }
-        //     Object.assign(pwsSettings, newSettings);
-        //     Settings.save(pwsSettings);
-        //     VMS.pwsSettings = pwsSettings;
-        //     if (restart) {
-        //         const Window = require('./window.js');
-        //         Window.alert("Notice", "Please quit and restart CodeGarden for changes to take effect.");
-        //     }
-        // });
+        // Handle saving settings
+        ipcMain.on('savePass', function(event, newSettings) {
+            let pwsSettings = self.read();
+            if (newSettings.pwsPass != pwsSettings.pwsPass) {
+                VMS.updatePassword(newSettings.pwsPass);
+                pwsSettings.pwsPass = newSettings.pwsPass;
+                self.save(pwsSettings);
+                VMS.pwsSettings = pwsSettings;
+                event.sender.send(newSettings.uuid);
+            }
+        });
 
         // Handle system requests
         ipcMain.on('erase', function(event, arg) {

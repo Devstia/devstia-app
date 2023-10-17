@@ -211,9 +211,12 @@ app.on('ready', () => {
     function showSettings() {
         const Window = require('./window.js');
         Window.show('./web/settings.html', {width:620, height: 450});
-        //Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
+        Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
 
         // From security tab
+        Window.on('savePass', (pwsPass) => {
+            
+        });
 
         // From system tab
         Window.on('localhost', () => {

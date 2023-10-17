@@ -102,5 +102,49 @@
                 hideWaitingSecurity();
             });
         });
+
+        // Handle save password
+        $('#savePass').click( (r) => {
+            let pwsPass = $('#pws-pass').val();
+            if (window.lastPass == pwsPass) return;
+            showWaitingSecurity('Updating passwords...');
+            window.lastPass = pwsPass;
+            ipcMain.send('savePass', { 'pwsPass': pwsPass }, function() {
+                $('#show-pw').show();
+                $('#hide-pw').hide();
+                $('#pws-pass').attr('type', 'password');
+                setTimeout(function() {
+                    hideWaitingSecurity();
+                }, 1000);
+            });
+        });
+
+        window.fillOutSettings = function(pwsSettings) {
+            window.lastPass = pwsSettings.pwsPass;
+            $('#pws-pass').val(pwsSettings.pwsPass);
+        }
+
+        // Prevent prohibited characters from being entered into the password field
+        $('#pws-pass').on('keypress', function (event) {
+            let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+            let prohibitedChars = '\'"\\`'
+            if (prohibitedChars.indexOf(key) !== -1) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+        // Handle view password button
+        $('#view-pass').click(r => {
+            if ($('#show-pw').is(':visible')) {
+                $('#show-pw').hide();
+                $('#hide-pw').show();
+                $('#pws-pass').attr('type', 'text');
+            } else {
+                $('#show-pw').show();
+                $('#hide-pw').hide();
+                $('#pws-pass').attr('type', 'password');
+            }
+        });
     </script>
     <script src="links.js"></script>
