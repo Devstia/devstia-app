@@ -32,6 +32,12 @@ label.form-label {
 }
 
 /* System */
+.inline-btns a.w-50 {
+    width: calc(50% - 4px) !important;
+}
+.inline-btns a.w-50:first-child { 
+    margin-right: 8px;
+}
 .badge {
     margin: 2px 0;
     width: 86px;

@@ -21,6 +21,14 @@
                 </svg> System</a>
             </li>
             <li class="nav-item">
+                <a href="#tabs-security-ex2" class="nav-link" data-bs-toggle="tab"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-lock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"></path>
+                    <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"></path>
+                    <path d="M8 11v-4a4 4 0 1 1 8 0v4"></path>
+                    </svg> Security</a>
+            </li>
+            <!-- <li class="nav-item">
                 <a href="#tabs-options-ex2" class="nav-link" data-bs-toggle="tab"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-adjustments-horizontal" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M14 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
@@ -33,7 +41,7 @@
                 <path d="M4 18l11 0"></path>
                 <path d="M19 18l1 0"></path>
                 </svg> Options</a>
-            </li>
+            </li> -->
             <li class="nav-item">
                 <a href="#tabs-about-ex2" class="nav-link" data-bs-toggle="tab"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-info-circle" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -57,7 +65,9 @@
             <div class="tab-content">
                 <div id="tabs-system-ex2" class="tab-pane active show">
                 </div>
-                <div id="tabs-options-ex2" class="tab-pane">
+                <!-- <div id="tabs-options-ex2" class="tab-pane">
+                </div> -->
+                <div id="tabs-security-ex2" class="tab-pane">
                 </div>
                 <div id="tabs-about-ex2" class="tab-pane">
                 </div>
@@ -68,8 +78,9 @@
     </div>
     <div class="settings">
         <button id="help-button" class="btn">Help</button>
-        <button id="cancel-button" class="btn">Cancel</button>
-        <button id="save-button" class="btn btn-primary">Save</button>
+        <!-- <button id="cancel-button" class="btn">Cancel</button>
+        <button id="save-button" class="btn btn-primary">Save</button> -->
+        <button id="close-button" class="btn btn-primary">Close</button>
     </div>
     <script>
         (function($) {
@@ -85,7 +96,8 @@
             
             // Load all tab content
             $("#tabs-system-ex2").load("system.html");
-            $("#tabs-options-ex2").load("options.html");
+            // $("#tabs-options-ex2").load("options.html");
+            $("#tabs-security-ex2").load("security.html");
             $("#tabs-about-ex2").load("about.html");
             $("#tabs-license-ex2").load("license.html");
 
