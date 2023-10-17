@@ -322,7 +322,7 @@ var VMS = {
         let tiShutdown = setInterval(() => {
             if (this.getProcessID() == null) {
                 clearInterval(tiShutdown);
-                this.startup();
+                this.startup(true);
                 cb();
             }
             retries++;
@@ -403,7 +403,7 @@ var VMS = {
     /**
      * startup - Starts the virtual machine server.
      */
-    startup: function() {
+    startup: function(restarted = false) {
         // Add runtime binaries to path for the given platform
         const self = this;
         const path = require('path');
@@ -425,65 +425,67 @@ var VMS = {
         }
 
         // Start the security server
-        const http = require('http');
-        this.securityServer = http.createServer((req, res) => {
-            if (req.method === 'POST') {
-                let body = '';
-                req.on('data', (chunk) => {
-                    body += chunk;
-                });
-                req.on('end', () => {
-                    try {
-                        const data = JSON.parse(body);
-                        for (const [filename, content] of Object.entries(data)) {
-                            if (!allowedFilenames.includes(filename)) {
-                                continue;
-                            }
-                            if (filename == 'pwsPass') {
-                                self.pwsSettings.pwsPass = content;
-                                const Settings = require('./settings.js');
-                                Settings.save(self.pwsSettings);
-                                continue;
-                            }
-                            const filePath = path.join(securityFolder, filename);
-                            fs.writeFile(filePath, content, (err) => {
-                                if (err) {
-                                    res.writeHead(500, { 'Content-Type': 'text/plain' });
-                                    res.end('Internal Server Error');
-                                } else {
-                                    fs.chmod(filePath, 0o600, (err) => {
-                                        if (err) {
-                                            console.error(`Error setting file mode: ${err}`);
-                                        }
-                                    });
-                                    if (filename == 'ssh/debian_rsa' && self.receivedInitSecurity == false) {
-
-                                        // Respond with the encrypted password, only the first time
-                                        self.receivedInitSecurity = true;
-                                        const Settings = require('./settings.js');
-                                        const password = Settings.encrypt(self.pwsSettings.pwsPass);
-                                        self.sudo(`bash -c 'echo '${password}' > /home/admin/.pwsPass'`);
-                                    }
-                                    res.writeHead(200, { 'Content-Type': 'text/plain' });
-                                    res.end('OK');                                    
+        if (this.securityServer == null) {
+            const http = require('http');
+            this.securityServer = http.createServer((req, res) => {
+                if (req.method === 'POST') {
+                    let body = '';
+                    req.on('data', (chunk) => {
+                        body += chunk;
+                    });
+                    req.on('end', () => {
+                        try {
+                            const data = JSON.parse(body);
+                            for (const [filename, content] of Object.entries(data)) {
+                                if (!allowedFilenames.includes(filename)) {
+                                    continue;
                                 }
-                            });
+                                if (filename == 'pwsPass') {
+                                    self.pwsSettings.pwsPass = content;
+                                    const Settings = require('./settings.js');
+                                    Settings.save(self.pwsSettings);
+                                    continue;
+                                }
+                                const filePath = path.join(securityFolder, filename);
+                                fs.writeFile(filePath, content, (err) => {
+                                    if (err) {
+                                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                                        res.end('Internal Server Error');
+                                    } else {
+                                        fs.chmod(filePath, 0o600, (err) => {
+                                            if (err) {
+                                                console.error(`Error setting file mode: ${err}`);
+                                            }
+                                        });
+                                        if (filename == 'ssh/debian_rsa' && self.receivedInitSecurity == false) {
+
+                                            // Respond with the encrypted password, only the first time
+                                            self.receivedInitSecurity = true;
+                                            const Settings = require('./settings.js');
+                                            const password = Settings.encrypt(self.pwsSettings.pwsPass);
+                                            self.sudo(`bash -c 'echo '${password}' > /home/admin/.pwsPass'`);
+                                        }
+                                        res.writeHead(200, { 'Content-Type': 'text/plain' });
+                                        res.end('OK');                                    
+                                    }
+                                });
+                            }
+                        }catch(error) {
+                            console.error(`Error parsing JSON data: ${error}`);
+                            res.writeHead(500, {'Content-Type': 'text/plain'});
+                            res.end('Internal Server Error');
                         }
-                    }catch(error) {
-                        console.error(`Error parsing JSON data: ${error}`);
-                        res.writeHead(500, {'Content-Type': 'text/plain'});
-                        res.end('Internal Server Error');
-                    }
-                });
-            }else{
-                res.writeHead(401, {'Content-Type': 'text/plain'});
-                res.end('Unauthorized');
-            }
-        });
-        this.securityServer.on('error', (err) => {
-            console.error(`Error starting security server: ${err}`);
-        });
-        this.securityServer.listen(8088);
+                    });
+                }else{
+                    res.writeHead(401, {'Content-Type': 'text/plain'});
+                    res.end('Unauthorized');
+                }
+            });
+            this.securityServer.on('error', (err) => {
+                console.error(`Error starting security server: ${err}`);
+            });
+            this.securityServer.listen(8088);
+        }
 
         // Startup doesn't require sudo, so we can just execute the script
         let startup = 'startup.sh';
@@ -535,7 +537,7 @@ var VMS = {
             }
         }
         if (started == true) {
-            self.invoke('startupComplete');
+            self.invoke('startupComplete', restarted);
         }else{
             if (exec_error == "") exec_error = 'Starting VMS timed out.';
             console.error(exec_error);

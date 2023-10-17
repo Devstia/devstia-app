@@ -33,120 +33,19 @@ app.on('ready', () => {
     function createTray() {
         Tray.create();
         Tray.on('localhost', () => {
-
-            // Write trusted token for auto-login, this verifies the source of the request
-            const altContent = Util.uuidv4().toString();
-            VMS.sudo("echo '" + altContent + "' > /tmp/alt.txt");
-            const shell = require('electron').shell;
-            shell.openExternal('http://localhost/?alt=' + altContent);
+            showLocalhost();
         });
         Tray.on('terminal', () => {
-            const { spawn } = require('child_process');
-            const path = require('path');
-            const pwsSettings = Settings.read();
-            const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
-                    + path.delimiter + `${process.env.PATH}${path.delimiter}`;
-            let scriptTerminal = null;
-            if (process.platform === 'win32') {
-                scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.bat');
-            }else{
-                scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
-            }
-            console.log(scriptTerminal);
-            const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
-                cwd: path.dirname(scriptTerminal),
-                detached: true,
-                stdio: 'ignore',
-                env: { PATH: runtimePath }
-            });
-            p.unref();
+            showTerminal();
         });
         Tray.on('files', () => {
-            const os = require('os');
-            if (os.platform() === 'darwin') {
-                
-                // Samba mount for macOS, works well and is fast.
-                const { exec } = require('child_process');
-                const pwsSettings = Settings.read();
-                let cmd = 'rm -rf /tmp/pws ; mkdir -p /tmp/pws ; mount -t smbfs //pws:' + pwsSettings.pwsPass;
-                cmd +='@local.dev.cc/PWS /tmp/pws ; open /tmp/pws';
-                exec(cmd, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`Error mounting samba: ${error.message}`);
-                        return;
-                    }
-                });
-            }else if (os.platform() === 'win32') {
-
-                // WebDAV mount for Windows, works well and is fast.
-                const { execSync } = require('child_process');
-                const pwsSettings = Settings.read();
-                try {
-                    execSync('net use P: https://webdav-pws.dev.cc /user:pws "' + pwsSettings.pwsPass + '"');
-                    execSync(`powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'PWS'"`);
-                }catch(err) {
-                    console.error(`Error mounting webdav: ${err.message}`);
-                }
-                execSync("IF EXIST P:\\ (start P:)");
-            }else{
-                // TODO: Support for Linux
-            }
-
-// WebDAV mount for macOS (not working well, drops files)
-//                 const { exec } = require('child_process');
-//                 const pwsPass = pwsSettings.pwsPass;
-//                 const script = `osascript <<END
-//                     mount volume "https://webdav-pws.dev.cc" as user name "pws" with password "${pwsSettings.pwsPass}"
-//                     do shell script "open /Volumes/webdav-pws.dev.cc"
-// END`;
-//                 exec(script, (error, stdout, stderr) => {
-//                     if (error) {
-//                       console.error(`Error executing the script: ${error.message}`);
-//                       return;
-//                     }
-//                 });
-
+            showFiles();
         });
         Tray.on('settings', () => {
-            const Window = require('./window.js');
-            Window.show('./web/settings.html', {width:620, height: 450});
-            Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
+            showSettings();
         });
         Tray.on('quit', (quitting) => {
-            if (quitting == true) {
-                const os = require('os');
-                if (os.platform() === 'darwin') {
-
-                    // Unmount Samba share for macOS
-                    if (pwsSettings.fsMode.toLowerCase() == 'samba') {
-                        const { exec } = require('child_process');
-                        let cmd = 'umount /tmp/pws && rm -rf /tmp/pws';
-                        exec(cmd, (error, stdout, stderr) => {
-                            if (error) {
-                                console.error(`Error unmounting samba: ${error.message}`);
-                                return;
-                            }
-                        });
-                    }
-                }else if (os.platform() === 'win32') {
-
-                    // Unmount WebDAV share for Windows
-                    if (pwsSettings.fsMode.toLowerCase() == 'webdav') {
-                        const { exec } = require('child_process');
-                        let cmd = 'net use P: /delete';
-                        exec(cmd, (error, stdout, stderr) => {
-                            if (error) {
-                                console.error(`Error unmounting webdav: ${error.message}`);
-                                return;
-                            }
-                        });
-                    }
-                }else{
-                    // TODO: Support for Linux
-                }
-                VMS.shutdown();
-            }
-            return quitting;
+            return doQuitting(quitting);
         });
     }
     createTray();
@@ -205,8 +104,10 @@ app.on('ready', () => {
 
         // Start the VMS runtime
         if (vms_state == 'startup') {
-            VMS.on('startupComplete', () => {
-                showWindow();
+            VMS.on('startupComplete', (msg) => {
+                if (msg.value == false) { // Restarted = false
+                    showWindow();
+                }
             });
             VMS.startup();
         }
@@ -227,6 +128,146 @@ app.on('ready', () => {
         };
     }
     showWindow();
+
+    // Show the localhost webpage
+    function showLocalhost() {
+        // Write trusted token for auto-login, this verifies the source of the request
+        const altContent = Util.uuidv4().toString();
+        VMS.sudo("echo '" + altContent + "' > /tmp/alt.txt");
+        const shell = require('electron').shell;
+        shell.openExternal('http://localhost/?alt=' + altContent);
+    }
+
+    // Show a terminal instance
+    function showTerminal() {
+        const { spawn } = require('child_process');
+        const path = require('path');
+        const pwsSettings = Settings.read();
+        const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
+                + path.delimiter + `${process.env.PATH}${path.delimiter}`;
+        let scriptTerminal = null;
+        if (process.platform === 'win32') {
+            scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.bat');
+        }else{
+            scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
+        }
+        console.log(scriptTerminal);
+        const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
+            cwd: path.dirname(scriptTerminal),
+            detached: true,
+            stdio: 'ignore',
+            env: { PATH: runtimePath }
+        });
+        p.unref();
+    }
+
+    // Show files from filesystem
+    function showFiles() {
+        const os = require('os');
+        if (os.platform() === 'darwin') {
+            
+            // Samba mount for macOS, works well and is fast.
+            const { exec } = require('child_process');
+            const pwsSettings = Settings.read();
+            let cmd = 'rm -rf /tmp/pws ; mkdir -p /tmp/pws ; mount -t smbfs //pws:' + pwsSettings.pwsPass;
+            cmd +='@local.dev.cc/PWS /tmp/pws ; open /tmp/pws';
+            exec(cmd, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Error mounting samba: ${error.message}`);
+                    return;
+                }
+            });
+        }else if (os.platform() === 'win32') {
+
+            // WebDAV mount for Windows, works well and is fast.
+            const { execSync } = require('child_process');
+            const pwsSettings = Settings.read();
+            try {
+                execSync('net use P: https://webdav-pws.dev.cc /user:pws "' + pwsSettings.pwsPass + '"');
+                execSync(`powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'PWS'"`);
+            }catch(err) {
+                console.error(`Error mounting webdav: ${err.message}`);
+            }
+            execSync("IF EXIST P:\\ (start P:)");
+        }else{
+            // TODO: Support for Linux
+        }
+        // WebDAV mount for macOS (not working well, drops files)
+        //                 const { exec } = require('child_process');
+        //                 const pwsPass = pwsSettings.pwsPass;
+        //                 const script = `osascript <<END
+        //                     mount volume "https://webdav-pws.dev.cc" as user name "pws" with password "${pwsSettings.pwsPass}"
+        //                     do shell script "open /Volumes/webdav-pws.dev.cc"
+        // END`;
+        //                 exec(script, (error, stdout, stderr) => {
+        //                     if (error) {
+        //                       console.error(`Error executing the script: ${error.message}`);
+        //                       return;
+        //                     }
+        //                 });
+    }
+
+    // Show the settings window
+    function showSettings() {
+        const Window = require('./window.js');
+        Window.show('./web/settings.html', {width:620, height: 450});
+        //Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
+
+        // From security tab
+
+        // From system tab
+        Window.on('localhost', () => {
+            showLocalhost();
+        });
+        Window.on('terminal', () => {
+            showTerminal();
+        });
+        Window.on('files', () => {      
+            showFiles();
+        });
+        Window.on('quit', (quitting) => {
+            Tray.quitting = doQuitting(quitting);
+            Window.close();
+        });
+    }
+
+    // Quit the application
+    function doQuitting(quitting) {
+        if (quitting == true) {
+            const os = require('os');
+            if (os.platform() === 'darwin') {
+
+                // Unmount Samba share for macOS
+                if (pwsSettings.fsMode.toLowerCase() == 'samba') {
+                    const { exec } = require('child_process');
+                    let cmd = 'umount /tmp/pws && rm -rf /tmp/pws';
+                    exec(cmd, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`Error unmounting samba: ${error.message}`);
+                            return;
+                        }
+                    });
+                }
+            }else if (os.platform() === 'win32') {
+
+                // Unmount WebDAV share for Windows
+                if (pwsSettings.fsMode.toLowerCase() == 'webdav') {
+                    const { exec } = require('child_process');
+                    let cmd = 'net use P: /delete';
+                    exec(cmd, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`Error unmounting webdav: ${error.message}`);
+                            return;
+                        }
+                    });
+                }
+            }else{
+                // TODO: Support for Linux
+            }
+            VMS.shutdown();
+        }
+        return quitting;
+    }
 
     // Handle reinstall
     const ipcMain = require('electron').ipcMain;

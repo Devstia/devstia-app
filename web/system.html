@@ -1,9 +1,9 @@
 <div id="system">
-    <div class="page page-center" id="waiting" style="display: none;">
+    <div class="page page-center" id="waiting-system" style="display:none;">
         <div class="container container-slim py-4">
         <div class="text-center">
             <br /><br /><br />
-            <div class="text-secondary mb-3" id="message"></div>
+            <div class="text-secondary mb-3" id="message-system"></div>
             <div class="progress progress-sm">
             <div class="progress-bar progress-bar-indeterminate"></div>
             </div>
@@ -51,7 +51,7 @@
                 <p> </p>
                 <a href="#restartServer" id="restartServer" class="btn btn-secondary w-100">Restart Server</a>
                 <p> </p>
-                <a href="#stopServer" id="stopServer" class="btn btn-secondary w-100">Quit & Stop Server</a>
+                <a href="#quit" id="quit" class="btn btn-secondary w-100">Quit & Stop Server</a>
                 <p> </p>
             </div>
         </div>
@@ -172,58 +172,51 @@
     checkStatus();
 
     // Show/hide waiting screen
-    function showWaiting(message) {
-        $('#message').html(message);
-        $('#waiting').fadeIn();
+    function showWaitingSystem(message) {
+        $('#message-system').html(message);
+        $('#waiting-system').fadeIn();
         $('#dg-system').fadeOut();
     }
-    function hideWaiting() {
-        $('#waiting').fadeOut();
+    function hideWaitingSystem() {
+        $('#waiting-system').fadeOut();
         $('#dg-system').fadeIn();
     }
 
-    // Handle show SSH keys button
-    $('#showSSHKeys').click( (r) => {
-        ipcMain.send('showSSHKeys');
+    // Handle Snapshots
+    $('#createSnapshot').click( (r) => {
+        ipcMain.send('createSnapshot');
     });
-
-    // Handle regenerate SSH keys button
-    $('#regenKeys').click( (r) => {
-        showWaiting('Regenerating SSH keys...');
-        ipcMain.send('regenKeys', function() {
-            hideWaiting();
-        });
+    $('#restoreSnapshot').click( (r) => {
+        ipcMain.send('restoreSnapshot');
     });
-
-    // Handle restart server
-    $('#restartServer').click( (r) => {
-        showWaiting('Restarting server...');
-        ipcMain.send('restartServer', function() {
-            setTimeout(() => {
-                hideWaiting();
-            }, 5000);
-        });
-    });
-
-    // Handle reinstall server
     $('#reinstall').click( (r) => {
         ipcMain.send('erase', function() {
             ipcMain.send('reinstall');
         });
     });
 
-    // Handle download master certificate link
-    $('#showMasterCert').click( (r) => {
-        ipcMain.send('showMasterCert');
+    // Handle Actions
+    $('#localhost').click( (r) => {
+        ipcMain.send('localhost');
     });
-
-    // Handle regenerate certificates button
-    $('#regenCerts').click( (r) => {
-        showWaiting('Regenerating master and all website certificates...');
-        ipcMain.send('regenCerts', function() {
-            hideWaiting();
+    $('#terminal').click( (r) => {
+        ipcMain.send('terminal');
+    });
+    $('#files').click( (r) => {
+        ipcMain.send('files');
+    });
+    $('#restartServer').click( (r) => {
+        showWaitingSystem('Restarting server...');
+        ipcMain.send('restartServer', function() {
+            setTimeout(() => {
+                $('.badge').css('opacity', '20%'); // Status unknown
+                $('#status-waiting').show();
+                hideWaitingSystem();
+            }, 5000);
         });
     });
-
+    $('#quit').click( (r) => {
+        ipcMain.send('quit', true);
+    });
 </script>
 <script src="links.js"></script>

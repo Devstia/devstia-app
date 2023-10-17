@@ -1,16 +1,16 @@
 <div id="system">
-    <div class="page page-center" id="waiting" style="display: none;">
+    <div class="page page-center" id="waiting-security" style="display:none;">
         <div class="container container-slim py-4">
         <div class="text-center">
             <br /><br /><br />
-            <div class="text-secondary mb-3" id="message"></div>
+            <div class="text-secondary mb-3" id="message-security"></div>
             <div class="progress progress-sm">
             <div class="progress-bar progress-bar-indeterminate"></div>
             </div>
         </div>
         </div>
     </div>
-    <div class="datagrid" id="dg-system">
+    <div class="datagrid" id="dg-security">
         <div class="datagrid-item">
             <div class="datagrid-title">SSL Certificates</div>
             <div class="datagrid-content">
@@ -69,3 +69,38 @@
             </div>
         </div>
     </div>
+    <script>
+        // Show/hide waiting screen
+        function showWaitingSecurity(message) {
+            $('#message-security').html(message);
+            $('#waiting-security').fadeIn();
+            $('#dg-security').fadeOut();
+        }
+        function hideWaitingSecurity() {
+            $('#waiting-security').fadeOut();
+            $('#dg-security').fadeIn();
+        }
+
+        // Handle SSL Certificates
+        $('#showMasterCert').click( (r) => {
+            ipcMain.send('showMasterCert');
+        });
+        $('#regenCerts').click( (r) => {
+            showWaitingSecurity('Regenerating master and all website certificates...');
+            ipcMain.send('regenCerts', function() {
+                hideWaitingSecurity();
+            });
+        });
+
+        // Handle Terminal / SSH 
+        $('#showSSHKeys').click( (r) => {
+            ipcMain.send('showSSHKeys');
+        });
+        $('#regenKeys').click( (r) => {
+            showWaitingSecurity('Regenerating SSH keys...');
+            ipcMain.send('regenKeys', function() {
+                hideWaitingSecurity();
+            });
+        });
+    </script>
+    <script src="links.js"></script>

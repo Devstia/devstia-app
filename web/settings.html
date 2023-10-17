@@ -110,23 +110,23 @@
         });
 
         // Save button
-        const saveButton = document.getElementById('save-button');
-        saveButton.addEventListener('click', () => {
-            let newSettings =  {
-                pwsPass: $('#pws-pass').val(),
-                sshPort: $('#ssh-port').val(),
-                cpPort: $('#cp-port').val(),
-                fsMode: $('#fs-mode').val()
-            };
-            ipcMain.send('saveSettings', newSettings);
-            window.close();
-        });
+        // const saveButton = document.getElementById('save-button');
+        // saveButton.addEventListener('click', () => {
+        //     let newSettings =  {
+        //         pwsPass: $('#pws-pass').val(),
+        //         sshPort: $('#ssh-port').val(),
+        //         cpPort: $('#cp-port').val(),
+        //         fsMode: $('#fs-mode').val()
+        //     };
+        //     ipcMain.send('saveSettings', newSettings);
+        //     window.close();
+        // });
 
-        // Cancel button
-        const cancelButton = document.getElementById('cancel-button');
-            cancelButton.addEventListener('click', () => {
-            window.close();
-        });
+        // // Cancel button
+        // const cancelButton = document.getElementById('cancel-button');
+        //     cancelButton.addEventListener('click', () => {
+        //     window.close();
+        // });
 
         // Close window when ESC key is pressed
         document.addEventListener('keydown', event => {

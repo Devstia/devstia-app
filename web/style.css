@@ -18,14 +18,14 @@ label.form-label {
     left: 8px;
 }
 
-/* Options */
+/* Security */
 .info {
     margin-bottom: 8px;
 }
 #options {
     position: relative;
 }
-#dg-options {
+#waiting-security, #dg-security {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -45,7 +45,7 @@ label.form-label {
 #system, #status-parent {
     position: relative;
 }
-#waiting, #dg-system, #status-waiting, #status-server {
+#waiting-system, #dg-system, #status-waiting, #status-server {
     position: absolute;
     width: 100%;
     height: 100%;

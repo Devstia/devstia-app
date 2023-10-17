@@ -141,12 +141,13 @@ var Settings = {
     },
 
     uiEvents: function() {
+        const Window = require('./window.js');
+        const VMS = require('./vms.js');
         const ipcMain = require('electron').ipcMain;
         const self = this;
 
         // Handle request for server status
         ipcMain.on('checkStatus', function(event, arg) {
-            const VMS = require('./vms.js');
             VMS.checkStatus().then((result) => {
                 console.log(`Command Result: ${result}`);
                 try {
@@ -169,47 +170,31 @@ var Settings = {
             }
         });
 
-        // Handle saving settings
-        ipcMain.on('saveSettings', function(event, newSettings) {
-            const VMS = require('./vms.js');
-            let pwsSettings = self.read();
-            let restart = false;
-            if (newSettings.pwsPass != pwsSettings.pwsPass) {
-                VMS.updatePassword(newSettings.pwsPass);
-            }
-            if (newSettings.cpPort != pwsSettings.cpPort) {
-                VMS.updateCPPort(newSettings.cpPort);
-                restart = true;
-            }
-            if (newSettings.fsMode != pwsSettings.fsMode) {
-                restart = true;
-            }
-            Object.assign(pwsSettings, newSettings);
-            Settings.save(pwsSettings);
-            VMS.pwsSettings = pwsSettings;
-            if (restart) {
-                const Window = require('./window.js');
-                Window.alert("Notice", "Please quit and restart CodeGarden for changes to take effect.");
-            }
-        });
+        // // Handle saving settings
+        // ipcMain.on('saveSettings', function(event, newSettings) {
+        //     const VMS = require('./vms.js');
+        //     let pwsSettings = self.read();
+        //     let restart = false;
+        //     if (newSettings.pwsPass != pwsSettings.pwsPass) {
+        //         VMS.updatePassword(newSettings.pwsPass);
+        //     }
+        //     if (newSettings.cpPort != pwsSettings.cpPort) {
+        //         VMS.updateCPPort(newSettings.cpPort);
+        //         restart = true;
+        //     }
+        //     if (newSettings.fsMode != pwsSettings.fsMode) {
+        //         restart = true;
+        //     }
+        //     Object.assign(pwsSettings, newSettings);
+        //     Settings.save(pwsSettings);
+        //     VMS.pwsSettings = pwsSettings;
+        //     if (restart) {
+        //         const Window = require('./window.js');
+        //         Window.alert("Notice", "Please quit and restart CodeGarden for changes to take effect.");
+        //     }
+        // });
 
         // Handle system requests
-        ipcMain.on('showSSHKeys', function(event) {
-            let pwsSettings = self.read();
-            const sshKey = require('path').join(pwsSettings.appFolder, 'security', 'ssh', 'pws_rsa.pub');
-            require('electron').shell.showItemInFolder(sshKey);
-        });
-        ipcMain.on('regenKeys', function(event, arg) {   
-            const VMS = require('./vms.js');
-            VMS.regenerateSSHKeys();
-            event.sender.send(arg.uuid);
-        });
-        ipcMain.on('restartServer', function(event, arg) {
-            const VMS = require('./vms.js');
-            VMS.restart(function() {
-                event.sender.send(arg.uuid);
-            });
-        });
         ipcMain.on('erase', function(event, arg) {
             const prompt = require('electron-prompt');
             prompt({
@@ -228,9 +213,7 @@ var Settings = {
                     console.log('user cancelled');
                 } else {
                     if (r === 'ERASE') {
-                        const Window = require('./window.js');
                         Window.executeJavaScript("showWaiting('Erasing and re-installing server...');");
-                        const VMS = require('./vms.js');
                         VMS.erase();
                         setTimeout(function() {
                             event.sender.send(arg.uuid);
@@ -242,14 +225,41 @@ var Settings = {
                 }
             })
         });
+        ipcMain.on('localhost', function(event, arg) {
+            event.returnValue = Window.invoke('localhost', arg);
+        });
+        ipcMain.on('terminal', function(event, arg) {
+            event.returnValue = Window.invoke('terminal', arg);
+        });
+        ipcMain.on('files', function(event, arg) {
+            event.returnValue = Window.invoke('files', arg);
+        });
+        ipcMain.on('restartServer', function(event, arg) {
+            VMS.restart(function() {
+                event.sender.send(arg.uuid);
+            });
+        });
+        ipcMain.on('quit', function(event, arg) {
+            event.returnValue = Window.invoke('quit', arg);
+        });
+
+        // Handle security requests
         ipcMain.on('showMasterCert', function(event) {
             let pwsSettings = self.read();
             const masterCert = require('path').join(pwsSettings.appFolder, 'security', 'ca', 'dev.cc.crt');
             require('electron').shell.showItemInFolder(masterCert);
         });
         ipcMain.on('regenCerts', function(event, arg) {
-            const VMS = require('./vms.js');
             VMS.regenerateCertificates();
+            event.sender.send(arg.uuid);
+        });
+        ipcMain.on('showSSHKeys', function(event) {
+            let pwsSettings = self.read();
+            const sshKey = require('path').join(pwsSettings.appFolder, 'security', 'ssh', 'pws_rsa.pub');
+            require('electron').shell.showItemInFolder(sshKey);
+        });
+        ipcMain.on('regenKeys', function(event, arg) {   
+            VMS.regenerateSSHKeys();
             event.sender.send(arg.uuid);
         });
     }
