@@ -56,88 +56,16 @@
             </div>
         </div>
         <div class="datagrid-item">
-            <!-- <div class="datagrid-title" style="margin-top:-148px;">Snapshots</div> -->
             <div class="datagrid-title" style="margin-top:-200px;">Snapshots</div>
             <div class="datagrid-content row inline-btns">
                 <a href="#createSnapshot" id="createSnapshot" class="btn btn-secondary w-100">Create Snapshot</a>
                 <p> </p>
                 <a href="#restoreSnapshot" id="restoreSnapshot" class="btn btn-secondary w-100">Restore Snapshot</a>
                 <p> </p>
-                <a href="#reinstall" id="reinstall" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
+                <a href="#erase" id="erase" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
             </div>
         </div>
     </div>
-
-
-        <!-- <div class="datagrid-item">
-            <div class="datagrid-title">Actions</div>
-            <div class="datagrid-content row inline-btns">
-                <a href="#restartServer" id="restartServer" class="btn btn-secondary w-50">Restart Server</a>
-                <a href="#stopServer" id="stopServer" class="btn btn-secondary w-50">Stop Server</a>
-            </div>
-        </div> -->
-        <!--
-        <div class="datagrid-item">
-            <div class="datagrid-title">Server</div>
-            <div class="datagrid-content">
-                <a href="#restartServer" id="restartServer" class="btn btn-secondary w-100">Restart Server</a>
-                <p> </p>
-                <a href="#reinstall" id="reinstall" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
-            </div>
-        </div>
-        <div class="datagrid-item">
-            <div class="datagrid-title">Status</div>
-            <div class="datagrid-content" id="status-parent">
-                <div id="status-server">
-                    <span class="badge badge-outline bg-green-lt" id="apache2">Apache2</span>
-                    <span class="badge badge-outline bg-green-lt" id="cron">CRON</span>
-                    <span class="badge badge-outline bg-green-lt" id="hestia">HestiaCP</span>
-                    <span class="badge badge-outline bg-green-lt" id="mariadb">MariaDB</span>
-                    <span class="badge badge-outline bg-green-lt" id="nginx">NGINX</span>
-                    <span class="badge badge-outline bg-green-lt" id="php-fpm">PHP-FPM</span>
-                    <span class="badge badge-outline bg-green-lt" id="postgresql">PostgreSQL</span>
-                    <span class="badge badge-outline bg-green-lt" id="smbd">Samba</span>
-                    <span class="badge badge-outline bg-green-lt" id="vsftpd">VSFTP</span>
-                </div>
-                <div id="status-waiting">
-                    <div class="page page-center" id="waiting">
-                        <div class="container container-slim py-4">
-                        <div class="text-center">
-                            <br /><br /><br />
-                            <div class="text-secondary mb-3" id="message"></div>
-                            <div class="progress progress-sm">
-                            <div class="progress-bar progress-bar-indeterminate"></div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="datagrid-item">
-            <div class="datagrid-title">SSL Certificates</div>
-            <div class="datagrid-content">
-                <a href="#showMasterCert" id="showMasterCert" class="btn btn-secondary w-100" aria-label="Show Master Certificate">Show Master Certificate</a>
-                <div id="cert-instructions">
-                    <span>
-                        <a href="https://code.gdn/docs/install-master-cert" class="ms-1" aria-label="How to install master certificate">How to install master certificate
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 15l6 -6"></path><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"></path><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"></path></svg>
-                        </a>      
-                    </span>
-                </div>
-                <p> </p>
-                <a href="#regenCerts" id="regenCerts" class="btn btn-secondary w-100" aria-label="Regenerate All Certificates">Regenerate All Certificates</a>
-            </div>
-        </div>
-        <div class="datagrid-item">
-            <div class="datagrid-title">Terminal / SSH Keys</div>
-            <div class="datagrid-content">
-                <a href="#showSSHKeys" id="showSSHKeys" class="btn btn-secondary w-100" aria-label="Show SSH Keys">Show SSH Keys</a>
-                <p> </p>
-                <a href="#regenKeys" id="regenKeys" class="btn btn-secondary w-100">Regenerate SSH Keys</a>
-            </div>
-        </div>
-        -->
     </div>
 </div>
 <script>
@@ -189,10 +117,8 @@
     $('#restoreSnapshot').click( (r) => {
         ipcMain.send('restoreSnapshot');
     });
-    $('#reinstall').click( (r) => {
-        ipcMain.send('erase', function() {
-            ipcMain.send('reinstall');
-        });
+    $('#erase').click( (r) => {
+        ipcMain.send('erase');
     });
 
     // Handle Actions
