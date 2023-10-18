@@ -213,9 +213,9 @@ var VMS = {
     },
     /**
      * extract - Extracts the VMS runtime from the downloaded archive.
-     * @param {function} callback - The callback function to invoke after extraction completes.
+     * @param {function} callback - Optional callback function to invoke after extraction completes.
      */
-    extract: function() {
+    extract: function(fComplete = null) {
         let self = this;
         const path = require('path');
         const filename = this.filename;
@@ -233,6 +233,7 @@ var VMS = {
         tarProcess.on('exit', (code) => {
             if (code === 0) {
                 self.invoke('extractComplete');
+                if (fComplete != null) fComplete();
             } else {
                 let err = `Archive extraction failed with exit code ${code}`;
                 console.error(err);
@@ -441,8 +442,8 @@ var VMS = {
                                     continue;
                                 }
                                 if (filename == 'pwsPass') {
-                                    self.pwsSettings.pwsPass = content;
                                     const Settings = require('./settings.js');
+                                    self.pwsSettings.pwsPass = Settings.decrypt(content);
                                     Settings.save(self.pwsSettings);
                                     continue;
                                 }
@@ -457,14 +458,6 @@ var VMS = {
                                                 console.error(`Error setting file mode: ${err}`);
                                             }
                                         });
-                                        if (filename == 'ssh/debian_rsa' && self.receivedInitSecurity == false) {
-
-                                            // Respond with the encrypted password, only the first time
-                                            self.receivedInitSecurity = true;
-                                            const Settings = require('./settings.js');
-                                            const password = Settings.encrypt(self.pwsSettings.pwsPass);
-                                            self.sudo(`bash -c 'echo '${password}' > /home/admin/.pwsPass'`);
-                                        }
                                         res.writeHead(200, { 'Content-Type': 'text/plain' });
                                         res.end('OK');                                    
                                     }

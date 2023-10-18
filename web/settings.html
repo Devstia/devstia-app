@@ -93,6 +93,7 @@
         // Close button
         const closeButton = document.getElementById('close-button');
         closeButton.addEventListener('click', () => {
+            if (closeButton.classList.contains('disabled')) return;
             window.close();
         });
 

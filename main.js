@@ -192,19 +192,6 @@ app.on('ready', () => {
         }else{
             // TODO: Support for Linux
         }
-        // WebDAV mount for macOS (not working well, drops files)
-        //                 const { exec } = require('child_process');
-        //                 const pwsPass = pwsSettings.pwsPass;
-        //                 const script = `osascript <<END
-        //                     mount volume "https://webdav-pws.dev.cc" as user name "pws" with password "${pwsSettings.pwsPass}"
-        //                     do shell script "open /Volumes/webdav-pws.dev.cc"
-        // END`;
-        //                 exec(script, (error, stdout, stderr) => {
-        //                     if (error) {
-        //                       console.error(`Error executing the script: ${error.message}`);
-        //                       return;
-        //                     }
-        //                 });
     }
 
     // Show the settings window
@@ -271,12 +258,6 @@ app.on('ready', () => {
         }
         return quitting;
     }
-
-    // Handle reinstall
-    const ipcMain = require('electron').ipcMain;
-    ipcMain.on('reinstall', function(event, arg) {
-        showWindow();
-    });
 });
 app.on('before-quit', () => {
     Window.close();
