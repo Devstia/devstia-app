@@ -204,10 +204,14 @@ var Settings = {
                     console.log('user cancelled');
                 } else {
                     if (r === 'ERASE') {
-                        Window.executeJavaScript("showWaiting('Erasing and re-installing server...');");
+                        Window.executeJavaScript("showWaitingSystem('Erasing server...');document.getElementById('close-button').addClass('disabled');");
                         VMS.erase();
                         setTimeout(function() {
-                            event.sender.send(arg.uuid);
+                            Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Re-installing server... Please wait');");
+                            VMS.extract(function() {
+                                Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
+                                VMS.startup(true); // restarted
+                            });
                         }, 10000);
                     }else{
                         const dialog = require('electron').dialog;
