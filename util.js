@@ -10,9 +10,9 @@ var Util = {
         // Allow only one instance of our application
         const fs = require('fs');
         const path = require('path');
-        const lockFilePath = path.join(this.appFolder, 'app.lock');
-        if (fs.existsSync(lockFilePath)) {
-            const lockFileContent = fs.readFileSync(lockFilePath, 'utf8');
+        const lockFile = path.join(this.appFolder, 'app.lock');
+        if (fs.existsSync(lockFile)) {
+            const lockFileContent = fs.readFileSync(lockFile, 'utf8');
             const lockFilePID = parseInt(lockFileContent, 10);
             const { execSync } = require('child_process');
             try {
@@ -26,22 +26,29 @@ var Util = {
                     const stdout = execSync('ps -ax -o pid', { encoding: 'utf8' });
                     runningPIDs = stdout.trim().split('\n').map(pid => parseInt(pid, 10));
                 }
-
                 if (runningPIDs.includes(lockFilePID)) {
                     console.log(`PID ${lockFilePID} exists and is running.`);
+
+                    // Pull up the existing instance's settings window
+                    const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
+                    + path.delimiter + `${process.env.PATH}${path.delimiter}`;
+                    const cmd = `curl -m 5 -X POST -H "Content-Type: application/json" -d '{"showSettings":true}' http://127.0.0.1:8088`;
+                    execSync(cmd, { env: { PATH: runtimePath } });
                     process.exit();
                 } else {
                     console.log(`PID ${lockFilePID} does not exist.`);
-                    fs.unlinkSync(lockFilePath);
+                    fs.unlinkSync(lockFile);
+                    fs.writeFileSync(lockFile, process.pid.toString());
                 }
             } catch (error) {
                 console.error(`Error executing Utils.allowOneInstance command: ${error.message}`);
                 process.exit();
             }
+        }else{
+            fs.writeFileSync(lockFile, process.pid.toString());
         }
-        fs.writeFileSync(lockFilePath, process.pid.toString());
         process.on('exit', () => {
-            fs.unlinkSync(lockFilePath);
+            fs.unlinkSync(lockFile);
         });
     },
     copyScripts: function() {

@@ -74,6 +74,7 @@ app.on('ready', () => {
     VMS.on('downloadError', VMSError);
     VMS.on('extractError', VMSError);
     VMS.on('startupError', VMSError);
+    VMS.on('showSettings', () => { showSettings(); });
 
     // Show the main application window state
     var vms_state = '';

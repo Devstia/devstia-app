@@ -437,6 +437,16 @@ var VMS = {
                     req.on('end', () => {
                         try {
                             const data = JSON.parse(body);
+
+                            // Pop up settings window
+                            if (data.hasOwnProperty('showSettings')) {
+                                if (data.showSettings == true) {
+                                    self.invoke('showSettings');
+                                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                                    res.end('OK');
+                                    return;                                    
+                                }
+                            }
                             for (const [filename, content] of Object.entries(data)) {
                                 if (!allowedFilenames.includes(filename)) {
                                     continue;
@@ -477,7 +487,7 @@ var VMS = {
             this.securityServer.on('error', (err) => {
                 console.error(`Error starting security server: ${err}`);
             });
-            this.securityServer.listen(8088);
+            this.securityServer.listen(8088, '127.0.0.1');
         }
 
         // Startup doesn't require sudo, so we can just execute the script
@@ -537,22 +547,23 @@ var VMS = {
             self.invoke('startupError', { error: exec_error });
         }
     },
-    /**
-     * updatePassword - Updates the passwords in the VMS for debian, admin, pws, Samba, and WebDAV.
-     * @param {string} password - The new password to use.
-     */
-    updatePassword: function(password) {
-        const shellEscape = require('shell-escape');
-        const escapedPassword = shellEscape([password]);
-        this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
-    },
-    /**
-     * updateCPPort - Updates the Control Panel port in the VMS.
-     * @param {number} port - The new port number.
-     */
-    updateCPPort: function(port) {
-        const shellEscape = require('shell-escape');
-        this.sudo('/usr/local/hestia/plugins/cg-pws/update-cp-port.sh ' + port.toString());
-    }
+    // Someday/maybe
+    // /**
+    //  * updatePassword - Updates the passwords in the VMS for debian, admin, pws, Samba, and WebDAV.
+    //  * @param {string} password - The new password to use.
+    //  */
+    // updatePassword: function(password) {
+    //     const shellEscape = require('shell-escape');
+    //     const escapedPassword = shellEscape([password]);
+    //     this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
+    // },
+    // /**
+    //  * updateCPPort - Updates the Control Panel port in the VMS.
+    //  * @param {number} port - The new port number.
+    //  */
+    // updateCPPort: function(port) {
+    //     const shellEscape = require('shell-escape');
+    //     this.sudo('/usr/local/hestia/plugins/cg-pws/update-cp-port.sh ' + port.toString());
+    // }
 };
 module.exports = VMS;
