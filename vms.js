@@ -183,33 +183,37 @@ var VMS = {
     },
     /**
      * erase - Erases the virtual machine server.
+     * @param {function} callback - The optional callback function to invoke after erase completes.
      */
-    erase: function() {
-        this.shutdown();
-        
-        // Delete all img files in the VMS folder
-        setTimeout(() => {
+    erase: function(fDone = null) {
+        const self = this;
+        this.shutdown(function() {
             const path = require('path');
             const fs = require('fs');
-            fs.readdir(this.pwsSettings.vmsFolder, (err, files) => {
-                if (err) {
-                    console.error('Error reading directory:', err);
-                    return;
-                }
-                files.forEach((file) => {
-                    const filePath = path.join(this.pwsSettings.vmsFolder, file);
-                    if (fs.statSync(filePath).isFile() && file.endsWith('.img')) {
-                        fs.unlink(filePath, (err) => {
-                            if (err) {
-                                console.error('Error deleting file:', err);
-                                return;
-                            }
-                            console.log(`Deleted file: ${filePath}`);
-                        });
-                    }
-                });
-            });
-        }, 5000);
+            let pwsFile = process.arch == 'arm64' ? 'pws-arm64.img' : 'pws-amd64.img';
+
+            pwsFile = path.join(self.pwsSettings.vmsFolder, pwsFile);
+            if (fs.existsSync(pwsFile)) {
+                fs.unlinkSync(pwsFile);
+                console.log(`Deleted file: ${pwsFile}`);
+                if (fDone != null) setTimeout(() => { fDone(); }, 1000);
+            }
+        });
+    },
+    /**
+     * restore - Restores the virtual machine server from a given img file.
+     * @param {string} imgFile - The path to the img file to restore.
+     * @param {function} callback - The optional callback function to invoke after restore completes.
+     */
+    restore: function(imgFile, fDone = null) {
+        const path = require('path');
+        const fs = require('fs');
+        const pwsFile = process.arch == 'arm64' ? 'pws-arm64.img' : 'pws-amd64.img';
+
+        // Copy the file to the VMS folder
+        const vmsFilePath = path.join(this.pwsSettings.vmsFolder, pwsFile);
+        fs.copyFileSync(imgFile, vmsFilePath);
+        if (fDone != null) setTimeout(() => { fDone(); }, 1000);
     },
     /**
      * extract - Extracts the VMS runtime from the downloaded archive.
@@ -391,15 +395,43 @@ var VMS = {
     },
     /**
      * shutdown - Shuts down the virtual machine server and rclone.
+     * @param {function} callback - The optional callback function to invoke after shutdown completes.
      */
-    shutdown: function() {
+    shutdown: function(fDone = null) {
         this.sudo("shutdown now");
+
+        // Wait up to 20 seconds for qemu to shutdown
+        const execSync = require('child_process').execSync;
+        let pid = null;
+        for (let i = 0; i < 20; i++) {
+            pid = this.getProcessID();
+            if ( pid == null) {
+                break;
+            }else{
+                const { execSync } = require('child_process');
+                if (process.platform === 'win32') { 
+                    execSync('ping 127.0.0.1 -n 2 > nul');
+                }else{
+                    execSync('sleep 1');
+                }
+            }
+        }
+        if (pid != null) {
+            // Kill the process by pid
+            console.log("QEMU shutdown failed. Killing process: " + pid);
+            if (process.platform === 'win32') {
+                execSync('taskkill /F /PID ' + pid);
+            }else{
+                execSync('kill -9 ' + pid);
+            }
+        }
 
         // Kill the rclone process
         if (this.securityServer != null) {
             this.securityServer.close();
             this.securityServer = null;
         }
+        if (fDone != null) setTimeout(() => { fDone(); }, 1000);
     },
     /**
      * startup - Starts the virtual machine server.

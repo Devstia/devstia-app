@@ -200,12 +200,10 @@ app.on('ready', () => {
         const Window = require('./window.js');
         Window.show('./web/settings.html', {width:620, height: 450});
         Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
-
-        // From security tab
-        Window.on('savePass', (pwsPass) => {
-            
-        });
-
+        if (pwsSettings.fsMode.toLowerCase() == 'none') {
+            Window.executeJavaScript("$('#files').addClass('disabled');");
+        }
+        
         // From system tab
         Window.on('localhost', () => {
             showLocalhost();

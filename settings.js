@@ -204,18 +204,29 @@ var Settings = {
                     console.log('user cancelled');
                 } else {
                     if (r === 'ERASE') {
-                        Window.executeJavaScript("showWaitingSystem('Erasing server...');document.getElementById('close-button').addClass('disabled');");
+                        Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Erasing server...');document.getElementById('close-button').addClass('disabled');");
                         VMS.erase();
                         setTimeout(function() {
-                            Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Re-installing server... Please wait');");
+                            Window.executeJavaScript("showWaitingSystem('Re-installing server... Please wait');");
                             VMS.extract(function() {
                                 Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
                                 VMS.startup(true); // restarted
                             });
                         }, 10000);
                     }else{
-                        const dialog = require('electron').dialog;
-                        dialog.showErrorBox('CodeGarden - Invalid Input', 'Please type "ERASE" to confirm.');
+                        const { dialog, app } = require('electron');
+                        const path = require('path');
+
+                        // Show the custom error message box
+                        const options = {
+                            type: 'error',
+                            title: 'CodeGarden - Invalid Input',
+                            message: 'Incorrect validation.',
+                            detail: 'Please type "ERASE" to confirm.',
+                            buttons: ['OK'],
+                            icon: path.join(app.getAppPath(), 'images/cg.png')
+                        };
+                        dialog.showMessageBox(options);
                     }    
                 }
             })
@@ -236,6 +247,106 @@ var Settings = {
         });
         ipcMain.on('quit', function(event, arg) {
             event.returnValue = Window.invoke('quit', arg);
+        });
+
+        // Handle snapshot requests
+        ipcMain.on('createSnapshot', function(event, arg) {
+            const { dialog } = require('electron');
+            const os = require('os');
+            const path = require('path');
+
+            // Show the save dialog with default filename
+            const date = new Date();
+            const month = date.toLocaleString('default', { month: 'short' }).toLowerCase();
+            const day = date.getDate().toString().padStart(2, '0');
+            const year = date.getFullYear().toString();
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const fileName = `pws-${month}-${day}-${year}-${hours}${minutes}.img`;
+            const options = {
+                title: 'Save Snapshot Image',
+                defaultPath: path.join(os.homedir(), fileName),
+                buttonLabel: 'Save',
+                filters: [
+                    { name: 'Snapshot Image', extensions: ['img'] },
+                    { name: 'All Files', extensions: ['*'] }
+                ]
+            };
+            dialog.showSaveDialog(options).then(result => {
+                if (result.canceled) return;
+                const filePath = result.filePath;
+                const pwsFile = process.arch == 'arm64' ? 'pws-arm64.img' : 'pws-amd64.img';
+                let pwsSettings = self.read();
+                const vmsFilePath = path.join(pwsSettings.vmsFolder, pwsFile);
+                Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Stopping server...');");
+                VMS.shutdown(function() {
+                    Window.executeJavaScript("showWaitingSystem('Creating snapshot. Please wait');");
+
+                    // Copy the current vms file to the selected location
+                    const fs = require('fs');
+                    fs.copyFile(vmsFilePath, filePath, (err) => {
+                        if (err) throw err;
+                        Window.executeJavaScript("showWaitingSystem('Resuming the server...');");
+                        setTimeout(function() {
+                            Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
+                            VMS.startup(true); // restarted
+                        }, 3000);
+                    });
+                });
+            }).catch(err => {
+                console.error(err);
+            });
+        });
+        ipcMain.on('restoreSnapshot', function(event, arg) {
+            const { dialog } = require('electron');
+
+            // Show the file selector dialog
+            const options = {
+                title: 'Select Snapshot Image',
+                buttonLabel: 'Select',
+                filters: [
+                    { name: 'Snapshot Files', extensions: ['img'] },
+                    { name: 'All Files', extensions: ['*'] }
+                ]
+            };
+
+            dialog.showOpenDialog(options).then(result => {
+                if (!result.canceled) {
+
+                    // Show the confirmation dialog
+                    const filePath = result.filePaths[0];
+                    const app = require('electron').app;
+                    const nativeImage = require('electron').nativeImage;
+                    const confirmOptions = {
+                        type: 'warning',
+                        title: 'Restore Snapshot',
+                        message: 'Restoring the snapshot will delete and replace your current running server. Are you sure?',
+                        buttons: ['Yes', 'No'],
+                        icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`),
+                        defaultId: 1,
+                        cancelId: 1
+                    };
+
+                    dialog.showMessageBox(confirmOptions).then(result => {
+                        if (result.response === 0) {
+                            // Restore the selected snapshot
+                            Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Stopping server...');");
+                            VMS.erase(function() {
+                                Window.executeJavaScript("showWaitingSystem('Restoring server... Please wait');");
+                                VMS.restore(filePath, function() {
+                                    Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
+                                    VMS.startup(true); // restarted
+                                });
+                            });
+                            console.log(`File selected: ${filePath}`);
+                        }
+                    }).catch(err => {
+                        console.error(err);
+                    });
+                }
+            }).catch(err => {
+                console.error(err);
+            });
         });
 
         // Handle security requests
