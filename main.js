@@ -2,6 +2,7 @@
  * Virtuosoft - CodeGarden PWS (Personal Web Server)
  * 
  * Provides a desktop application for managing CODE (Core Open Developer Elements)
+ * TODO: rewrite everything using VueJS :)
  */
 
 // Initialize our application
