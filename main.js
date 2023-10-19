@@ -19,7 +19,7 @@ app.on('ready', () => {
     // Copy over our user customizable scripts folder
     const Util = require('./util.js');
     Util.appFolder = pwsSettings.appFolder;
-    Util.allowOneInstance();
+    if (Util.allowOneInstance()) return;
     Util.copyScripts();
 
     // Hide pull down menus

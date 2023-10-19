@@ -21,7 +21,10 @@ var Util = {
                 if (platform() === 'win32') {
                     const stdout = execSync('tasklist', { encoding: 'utf8' });
                     const lines = stdout.split('\n');
-                    runningPIDs = lines.slice(3).map(line => parseInt(line.substr(28, 5)));
+                    runningPIDs = lines.map(line => {
+                        const columns = line.trim().split(/\s+/);
+                        return columns[1];
+                    }).filter(pid => !isNaN(pid)).map(pid => parseInt(pid, 10));
                 }else{
                     const stdout = execSync('ps -ax -o pid', { encoding: 'utf8' });
                     runningPIDs = stdout.trim().split('\n').map(pid => parseInt(pid, 10));
@@ -32,9 +35,44 @@ var Util = {
                     // Pull up the existing instance's settings window
                     const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
                     + path.delimiter + `${process.env.PATH}${path.delimiter}`;
-                    const cmd = `curl -m 5 -X POST -H "Content-Type: application/json" -d '{"showSettings":true}' http://127.0.0.1:8088`;
-                    execSync(cmd, { env: { PATH: runtimePath } });
-                    process.exit();
+                    const http = require('http');
+
+                    const postData = JSON.stringify({
+                      showSettings: true
+                    });
+                    
+                    const options = {
+                      hostname: '127.0.0.1',
+                      port: 8088,
+                      path: '/',
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': postData.length
+                      }
+                    };
+                    
+                    const req = http.request(options, (res) => {
+                      console.log(`Response status code: ${res.statusCode}`);
+                      res.on('data', (data) => {
+                        console.log(`Response data: ${data}`);
+                        process.exit();
+                      });
+                    });
+                    
+                    req.on('error', (error) => {
+                      console.error(`Error making request: ${error.message}`);
+                      process.exit();
+                    });
+                    
+                    req.setTimeout(3000, () => {
+                      console.error('Request timed out.');
+                      req.abort();
+                      process.exit();
+                    });
+                    req.write(postData);
+                    req.end();
+                    return true;
                 } else {
                     console.log(`PID ${lockFilePID} does not exist.`);
                     fs.unlinkSync(lockFile);
@@ -50,6 +88,7 @@ var Util = {
         process.on('exit', () => {
             fs.unlinkSync(lockFile);
         });
+        return false;
     },
     copyScripts: function() {
         // Copy over our user customizable scripts folder
