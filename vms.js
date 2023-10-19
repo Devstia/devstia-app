@@ -250,6 +250,10 @@ var VMS = {
             self.invoke('extractError', { error: err });
         });
     },
+    /**
+     * getProcessID - Gets the process ID of the VMS server running under QEMU.
+     * @returns {number} - The process ID of the VMS server.
+     */
     getProcessID: function() {
         const { execSync } = require('child_process');
         try {
@@ -259,7 +263,7 @@ var VMS = {
                 const filteredIds = processIds.filter(str => !str.includes('findstr')).map(str => parseInt(str.trim().slice(-25)));
                 if (isNaN(filteredIds[0]) || filteredIds == '') return null;
                 if (filteredIds.length == 0) return null;
-                return processIds[0];
+                return filteredIds[0];
             }else{
                 const stdout = execSync('ps -ax | grep "qemu.*file=' + this.filename + '.img" | grep -v grep | awk \'{print $1}\'');
                 const processIds = stdout.toString().trim().split('\n');
