@@ -134,3 +134,8 @@ copy /Y "C:\Program Files\qemu\libvirglrenderer-1.dll" ".\runtime\win32_x64\libv
 copy /Y "C:\Program Files\qemu\libssp-0.dll" ".\runtime\win32_x64\libssp-0.dll"
 copy /Y "C:\Program Files\qemu\libpcre2-8-0.dll" ".\runtime\win32_x64\libpcre2-8-0.dll"
 copy /Y "C:\Program Files\qemu\liblz4.dll" ".\runtime\win32_x64\liblz4.dll"
+
+mkdir -p ".\runtime\win32_x64\share"
+copy /Y "C:\Program Files\qemu\share\kvmvapic.bin" ".\runtime\win32_x64\share\kvmvapic.bin"
+copy /Y "C:\Program Files\qemu\share\vgabios-virtio.bin" ".\runtime\win32_x64\share\vgabios-virtio.bin"
+copy /Y "C:\Program Files\qemu\share\efi-e1000e.rom" ".\runtime\win32_x64\share\efi-e1000e.rom"

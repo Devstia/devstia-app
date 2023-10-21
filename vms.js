@@ -451,6 +451,7 @@ var VMS = {
         const allowedFilenames = ['pwsPass','ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
             'ssh/pws_rsa','ssh/pws_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
         
+            
         // Create app security folders
         const fs = require('fs');
         const securityFolder = path.join(self.pwsSettings.appFolder, 'security');
@@ -531,7 +532,8 @@ var VMS = {
         if (process.platform === 'win32') {
             startup = 'startup.bat';
         }
-        let cmd = '"' + this.pwsSettings.appFolder + '/scripts/' + startup + '" ' + this.pwsSettings.sshPort;
+        const startupScript = path.join(this.pwsSettings.appFolder, 'scripts', startup);
+        let cmd = '"' + startupScript + '" ' + this.pwsSettings.sshPort;
         cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.vmsFolder + '"';
         if (this.pwsSettings.fsMode.toLowerCase() == 'samba') {
             cmd += ' ",hostfwd=tcp::445-:445"';
@@ -553,6 +555,9 @@ var VMS = {
                     pwsSettings.fsMode = 'None';
                     Settings.save(pwsSettings);
                 }
+            }else{
+                console.log(`stdout: ${stdout}`);
+                console.error(`stderr: ${stderr}`);
             }
         });
         child.unref();
