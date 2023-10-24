@@ -1,5 +1,5 @@
 :: 
-:: Build the CYGWIN dependencies for our runtime folder.
+:: Get the CYGWIN dependencies for our runtime folder.
 :: 
 
 :: Make temp folder if it does not exist
@@ -16,7 +16,8 @@ install ./apt-cyg /bin
 :: Install OpenSSH
 bash apt-cyg install openssh
 
-:: copy /Y dependencies to runtime folder for win32_x64
+:: copy dependencies to runtime folder for Windows
+mkdir -p "..\runtime\win32_x64"
 copy /Y bin\tar.exe "..\runtime\win32_x64\tar.exe"
 copy /Y bin\xz.exe "..\runtime\win32_x64\xz.exe"
 copy /Y bin\ssh.exe "..\runtime\win32_x64\ssh.exe"

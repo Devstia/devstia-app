@@ -444,7 +444,7 @@ var VMS = {
         // Add runtime binaries to path for the given platform
         const self = this;
         const path = require('path');
-        const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
+        const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch, 'bin')
                             + path.delimiter + `${process.env.PATH}${path.delimiter}`;
 
         // Allowed security server cert and key files to obtain from the VMS

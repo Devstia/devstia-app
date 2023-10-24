@@ -33,7 +33,7 @@ var Util = {
                     console.log(`PID ${lockFilePID} exists and is running.`);
 
                     // Pull up the existing instance's settings window
-                    const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
+                    const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch, 'bin')
                     + path.delimiter + `${process.env.PATH}${path.delimiter}`;
                     const http = require('http');
 

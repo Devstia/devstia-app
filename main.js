@@ -145,7 +145,7 @@ app.on('ready', () => {
         const { spawn } = require('child_process');
         const path = require('path');
         const pwsSettings = Settings.read();
-        const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch)
+        const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch, 'bin')
                 + path.delimiter + `${process.env.PATH}${path.delimiter}`;
         let scriptTerminal = null;
         if (process.platform === 'win32') {

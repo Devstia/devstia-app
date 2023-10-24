@@ -8,6 +8,11 @@ cpPort=$2
 vmsFolder="$3"
 samba=$4
 
+# Set DYLD_FALLBACK_LIBRARY_PATH to the lib directory
+qemu_path=$(which qemu-system-x86_64)
+lib_path=$(dirname "$qemu_path")/../lib
+export DYLD_FALLBACK_LIBRARY_PATH="$lib_path"
+
 cd "$vmsFolder" || exit
 qemu-system-x86_64 \
         -machine q35,vmport=off -accel hvf \
