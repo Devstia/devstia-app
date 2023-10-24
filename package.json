@@ -42,7 +42,6 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-tabs": "^1.0.1",
     "jquery": "^3.6.4",
-    "shell-escape": "^0.2.0",
     "sudo-prompt": "^9.2.1"
   }
 }
