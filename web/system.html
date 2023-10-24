@@ -11,9 +11,12 @@
         </div>
     </div>
     <div class="datagrid" id="dg-system">
+
+        
         <div class="datagrid-item">
+
             <div class="datagrid-title">Status</div>
-            <div class="datagrid-content" id="status-parent">
+            <div class="datagrid-content" id="status-parent" style="height:30%;">
                 <div id="status-server">
                     <span class="badge badge-outline bg-green-lt" id="apache2">Apache2</span>
                     <span class="badge badge-outline bg-green-lt" id="cron">CRON</span>
@@ -39,7 +42,20 @@
                     </div>
                 </div>
             </div>
+
+
+
+            <div class="datagrid-title">Snapshots</div>
+            <div class="datagrid-content row inline-btns">
+                <a href="#createSnapshot" id="createSnapshot" class="btn btn-secondary w-100">Create Snapshot</a>
+                <p> </p>
+                <a href="#restoreSnapshot" id="restoreSnapshot" class="btn btn-secondary w-100">Restore Snapshot</a>
+                <p> </p>
+                <a href="#erase" id="erase" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
+            </div>
+            
         </div>
+
         <div class="datagrid-item">
             <div class="datagrid-title">Actions</div>
             <div class="datagrid-content">
@@ -55,17 +71,11 @@
                 <p> </p>
             </div>
         </div>
-        <div class="datagrid-item">
-            <div class="datagrid-title" style="margin-top:-200px;">Snapshots</div>
-            <div class="datagrid-content row inline-btns">
-                <a href="#createSnapshot" id="createSnapshot" class="btn btn-secondary w-100">Create Snapshot</a>
-                <p> </p>
-                <a href="#restoreSnapshot" id="restoreSnapshot" class="btn btn-secondary w-100">Restore Snapshot</a>
-                <p> </p>
-                <a href="#erase" id="erase" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
-            </div>
-        </div>
-    </div>
+
+        <!-- <div class="datagrid-item" style="margin-top:-129px;">
+        </div> -->
+
+    
     </div>
 </div>
 <script>
