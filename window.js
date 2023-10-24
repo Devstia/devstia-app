@@ -133,7 +133,7 @@ var Window = {
                 setTimeout(() => { this.win.show(); }, 300);
             });
         }
-        this.win.setSize(size.width, size.height);
+        this.win.setSize(size.width, size.height + (process.platform === 'darwin' ? 3 : 0));
         this.win.loadFile(file);
     },
 
