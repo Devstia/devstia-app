@@ -76,7 +76,7 @@ var Window = {
      * @param {*} file contains the URL to load.
      * @param {object} size optional size object with width and height properties.
      */
-    show: function(file = './web/index.html', size = { width: 600, height: 400} ) {
+    show: function(file = './web/index.html', size = { width: 620, height: 450} ) {
         if (this.win == null) {
             const BrowserWindow = require('electron').BrowserWindow;
             const path = require('path');

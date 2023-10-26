@@ -199,7 +199,7 @@ app.on('ready', () => {
     // Show the settings window
     function showSettings() {
         const Window = require('./window.js');
-        Window.show('./web/settings.html', {width:620, height: 450});
+        Window.show('./web/settings.html');
         Window.executeJavaScript('fillOutSettings(' + JSON.stringify(Settings.read()) + ');');
         if (pwsSettings.fsMode.toLowerCase() == 'none') {
             Window.executeJavaScript("$('#files').addClass('disabled');");
