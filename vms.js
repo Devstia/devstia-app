@@ -221,6 +221,7 @@ var VMS = {
      */
     extract: function(fComplete = null) {
         let self = this;
+        const fs = require('fs');
         const path = require('path');
         const filename = this.filename;
         const archiveFile = path.join(self.pwsSettings.vmsFolder, filename + '.tar.xz');
@@ -242,12 +243,18 @@ var VMS = {
                 let err = `Archive extraction failed with exit code ${code}`;
                 console.error(err);
                 self.invoke('extractError', { error: err });
+                if (fs.existsSync(archiveFile)) {
+                    fs.unlinkSync(archiveFile);
+                }
             }
         });
         tarProcess.on('error', (err) => {
             err = `Archive extraction failed: ${err}`;
             console.error(err);
             self.invoke('extractError', { error: err });
+            if (fs.existsSync(archiveFile)) {
+                fs.unlinkSync(archiveFile);
+            }
         });
     },
     /**
