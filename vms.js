@@ -227,7 +227,7 @@ var VMS = {
         const archiveFile = path.join(self.pwsSettings.vmsFolder, filename + '.tar.xz');
         let pathAddendum = '';
         if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
-            pathAddendum = path.join(__dirname, 'runtime', 'win32_x64') + ';';
+            pathAddendum = path.join(__dirname, 'runtime', 'win32_x64', 'bin') + ';';
         }
         const tarProcess = require('child_process').spawn('tar', ['-xf', path.basename(archiveFile)], {
             cwd: path.dirname(archiveFile),
