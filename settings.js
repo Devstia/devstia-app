@@ -208,7 +208,7 @@ var Settings = {
                         Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Erasing server...');document.getElementById('close-button').addClass('disabled');");
                         VMS.erase();
                         setTimeout(function() {
-                            Window.executeJavaScript("showWaitingSystem('Re-installing server... Please wait');");
+                            Window.executeJavaScript("showWaitingSystem('Re-installing server...<br> Please wait');");
                             VMS.extract(function() {
                                 Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
                                 VMS.startup(true); // restarted
@@ -281,7 +281,7 @@ var Settings = {
                 const vmsFilePath = path.join(pwsSettings.vmsFolder, pwsFile);
                 Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Stopping server...');");
                 VMS.shutdown(function() {
-                    Window.executeJavaScript("showWaitingSystem('Creating snapshot. Please wait');");
+                    Window.executeJavaScript("showWaitingSystem('Creating snapshot...<br> Please wait');");
 
                     // Copy the current vms file to the selected location
                     const fs = require('fs');
@@ -333,7 +333,7 @@ var Settings = {
                             // Restore the selected snapshot
                             Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Stopping server...');");
                             VMS.erase(function() {
-                                Window.executeJavaScript("showWaitingSystem('Restoring server... Please wait');");
+                                Window.executeJavaScript("showWaitingSystem('Restoring server...<br> Please wait');");
                                 VMS.restore(filePath, function() {
                                     Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
                                     VMS.startup(true); // restarted
