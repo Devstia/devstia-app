@@ -595,16 +595,16 @@ var VMS = {
             self.invoke('startupError', { error: exec_error });
         }
     },
+    /**
+     * updatePassword - Updates the passwords in the VMS for debian, admin, pws, Samba, and WebDAV.
+     * @param {string} password - The new password to use.
+     */
+    updatePassword: function(password) {
+        const shellEscape = require('shell-escape');
+        const escapedPassword = shellEscape([password]);
+        this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
+    },
     // Someday/maybe
-    // /**
-    //  * updatePassword - Updates the passwords in the VMS for debian, admin, pws, Samba, and WebDAV.
-    //  * @param {string} password - The new password to use.
-    //  */
-    // updatePassword: function(password) {
-    //     const shellEscape = require('shell-escape');
-    //     const escapedPassword = shellEscape([password]);
-    //     this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
-    // },
     // /**
     //  * updateCPPort - Updates the Control Panel port in the VMS.
     //  * @param {number} port - The new port number.
