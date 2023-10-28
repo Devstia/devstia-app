@@ -171,8 +171,9 @@ app.on('ready', () => {
             // Samba mount for macOS, works well and is fast.
             const { exec } = require('child_process');
             const pwsSettings = Settings.read();
-            let cmd = 'rm -rf /tmp/pws ; mkdir -p /tmp/pws ; mount -t smbfs //pws:' + pwsSettings.pwsPass;
-            cmd +='@local.dev.cc/PWS /tmp/pws ; open /tmp/pws';
+            let cmd = `[ -n "$(mount -t smbfs | grep '/tmp/pws')" ] && { open /tmp/pws; } `;
+            cmd += '|| { rm -rf /tmp/pws; mkdir -p /tmp/pws; mount -t smbfs //pws:';
+            cmd += pwsSettings.pwsPass + '@local.dev.cc/PWS /tmp/pws && open /tmp/pws; }';
             exec(cmd, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error mounting samba: ${error.message}`);
