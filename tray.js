@@ -6,7 +6,7 @@ var Tray = {
     // Properties
     listeners: [],
     menu: null,
-    qutting: false,
+    quitting: false,
 
     // Methods
     create: function() {
@@ -68,7 +68,7 @@ var Tray = {
                 id: 'quit',
                 click: () => {
                     this.quitting = this.invoke('quit', true);
-                    app.quit();
+                    //app.quit();
                 }
             }
         ]);

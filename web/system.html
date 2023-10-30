@@ -84,7 +84,7 @@
 
     // Check status
     function checkStatus() {
-        ipcMain.send('checkStatus', function(stats) {
+        ipcComm.send('checkStatus', function(stats) {
             $('.badge').css('opacity', '100%');
             setStatus('apache2', stats.indexOf('[ + ]  apache2') > -1);
             setStatus('cron', stats.indexOf('[ + ]  cron') > -1);
@@ -122,28 +122,28 @@
 
     // Handle Snapshots
     $('#createSnapshot').click( (r) => {
-        ipcMain.send('createSnapshot');
+        ipcComm.send('createSnapshot');
     });
     $('#restoreSnapshot').click( (r) => {
-        ipcMain.send('restoreSnapshot');
+        ipcComm.send('restoreSnapshot');
     });
     $('#erase').click( (r) => {
-        ipcMain.send('erase');
+        ipcComm.send('erase');
     });
 
     // Handle Actions
     $('#localhost').click( (r) => {
-        ipcMain.send('localhost');
+        ipcComm.send('localhost');
     });
     $('#terminal').click( (r) => {
-        ipcMain.send('terminal');
+        ipcComm.send('terminal');
     });
     $('#files').click( (r) => {
-        ipcMain.send('files');
+        ipcComm.send('files');
     });
     $('#restartServer').click( (r) => {
         showWaitingSystem('Restarting server...');
-        ipcMain.send('restartServer', function() {
+        ipcComm.send('restartServer', function() {
             setTimeout(() => {
                 $('.badge').css('opacity', '20%'); // Status unknown
                 $('#status-waiting').show();
@@ -152,7 +152,7 @@
         });
     });
     $('#quit').click( (r) => {
-        ipcMain.send('quit', true);
+        ipcComm.send('quit', true);
     });
 </script>
 <script src="links.js"></script>

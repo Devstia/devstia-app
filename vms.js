@@ -1,7 +1,6 @@
 /**
  * VMS object determines the state of our virtual machine server.
  */
-const Util = require('./util.js');
 var VMS = {
 
     // Properties
@@ -291,7 +290,7 @@ var VMS = {
     invoke: function(event, message = {}) {
         if (typeof message == 'object' && Array.isArray(message) == false) {
         }else{
-            message = { value: message, uuid: Util.uuidv4() };
+            message = { value: message, uuid: global.Util.uuidv4() };
         }
         try {
             if (this.listeners[event] != undefined) {
@@ -496,9 +495,8 @@ var VMS = {
                                     continue;
                                 }
                                 if (filename == 'pwsPass') {
-                                    const Settings = require('./settings.js');
-                                    self.pwsSettings.pwsPass = Settings.decrypt(content);
-                                    Settings.save(self.pwsSettings);
+                                    self.pwsSettings.pwsPass = global.Settings.decrypt(content);
+                                    global.Settings.save(self.pwsSettings);
                                     continue;
                                 }
                                 const filePath = path.join(securityFolder, filename);
@@ -557,10 +555,10 @@ var VMS = {
 
                 // Automatically turn off Samba if host forward error detected
                 if (exec_error.indexOf("Could not set up host forwarding rule 'tcp::445-:445'") > -1) {
-                    const Settings = require('./settings.js');
-                    let pwsSettings = Settings.read();
+                    //const Settings = require('./settings.js');
+                    let pwsSettings = global.Settings.read();
                     pwsSettings.fsMode = 'None';
-                    Settings.save(pwsSettings);
+                    global.Settings.save(pwsSettings);
                 }
             }else{
                 console.log(`stdout: ${stdout}`);
