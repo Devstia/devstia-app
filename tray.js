@@ -6,7 +6,7 @@ var Tray = {
     // Properties
     listeners: [],
     menu: null,
-    quitting: false,
+    //quitting: false,
 
     // Methods
     create: function() {
@@ -67,19 +67,18 @@ var Tray = {
                 label: 'Quit',
                 id: 'quit',
                 click: () => {
-                    this.quitting = this.invoke('quit', true);
-                    //app.quit();
+                    this.invoke('quit');
                 }
             }
         ]);
         tray.setContextMenu(this.menu);
 
-        // Keep app in memory when the user closes the window
-        app.on('before-quit', (event) => {
-            if (!this.quitting) { // Unless quitting
-                event.preventDefault();
-            }
-        });
+        // // Keep app in memory when the user closes the window
+        // app.on('before-quit', (event) => {
+        //     if (!this.quitting) { // Unless quitting
+        //         event.preventDefault();
+        //     }
+        // });
     },
     invoke: function(event, arg) {
         for (let i = 0; i < this.listeners.length; i++) {

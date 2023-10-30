@@ -1,6 +1,8 @@
 /**
  * VMS object determines the state of our virtual machine server.
  */
+const Util = global.Util;
+const Settings = global.Settings;
 var VMS = {
 
     // Properties
@@ -290,7 +292,7 @@ var VMS = {
     invoke: function(event, message = {}) {
         if (typeof message == 'object' && Array.isArray(message) == false) {
         }else{
-            message = { value: message, uuid: global.Util.uuidv4() };
+            message = { value: message, uuid: Util.uuidv4() };
         }
         try {
             if (this.listeners[event] != undefined) {
@@ -452,12 +454,7 @@ var VMS = {
         const path = require('path');
         const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch, 'bin')
                             + path.delimiter + `${process.env.PATH}${path.delimiter}`;
-
-        // Allowed security server cert and key files to obtain from the VMS
-        const allowedFilenames = ['pwsPass','ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
-            'ssh/pws_rsa','ssh/pws_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
-        
-            
+                  
         // Create app security folders
         const fs = require('fs');
         const securityFolder = path.join(self.pwsSettings.appFolder, 'security');
@@ -467,6 +464,10 @@ var VMS = {
         if (!fs.existsSync(path.join(securityFolder, 'ssh'))) {
             fs.mkdirSync(path.join(securityFolder, 'ssh'), { recursive: true });
         }
+
+        // Allowed security server cert and key files to obtain from the VMS
+        const allowedFilenames = ['pwsPass','ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
+            'ssh/pws_rsa','ssh/pws_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
 
         // Start the security server
         if (this.securityServer == null) {
@@ -495,8 +496,8 @@ var VMS = {
                                     continue;
                                 }
                                 if (filename == 'pwsPass') {
-                                    self.pwsSettings.pwsPass = global.Settings.decrypt(content);
-                                    global.Settings.save(self.pwsSettings);
+                                    self.pwsSettings.pwsPass = Settings.decrypt(content);
+                                    Settings.save(self.pwsSettings);
                                     continue;
                                 }
                                 const filePath = path.join(securityFolder, filename);
@@ -556,16 +557,16 @@ var VMS = {
                 // Automatically turn off Samba if host forward error detected
                 if (exec_error.indexOf("Could not set up host forwarding rule 'tcp::445-:445'") > -1) {
                     //const Settings = require('./settings.js');
-                    let pwsSettings = global.Settings.read();
+                    let pwsSettings = Settings.read();
                     pwsSettings.fsMode = 'None';
-                    global.Settings.save(pwsSettings);
+                    Settings.save(pwsSettings);
                 }
             }else{
                 console.log(`stdout: ${stdout}`);
                 console.error(`stderr: ${stderr}`);
             }
+            child.unref();
         });
-        child.unref();
 
         // Wait up to 20 seconds for the VMS to start
         let started = false;
@@ -601,15 +602,6 @@ var VMS = {
         const shellEscape = require('shell-escape');
         const escapedPassword = shellEscape([password]);
         this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
-    },
-    // Someday/maybe
-    // /**
-    //  * updateCPPort - Updates the Control Panel port in the VMS.
-    //  * @param {number} port - The new port number.
-    //  */
-    // updateCPPort: function(port) {
-    //     const shellEscape = require('shell-escape');
-    //     this.sudo('/usr/local/hestia/plugins/cg-pws/update-cp-port.sh ' + port.toString());
-    // }
+    }
 };
 module.exports = VMS;

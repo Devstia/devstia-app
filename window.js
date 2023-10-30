@@ -3,6 +3,10 @@ const { StringDecoder } = require('string_decoder');
 /**
  * Window object represent our main application window.
  */
+const Settings = global.Settings;
+const ipcMain = global.ipcMain;
+const Tray = global.Tray;
+const VMS = global.VMS;
 var Window = {
 
     // Properties
@@ -49,29 +53,6 @@ var Window = {
             console.error(error);
         }
     },
-    invoke: function(event, arg) {
-        for (let i = 0; i < this.listeners.length; i++) {
-            if (this.listeners[i].event === event) {
-                arg = this.listeners[i].callback(arg);
-            }
-        }
-        return arg;
-    },
-    /**
-     * off - Unregisters a listener for the given event.
-     * @param {string} event 
-     */
-    off: function(event) {
-        this.listeners = this.listeners.filter(listener => listener.event !== event);
-    },
-    /**
-     * on - Registers a listener for the given event.
-     * @param {string} event 
-     * @param {function} callback 
-     */
-    on: function(event, callback) {
-        this.listeners.push({event: event, callback: callback});
-    },
     /**
      * show - Shows application window with the given file and optional dimensions.
      * @param {*} file contains the URL to load.
@@ -90,7 +71,7 @@ var Window = {
                 title: 'CodeGarden PWS',
                 maximizable: false,
                 minimizable: false,
-                resizable: true,
+                resizable: false,
                 show: false,
                 icon: './images/cg.png',
                 webPreferences: {
@@ -99,15 +80,15 @@ var Window = {
                 }
             }
             this.win = new BrowserWindow(winOptions);
-            //this.win.setMenu(null);
+            this.win.setMenu(null);
             this.win.on('closed', () => {
-//                this.unregisterUIEvents();
                 const app = require('electron').app;
                 if (process.platform === 'darwin') {
                     app.dock.hide();
                 }
-                this.listeners = [];
-                this.invoke('closed');
+                if (this.quitOnClose == true) {
+                    global.doQuitting();
+                }
                 this.win = null;
             });
             this.win.webContents.on('did-finish-load', () => {
@@ -134,10 +115,12 @@ var Window = {
                     const app = require('electron').app;
                     app.dock.show();
                 }
-                let pwsSettings = global.Settings.read();
-                this.executeJavaScript('fillOutSettings(' + JSON.stringify(pwsSettings) + ');');
-                if (pwsSettings.fsMode.toLowerCase() == 'none') {
-                    this.executeJavaScript("$('#files').addClass('disabled');");
+                if (file.indexOf('settings.html') > -1) {
+                    let pwsSettings = Settings.read();
+                    this.executeJavaScript('fillOutSettings(' + JSON.stringify(pwsSettings) + ');');
+                    if (pwsSettings.fsMode.toLowerCase() == 'none') {
+                        this.executeJavaScript("$('#files').addClass('disabled');");
+                    }
                 }
                 setTimeout(() => { this.win.show(); }, 300);
             });
@@ -177,14 +160,11 @@ var Window = {
      * registerUIEvents - Handles user interface events from the window.
      */
     registerUIEvents: function() {
-        //const Window = require('./window.js');
-        //const VMS = require('./vms.js');
-        //const self = this;
 
         // Handle request for server status
         console.log("Setting up uiEvents!!!");
-        global.ipcMain.on('checkStatus', function(event, arg) {
-            global.VMS.checkStatus().then((result) => {
+        ipcMain.on('checkStatus', function(event, arg) {
+            VMS.checkStatus().then((result) => {
                 console.log(`Command Result: ${result}`);
                 try {
                     event.sender.send(arg.uuid, result);
@@ -193,12 +173,12 @@ var Window = {
                 }
             })
             .catch((error) => {
-                console.error(`Error executing Settings.checkStatus command: ${error}`);
+                console.error(`Error executing VMS.checkStatus command: ${error}`);
             });
         });
 
         // Handle request for opening external http/s links
-        global.ipcMain.on('openLink', (event, url) => {
+        ipcMain.on('openLink', (event, url) => {
             if (typeof url != 'string') return;
             const urlPattern = /^(https?|ftp):\/\//i; // sanitize
             if ( urlPattern.test(url) ) {
@@ -207,19 +187,19 @@ var Window = {
         });
 
         // Handle saving settings
-        global.ipcMain.on('savePass', function(event, newSettings) {
-            let pwsSettings = global.Settings.read();
+        ipcMain.on('savePass', function(event, newSettings) {
+            let pwsSettings = Settings.read();
             if (newSettings.pwsPass != pwsSettings.pwsPass) {
-                global.VMS.updatePassword(newSettings.pwsPass);
+                VMS.updatePassword(newSettings.pwsPass);
                 pwsSettings.pwsPass = newSettings.pwsPass;
-                global.Settings.save(pwsSettings);
-                global.VMS.pwsSettings = pwsSettings;
+                Settings.save(pwsSettings);
+                VMS.pwsSettings = pwsSettings;
                 event.sender.send(newSettings.uuid);
             }
         });
 
         // Handle system requests
-        global.ipcMain.on('erase', function(event, arg) {
+        ipcMain.on('erase', function(event, arg) {
             const prompt = require('electron-prompt');
             prompt({
                 title: 'CodeGarden - WARNING',
@@ -234,16 +214,18 @@ var Window = {
                 height: 210
             }).then((r) => {
                 if(r === null) {
-                    console.log('user cancelled');
+                    event.sender.send(arg.uuid);
+                    return;
                 } else {
                     if (r === 'ERASE') {
-                        global.Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Erasing server...');document.getElementById('close-button').addClass('disabled');");
-                        global.VMS.erase();
+                        global.Window.executeJavaScript("$('#close-button').addClass('disabled');showSystemWaiting('Erasing server...');document.getElementById('close-button').addClass('disabled');");
+                        VMS.erase();
                         setTimeout(function() {
-                            global.Window.executeJavaScript("showWaitingSystem('Re-installing server...<br> Please wait');");
-                            global.VMS.extract(function() {
-                                global.Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
-                                global.VMS.startup(true); // restarted
+                            global.Window.executeJavaScript("showSystemWaiting('Re-installing server...<br> Please wait');");
+                            VMS.extract(function() {
+                                global.Window.executeJavaScript("$('.badge').css('opacity', '20%');showStatusWait();hideSystemWaiting();$('#close-button').removeClass('disabled');");
+                                VMS.startup(true); // restarted
+                                event.sender.send(arg.uuid);
                             });
                         }, 10000);
                     }else{
@@ -260,35 +242,32 @@ var Window = {
                             icon: path.join(app.getAppPath(), 'images/cg.png')
                         };
                         dialog.showMessageBox(options);
+                        event.sender.send(arg.uuid);
                     }    
                 }
             })
         });
-        global.ipcMain.on('localhost', function(event, arg) {
-            //event.returnValue = global.Window.invoke('localhost', arg);
+        ipcMain.on('localhost', function(event, arg) {
             global.showLocalhost();
         });
-        global.ipcMain.on('terminal', function(event, arg) {
-            //event.returnValue = global.Window.invoke('terminal', arg);
+        ipcMain.on('terminal', function(event, arg) {
             global.showTerminal();
         });
-        global.ipcMain.on('files', function(event, arg) {
-            //event.returnValue = global.Window.invoke('files', arg);
+        ipcMain.on('files', function(event, arg) {
             global.showFiles();
         });
-        global.ipcMain.on('restartServer', function(event, arg) {
-            global.VMS.restart(function() {
+        ipcMain.on('restartServer', function(event, arg) {
+            VMS.restart(function() {
                 event.sender.send(arg.uuid);
             });
         });
-        global.ipcMain.on('quit', function(event, arg) {
-            //event.returnValue = global.Window.invoke('quit', arg);
-            global.Tray.quitting = global.doQuitting(true);
+        ipcMain.on('quit', function(event, arg) {
+            global.doQuitting();
             global.Window.close();
         });
 
         // Handle snapshot requests
-        global.ipcMain.on('createSnapshot', function(event, arg) {
+        ipcMain.on('createSnapshot', function(event, arg) {
             const { dialog } = require('electron');
             const os = require('os');
             const path = require('path');
@@ -311,31 +290,35 @@ var Window = {
                 ]
             };
             dialog.showSaveDialog(options).then(result => {
-                if (result.canceled) return;
+                if (result.canceled) {
+                    event.sender.send(arg.uuid);
+                    return;
+                }
                 const filePath = result.filePath;
                 const pwsFile = process.arch == 'arm64' ? 'pws-arm64.img' : 'pws-amd64.img';
-                let pwsSettings = global.Settings.read();
+                let pwsSettings = Settings.read();
                 const vmsFilePath = path.join(pwsSettings.vmsFolder, pwsFile);
-                Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Stopping server...');");
-                global.VMS.shutdown(function() {
-                    global.Window.executeJavaScript("showWaitingSystem('Creating snapshot...<br> Please wait');");
+                Window.executeJavaScript("$('#close-button').addClass('disabled');showSystemWaiting('Stopping server...');");
+                VMS.shutdown(function() {
+                    global.Window.executeJavaScript("showSystemWaiting('Creating snapshot...<br> Please wait');");
 
                     // Copy the current vms file to the selected location
                     const fs = require('fs');
                     fs.copyFile(vmsFilePath, filePath, (err) => {
                         if (err) throw err;
-                        global.Window.executeJavaScript("showWaitingSystem('Resuming the server...');");
+                        global.Window.executeJavaScript("showSystemWaiting('Resuming the server...');");
                         setTimeout(function() {
-                            global.Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
-                            global.VMS.startup(true); // restarted
+                            global.Window.executeJavaScript("$('.badge').css('opacity', '20%');showStatusWait();hideSystemWaiting();$('#close-button').removeClass('disabled');");
+                            VMS.startup(true); // restarted
                         }, 3000);
                     });
+                    event.sender.send(arg.uuid);
                 });
             }).catch(err => {
                 console.error(err);
             });
         });
-        global.ipcMain.on('restoreSnapshot', function(event, arg) {
+        ipcMain.on('restoreSnapshot', function(event, arg) {
             const { dialog } = require('electron');
 
             // Show the file selector dialog
@@ -367,20 +350,26 @@ var Window = {
 
                     dialog.showMessageBox(confirmOptions).then(result => {
                         if (result.response === 0) {
+
                             // Restore the selected snapshot
-                            global.Window.executeJavaScript("$('#close-button').addClass('disabled');showWaitingSystem('Stopping server...');");
-                            global.VMS.erase(function() {
-                                global.Window.executeJavaScript("showWaitingSystem('Restoring server...<br> Please wait');");
-                                global.VMS.restore(filePath, function() {
-                                    global.Window.executeJavaScript("$('.badge').css('opacity', '20%');$('#status-waiting').show();hideWaitingSystem();$('#close-button').removeClass('disabled');");
-                                    global.VMS.startup(true); // restarted
+                            global.Window.executeJavaScript("$('#close-button').addClass('disabled');showSystemWaiting('Stopping server...');");
+                            VMS.erase(function() {
+                                global.Window.executeJavaScript("showSystemWaiting('Restoring server...<br> Please wait');");
+                                VMS.restore(filePath, function() {
+                                    global.Window.executeJavaScript("$('.badge').css('opacity', '20%');showStatusWait();hideSystemWaiting();$('#close-button').removeClass('disabled');");
+                                    VMS.startup(true); // restarted
+                                    event.sender.send(arg.uuid);
                                 });
                             });
                             console.log(`File selected: ${filePath}`);
+                        }else{
+                            event.sender.send(arg.uuid);
                         }
                     }).catch(err => {
                         console.error(err);
                     });
+                }else{
+                    event.sender.send(arg.uuid);
                 }
             }).catch(err => {
                 console.error(err);
@@ -388,22 +377,22 @@ var Window = {
         });
 
         // Handle security requests
-        global.ipcMain.on('showMasterCert', function(event) {
-            let pwsSettings = global.Settings.read();
+        ipcMain.on('showMasterCert', function(event) {
+            let pwsSettings = Settings.read();
             const masterCert = require('path').join(pwsSettings.appFolder, 'security', 'ca', 'dev.cc.crt');
             require('electron').shell.showItemInFolder(masterCert);
         });
-        global.ipcMain.on('regenCerts', function(event, arg) {
-            global.VMS.regenerateCertificates();
+        ipcMain.on('regenCerts', function(event, arg) {
+            VMS.regenerateCertificates();
             event.sender.send(arg.uuid);
         });
-        global.ipcMain.on('showSSHKeys', function(event) {
-            let pwsSettings = global.Settings.read();
+        ipcMain.on('showSSHKeys', function(event) {
+            let pwsSettings = Settings.read();
             const sshKey = require('path').join(pwsSettings.appFolder, 'security', 'ssh', 'pws_rsa.pub');
             require('electron').shell.showItemInFolder(sshKey);
         });
-        global.ipcMain.on('regenKeys', function(event, arg) {   
-            global.VMS.regenerateSSHKeys();
+        ipcMain.on('regenKeys', function(event, arg) {   
+            VMS.regenerateSSHKeys();
             event.sender.send(arg.uuid);
         });
     },
@@ -413,21 +402,21 @@ var Window = {
      */
     unregisterUIEvents: function() {
         console.log("Destroying uiEvents!!!");
-        global.ipcMain.removeAllListeners('checkStatus');
-        global.ipcMain.removeAllListeners('openLink');
-        global.ipcMain.removeAllListeners('savePass');
-        global.ipcMain.removeAllListeners('erase');
-        global.ipcMain.removeAllListeners('localhost');
-        global.ipcMain.removeAllListeners('terminal');
-        global.ipcMain.removeAllListeners('files');
-        global.ipcMain.removeAllListeners('restartServer');
-        global.ipcMain.removeAllListeners('quit');
-        global.ipcMain.removeAllListeners('createSnapshot');
-        global.ipcMain.removeAllListeners('restoreSnapshot');
-        global.ipcMain.removeAllListeners('showMasterCert');
-        global.ipcMain.removeAllListeners('regenCerts');
-        global.ipcMain.removeAllListeners('showSSHKeys');
-        global.ipcMain.removeAllListeners('regenKeys');
+        ipcMain.removeAllListeners('checkStatus');
+        ipcMain.removeAllListeners('openLink');
+        ipcMain.removeAllListeners('savePass');
+        ipcMain.removeAllListeners('erase');
+        ipcMain.removeAllListeners('localhost');
+        ipcMain.removeAllListeners('terminal');
+        ipcMain.removeAllListeners('files');
+        ipcMain.removeAllListeners('restartServer');
+        ipcMain.removeAllListeners('quit');
+        ipcMain.removeAllListeners('createSnapshot');
+        ipcMain.removeAllListeners('restoreSnapshot');
+        ipcMain.removeAllListeners('showMasterCert');
+        ipcMain.removeAllListeners('regenCerts');
+        ipcMain.removeAllListeners('showSSHKeys');
+        ipcMain.removeAllListeners('regenKeys');
     }
 };
 module.exports = Window;

@@ -14,7 +14,6 @@
 
         
         <div class="datagrid-item">
-
             <div class="datagrid-title">Status</div>
             <div class="datagrid-content" id="status-parent" style="height:30.6%;">
                 <div id="status-server">
@@ -42,9 +41,6 @@
                     </div>
                 </div>
             </div>
-
-
-
             <div class="datagrid-title">Snapshots</div>
             <div class="datagrid-content row inline-btns">
                 <a href="#createSnapshot" id="createSnapshot" class="btn btn-secondary w-100">Create Snapshot</a>
@@ -52,8 +48,7 @@
                 <a href="#restoreSnapshot" id="restoreSnapshot" class="btn btn-secondary w-100">Restore Snapshot</a>
                 <p> </p>
                 <a href="#erase" id="erase" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
-            </div>
-            
+            </div>            
         </div>
 
         <div class="datagrid-item">
@@ -71,10 +66,6 @@
                 <p> </p>
             </div>
         </div>
-
-        <!-- <div class="datagrid-item" style="margin-top:-129px;">
-        </div> -->
-
     
     </div>
 </div>
@@ -84,6 +75,7 @@
 
     // Check status
     function checkStatus() {
+        if ($('#waiting-system').is(':visible')) return;
         ipcComm.send('checkStatus', function(stats) {
             $('.badge').css('opacity', '100%');
             setStatus('apache2', stats.indexOf('[ + ]  apache2') > -1);
@@ -95,8 +87,7 @@
             setStatus('smbd', stats.indexOf('[ + ]  smbd') > -1);
             setStatus('vsftpd', stats.indexOf('[ + ]  vsftpd') > -1);
             setStatus('php-fpm', (stats.indexOf('[ - ]  php') > -1) == false);
-            $('#status-waiting').hide();
-            console.log(stats);
+            hideStatusWait();
         });
     }
     function setStatus(service, online) {
@@ -107,28 +98,57 @@
         }
     }
     var csInterval = setInterval(checkStatus, 10000);
+    showStatusWait();
     checkStatus();
 
-    // Show/hide waiting screen
-    function showWaitingSystem(message) {
+    // Show/hide Status wait overlay
+    function showStatusWait() {
+        $('#status-waiting').show();
+        let controls = ['tab-security', 'localhost', 'terminal', 'files'];
+        controls.forEach(function(control) {
+            $('#' + control).addClass('disabled');
+        });
+    }
+    function hideStatusWait() {
+        $('#status-waiting').hide();
+        let controls = ['tab-security', 'localhost', 'terminal', 'files'];
+        controls.forEach(function(control) {
+            $('#' + control).removeClass('disabled');
+        });
+    }
+
+    // Show/hide System waiting screen
+    function showSystemWaiting(message) {
+        $('#tab-security').addClass('disabled');
         $('#message-system').html(message);
         $('#waiting-system').fadeIn();
         $('#dg-system').fadeOut();
     }
-    function hideWaitingSystem() {
+    function hideSystemWaiting() {
         $('#waiting-system').fadeOut();
-        $('#dg-system').fadeIn();
+        $('#dg-system').fadeIn().after(function() {
+            $('#tab-security').removeClass('disabled');
+        });
     }
 
     // Handle Snapshots
     $('#createSnapshot').click( (r) => {
-        ipcComm.send('createSnapshot');
+        $('#createSnapshot').addClass('disabled');
+        ipcComm.send('createSnapshot', function() {
+            $('#createSnapshot').removeClass('disabled');
+        });
     });
     $('#restoreSnapshot').click( (r) => {
-        ipcComm.send('restoreSnapshot');
+        $('#restoreSnapshot').addClass('disabled');
+        ipcComm.send('restoreSnapshot', function() {
+            $('#restoreSnapshot').removeClass('disabled');
+        });
     });
     $('#erase').click( (r) => {
-        ipcComm.send('erase');
+        $('#erase').addClass('disabled');
+        ipcComm.send('erase', function() {
+            $('#erase').removeClass('disabled');
+        });
     });
 
     // Handle Actions
@@ -142,16 +162,17 @@
         ipcComm.send('files');
     });
     $('#restartServer').click( (r) => {
-        showWaitingSystem('Restarting server...');
+        showSystemWaiting('Restarting server...');
         ipcComm.send('restartServer', function() {
             setTimeout(() => {
                 $('.badge').css('opacity', '20%'); // Status unknown
-                $('#status-waiting').show();
-                hideWaitingSystem();
+                hideSystemWaiting();
+                showStatusWait();
             }, 5000);
         });
     });
     $('#quit').click( (r) => {
+        showSystemWaiting('Stopping server...');
         ipcComm.send('quit', true);
     });
 </script>
