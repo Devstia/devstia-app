@@ -21,14 +21,14 @@ app.on('ready', () => {
     if (process.platform === 'win32') {
         const { execSync } = require('child_process');
         const stdout = execSync('powershell -Command get-service | findstr vmcompute');
-        if (stdout.indexOf('Hyper-V') == -1) {
+        if (stdout.indexOf('Hyper-V') != -1) {
 
             // Display message to user to enable Hyper-V
             const { dialog } = require('electron');
             const options = {
                 type: 'info',
                 title: 'Code Garden - Hyper-V is not enabled',
-                message: "Hyper-V is not enabled, please enable it and reboot your computer.\n\nVisit https://code.gdn/pws/hyper-v for instructions.",
+                message: "Hyper-V is not enabled, please enable it.\n\nClick Windows' Start button, type \"Turn Windows Features on or off\", check Hyper-V.",
                 buttons: ['OK']
             };
             dialog.showMessageBox(null, options).then( (response) => {
