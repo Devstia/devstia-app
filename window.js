@@ -161,7 +161,6 @@ var Window = {
     registerUIEvents: function() {
 
         // Handle request for server status
-        console.log("Setting up uiEvents!!!");
         ipcMain.on('checkStatus', function(event, arg) {
             VMS.checkStatus().then((result) => {
                 console.log(`Command Result: ${result}`);
@@ -400,7 +399,6 @@ var Window = {
      * unregisterUIEvents - Unregisters all UI events.
      */
     unregisterUIEvents: function() {
-        console.log("Destroying uiEvents!!!");
         ipcMain.removeAllListeners('checkStatus');
         ipcMain.removeAllListeners('openLink');
         ipcMain.removeAllListeners('savePass');
