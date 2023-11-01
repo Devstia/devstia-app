@@ -14,9 +14,29 @@ global.VMS = require('./vms.js');
 global.Window = require('./window.js');
 global.Tray = require('./tray.js');
 global.Menu = require('electron').Menu;
+
 app.on('ready', () => {
 
-    // TODO: On Windows, check for Hyper-V, if not enabled ask to enable/reboot
+    // On Windows, check for Hyper-V, if not enabled ask to enable/reboot
+    if (process.platform === 'win32') {
+        const { execSync } = require('child_process');
+        const stdout = execSync('powershell -Command get-service | findstr vmcompute');
+        if (stdout.indexOf('Hyper-V') == -1) {
+
+            // Display message to user to enable Hyper-V
+            const { dialog } = require('electron');
+            const options = {
+                type: 'info',
+                title: 'Code Garden - Hyper-V is not enabled',
+                message: "Hyper-V is not enabled, please enable it and reboot your computer.\n\nVisit https://code.gdn/pws/hyper-v for instructions.",
+                buttons: ['OK']
+            };
+            dialog.showMessageBox(null, options).then( (response) => {
+                app.quit();
+            });
+            return;
+        }
+    }
 
     // Read our settings
     const pwsSettings = global.Settings.read();

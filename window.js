@@ -5,7 +5,6 @@ const { StringDecoder } = require('string_decoder');
  */
 const Settings = global.Settings;
 const ipcMain = global.ipcMain;
-const Tray = global.Tray;
 const VMS = global.VMS;
 var Window = {
 
