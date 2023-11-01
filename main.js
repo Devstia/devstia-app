@@ -21,7 +21,7 @@ app.on('ready', () => {
     if (process.platform === 'win32') {
         const { execSync } = require('child_process');
         const stdout = execSync('powershell -Command get-service | findstr vmcompute');
-        if (stdout.indexOf('Hyper-V') != -1) {
+        if (stdout.indexOf('Hyper-V') == -1) {
 
             // Display message to user to enable Hyper-V
             const { dialog } = require('electron');
