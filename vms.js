@@ -8,7 +8,7 @@ var VMS = {
     // Properties
     receivedInitSecurity: false,
     securityServer: null,
-    pwsSettings: null,
+    pwSettings: null,
     filename: null,
     quitting: false,
     listeners: {},
@@ -21,15 +21,15 @@ var VMS = {
     checkStatus: function() {
         return new Promise((resolve, reject) => {
             const { spawn } = require('child_process');
-            const scriptsFolder = require('path').join(this.pwsSettings.appFolder, 'scripts');
+            const scriptsFolder = require('path').join(this.pwSettings.appFolder, 'scripts');
             let cmd = '';
             let ssh = null;
             if (process.platform === 'win32') {
-                let cmd = `cd ${scriptsFolder.replace(/ /g, '\\ ')} && status.bat ${this.pwsSettings.sshPort}`;
+                let cmd = `cd ${scriptsFolder.replace(/ /g, '\\ ')} && status.bat ${this.pwSettings.sshPort}`;
                 console.log(cmd);
                 ssh = spawn('cmd', ['/C', cmd]);
             }else{
-                cmd = `cd "${scriptsFolder}" && ./status.sh ${this.pwsSettings.sshPort}`;
+                cmd = `cd "${scriptsFolder}" && ./status.sh ${this.pwSettings.sshPort}`;
                 ssh = spawn('bash', ['-c', cmd]);
             }            
             let output = '';
@@ -50,17 +50,17 @@ var VMS = {
         });
     },
     /**
-     * download - Locates the compatible VMS runtime at virtuosoft.com/downloads/cg-pws.
-     * @param {function} callback - The callback function to furnish the download progress.
+     * download - Locates the compatible VMS runtime at virtuosoft.com/downloads/devstia-vm.
+     * @param {function} callback - The callback function to furnish the   progress.
      */
     download: function() {
         var self = this;
         const https = require('https');
         const fs = require('fs');
         const path = require('path');
-        const jsonUrl = 'https://virtuosoft.com/downloads/cg-pws';
+        const jsonUrl = 'https://virtuosoft.com/downloads/dev-pw';
         const filename = this.filename;
-        const archiveFile = path.join(this.pwsSettings.vmsFolder, filename + '.tar.xz');
+        const archiveFile = path.join(this.pwSettings.vmsFolder, filename + '.tar.xz');
         const directoryPath = path.dirname(archiveFile);
         if (!fs.existsSync(directoryPath)) {
             try {
@@ -191,12 +191,12 @@ var VMS = {
         this.shutdown(function() {
             const path = require('path');
             const fs = require('fs');
-            let pwsFile = process.arch == 'arm64' ? 'pws-arm64.img' : 'pws-amd64.img';
+            let pwFile = process.arch == 'arm64' ? 'devstia-arm64.img' : 'devstia-amd64.img';
 
-            pwsFile = path.join(self.pwsSettings.vmsFolder, pwsFile);
-            if (fs.existsSync(pwsFile)) {
-                fs.unlinkSync(pwsFile);
-                console.log(`Deleted file: ${pwsFile}`);
+            pwFile = path.join(self.pwSettings.vmsFolder, pwFile);
+            if (fs.existsSync(pwFile)) {
+                fs.unlinkSync(pwFile);
+                console.log(`Deleted file: ${pwFile}`);
                 if (fDone != null) setTimeout(() => { fDone(); }, 1000);
             }
         });
@@ -209,10 +209,10 @@ var VMS = {
     restore: function(imgFile, fDone = null) {
         const path = require('path');
         const fs = require('fs');
-        const pwsFile = process.arch == 'arm64' ? 'pws-arm64.img' : 'pws-amd64.img';
+        const pwFile = process.arch == 'arm64' ? 'devstia-arm64.img' : 'devstia-amd64.img';
 
         // Copy the file to the VMS folder
-        const vmsFilePath = path.join(this.pwsSettings.vmsFolder, pwsFile);
+        const vmsFilePath = path.join(this.pwSettings.vmsFolder, pwFile);
         fs.copyFileSync(imgFile, vmsFilePath);
         if (fDone != null) setTimeout(() => { fDone(); }, 1000);
     },
@@ -225,7 +225,7 @@ var VMS = {
         const fs = require('fs');
         const path = require('path');
         const filename = this.filename;
-        const archiveFile = path.join(self.pwsSettings.vmsFolder, filename + '.tar.xz');
+        const archiveFile = path.join(self.pwSettings.vmsFolder, filename + '.tar.xz');
         let pathAddendum = '';
         if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
             pathAddendum = path.join(__dirname, 'runtime', 'win32_x64', 'bin') + ';';
@@ -319,13 +319,13 @@ var VMS = {
      * regenerateCertificates - Regenerates the certificates for the VMS.
      */
     regenerateCertificates: function() {
-        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin cg_pws_regenerate_certificates' );
+        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin dev_pw_regenerate_certificates' );
     },
     /**
      * regenerateSSHKeys - Regenerates the SSH keys for the VMS.
      */
     regenerateSSHKeys: function() {
-        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin cg_pws_regenerate_ssh_keys' );
+        this.sudo( '/usr/local/hestia/bin/v-invoke-plugin dev_pw_regenerate_ssh_keys' );
     },
     /**
      * restart - Restarts the virtual machine server.
@@ -352,21 +352,21 @@ var VMS = {
     },
     /**
      * state - Determines the state of our virtual machine server.
-     * @param {object} pwsSettings - The PWS settings object.
+     * @param {object} pwSettings - The PWS settings object.
      * @returns {string} - The state of our virtual machine server.
      */
     state: function() {
         this.filename = null;
-        if (process.arch == 'arm64') this.filename = 'pws-arm64';
-        if (process.arch == 'x64') this.filename = 'pws-amd64';
+        if (process.arch == 'arm64') this.filename = 'devstia-arm64';
+        if (process.arch == 'x64') this.filename = 'devstia-amd64';
         if (this.filename != null) {
             if (this.getProcessID() != null) {
                 return 'running';               // Running
             }
             const path = require('path');
             const fs = require('fs');
-            const archiveFile = path.join(this.pwsSettings.vmsFolder, this.filename + '.tar.xz');
-            const imageFile = path.join(this.pwsSettings.vmsFolder, this.filename + '.img');
+            const archiveFile = path.join(this.pwSettings.vmsFolder, this.filename + '.tar.xz');
+            const imageFile = path.join(this.pwSettings.vmsFolder, this.filename + '.img');
             if (!fs.existsSync(archiveFile)) {
                 return 'download';              // Download
             }else{
@@ -393,9 +393,9 @@ var VMS = {
         }else{
             sudo = './sudo.sh';
         }
-        const scriptsFolder = require('path').join(this.pwsSettings.appFolder, 'scripts');
-        let ssh = `cd "${scriptsFolder}" && ${sudo} ${this.pwsSettings.sshPort}`;
-        ssh += ` "${this.pwsSettings.pwsPass}" "${cmd}"`;
+        const scriptsFolder = require('path').join(this.pwSettings.appFolder, 'scripts');
+        let ssh = `cd "${scriptsFolder}" && ${sudo} ${this.pwSettings.sshPort}`;
+        ssh += ` "${this.pwSettings.pwPass}" "${cmd}"`;
         let stdout = null;
         try {
             stdout = execSync(ssh, { encoding: 'utf8' });
@@ -457,7 +457,7 @@ var VMS = {
                   
         // Create app security folders
         const fs = require('fs');
-        const securityFolder = path.join(self.pwsSettings.appFolder, 'security');
+        const securityFolder = path.join(self.pwSettings.appFolder, 'security');
         if (!fs.existsSync(path.join(securityFolder, 'ca'))) {
             fs.mkdirSync(path.join(securityFolder, 'ca'), { recursive: true });
         }
@@ -466,8 +466,8 @@ var VMS = {
         }
 
         // Allowed security server cert and key files to obtain from the VMS
-        const allowedFilenames = ['pwsPass','ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
-            'ssh/pws_rsa','ssh/pws_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
+        const allowedFilenames = ['pwPass','ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
+            'ssh/devstia_rsa','ssh/devstia_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
 
         // Start the security server
         if (this.securityServer == null) {
@@ -495,9 +495,9 @@ var VMS = {
                                 if (!allowedFilenames.includes(filename)) {
                                     continue;
                                 }
-                                if (filename == 'pwsPass') {
-                                    self.pwsSettings.pwsPass = Settings.decrypt(content);
-                                    Settings.save(self.pwsSettings);
+                                if (filename == 'pwPass') {
+                                    self.pwSettings.pwPass = Settings.decrypt(content);
+                                    Settings.save(self.pwSettings);
                                     continue;
                                 }
                                 const filePath = path.join(securityFolder, filename);
@@ -538,10 +538,10 @@ var VMS = {
         if (process.platform === 'win32') {
             startup = 'startup.bat';
         }
-        const startupScript = path.join(this.pwsSettings.appFolder, 'scripts', startup);
-        let cmd = '"' + startupScript + '" ' + this.pwsSettings.sshPort;
-        cmd += ' ' + this.pwsSettings.cpPort + ' "' + this.pwsSettings.vmsFolder + '"';
-        if (this.pwsSettings.fsMode.toLowerCase() == 'samba') {
+        const startupScript = path.join(this.pwSettings.appFolder, 'scripts', startup);
+        let cmd = '"' + startupScript + '" ' + this.pwSettings.sshPort;
+        cmd += ' ' + this.pwSettings.cpPort + ' "' + this.pwSettings.vmsFolder + '"';
+        if (this.pwSettings.fsMode.toLowerCase() == 'samba') {
             cmd += ' ",hostfwd=tcp::445-:445"';
         }else{
             cmd += ' ""';
@@ -557,9 +557,9 @@ var VMS = {
                 // Automatically turn off Samba if host forward error detected
                 if (exec_error.indexOf("Could not set up host forwarding rule 'tcp::445-:445'") > -1) {
                     //const Settings = require('./settings.js');
-                    let pwsSettings = Settings.read();
-                    pwsSettings.fsMode = 'None';
-                    Settings.save(pwsSettings);
+                    let pwSettings = Settings.read();
+                    pwSettings.fsMode = 'None';
+                    Settings.save(pwSettings);
                 }
             }else{
                 console.log(`stdout: ${stdout}`);
@@ -595,13 +595,13 @@ var VMS = {
         }
     },
     /**
-     * updatePassword - Updates the passwords in the VMS for debian, admin, pws, Samba, and WebDAV.
+     * updatePassword - Updates the passwords in the VMS for debian, admin, devstia, Samba, and WebDAV.
      * @param {string} password - The new password to use.
      */
     updatePassword: function(password) {
         const shellEscape = require('shell-escape');
         const escapedPassword = shellEscape([password]);
-        this.sudo('/usr/local/hestia/plugins/cg-pws/update-password.sh ' + escapedPassword);
+        this.sudo('/usr/local/hestia/plugins/dev-pw/update-password.sh ' + escapedPassword);
     }
 };
 module.exports = VMS;

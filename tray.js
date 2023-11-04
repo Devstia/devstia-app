@@ -14,7 +14,7 @@ var Tray = {
         // Create the tray icon
         const nativeImage = require('electron').nativeImage;
         const app = require('electron').app;
-        let icon = nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
+        let icon = nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`)
         icon = icon.resize({
             height: 16,
             width: 16
@@ -72,13 +72,6 @@ var Tray = {
             }
         ]);
         tray.setContextMenu(this.menu);
-
-        // // Keep app in memory when the user closes the window
-        // app.on('before-quit', (event) => {
-        //     if (!this.quitting) { // Unless quitting
-        //         event.preventDefault();
-        //     }
-        // });
     },
     invoke: function(event, arg) {
         for (let i = 0; i < this.listeners.length; i++) {

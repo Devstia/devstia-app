@@ -1,7 +1,6 @@
 /**
- * Virtuosoft - CodeGarden PWS (Personal Web Server)
+ * Virtuosoft - Devstria Preview (a localhost development server)
  * 
- * Provides a desktop application for managing CODE (Core Open Developer Elements)
  * TODO: rewrite everything using VueJS :)
  */
 
@@ -27,7 +26,7 @@ app.on('ready', () => {
             const { dialog } = require('electron');
             const options = {
                 type: 'info',
-                title: 'Code Garden - Hyper-V is not enabled',
+                title: 'Devstia Preview - Hyper-V is not enabled',
                 message: "Hyper-V is not enabled, please enable it.\n\nClick Windows' Start button, type \"Turn Windows Features on or off\", check Hyper-V.",
                 buttons: ['OK']
             };
@@ -39,11 +38,11 @@ app.on('ready', () => {
     }
 
     // Read our settings
-    const pwsSettings = global.Settings.read();
+    const pwSettings = global.Settings.read();
     Window.registerUIEvents();
 
     // Copy over our user customizable scripts folder   
-    Util.appFolder = pwsSettings.appFolder;
+    Util.appFolder = pwSettings.appFolder;
     if (Util.allowOneInstance()) return;
     Util.copyScripts();
 
@@ -51,7 +50,7 @@ app.on('ready', () => {
     const customMenu = Menu.buildFromTemplate([]);
 
     // Create our tray icon
-    VMS.pwsSettings = pwsSettings;
+    VMS.pwSettings = pwSettings;
     function createTray() {
         Tray.create();
         Tray.on('localhost', () => {
@@ -126,7 +125,7 @@ app.on('ready', () => {
         if (vms_state == 'running') {
             Tray.setMenuState('localhost', true);
             Tray.setMenuState('terminal', true);
-            Tray.setMenuState('files', (pwsSettings.fsMode.toLowerCase() != 'none'));
+            Tray.setMenuState('files', (pwSettings.fsMode.toLowerCase() != 'none'));
             Tray.setMenuState('settings', true);
         }
 
@@ -152,17 +151,17 @@ app.on('ready', () => {
     global.showTerminal = function() {
         const { spawn } = require('child_process');
         const path = require('path');
-        const pwsSettings = Settings.read();
+        const pwSettings = Settings.read();
         const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch, 'bin')
                 + path.delimiter + `${process.env.PATH}${path.delimiter}`;
         let scriptTerminal = null;
         if (process.platform === 'win32') {
-            scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.bat');
+            scriptTerminal = path.join(pwSettings.appFolder, 'scripts', 'terminal.bat');
         }else{
-            scriptTerminal = path.join(pwsSettings.appFolder, 'scripts', 'terminal.sh');
+            scriptTerminal = path.join(pwSettings.appFolder, 'scripts', 'terminal.sh');
         }
         console.log(scriptTerminal);
-        const p = spawn(scriptTerminal, [pwsSettings.sshPort.toString()], {
+        const p = spawn(scriptTerminal, [pwSettings.sshPort.toString()], {
             cwd: path.dirname(scriptTerminal),
             detached: true,
             stdio: 'ignore',
@@ -178,10 +177,10 @@ app.on('ready', () => {
             
             // Samba mount for macOS, works well and is fast.
             const { exec } = require('child_process');
-            const pwsSettings = Settings.read();
-            let cmd = `[ -n "$(mount -t smbfs | grep '/tmp/pws')" ] && { open /tmp/pws; } `;
-            cmd += '|| { rm -rf /tmp/pws; mkdir -p /tmp/pws; mount -t smbfs //pws:';
-            cmd += pwsSettings.pwsPass + '@local.dev.cc/PWS /tmp/pws && open /tmp/pws; }';
+            const pwSettings = Settings.read();
+            let cmd = `[ -n "$(mount -t smbfs | grep '/tmp/devstia')" ] && { open /tmp/devstia; } `;
+            cmd += '|| { rm -rf /tmp/devstia; mkdir -p /tmp/devstia; mount -t smbfs //devstia:';
+            cmd += pwSettings.pwPass + '@local.dev.cc/Devstia /tmp/devstia && open /tmp/devstia; }';
             exec(cmd, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error mounting samba: ${error.message}`);
@@ -192,10 +191,10 @@ app.on('ready', () => {
 
             // WebDAV mount for Windows, works well and is fast.
             const { execSync } = require('child_process');
-            const pwsSettings = Settings.read();
+            const pwSettings = Settings.read();
             try {
-                execSync('net use P: https://webdav-pws.dev.cc /user:pws "' + pwsSettings.pwsPass + '"');
-                execSync(`powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'PWS'"`);
+                execSync('net use P: https://webdav-devstia.dev.cc /user:devstia "' + pwSettings.pwPass + '"');
+                execSync(`powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'Devstia'"`);
             }catch(err) {
                 console.error(`Error mounting webdav: ${err.message}`);
             }
@@ -220,9 +219,9 @@ app.on('ready', () => {
             if (os.platform() === 'darwin') {
 
                 // Unmount Samba share for macOS
-                if (pwsSettings.fsMode.toLowerCase() == 'samba') {
+                if (pwSettings.fsMode.toLowerCase() == 'samba') {
                     const { exec } = require('child_process');
-                    let cmd = 'umount /tmp/pws && rm -rf /tmp/pws';
+                    let cmd = 'umount /tmp/devstia && rm -rf /tmp/devstia';
                     exec(cmd, (error, stdout, stderr) => {
                         if (error) {
                             console.error(`Error unmounting samba: ${error.message}`);
@@ -233,7 +232,7 @@ app.on('ready', () => {
             }else if (os.platform() === 'win32') {
 
                 // Unmount WebDAV share for Windows
-                if (pwsSettings.fsMode.toLowerCase() == 'webdav') {
+                if (pwSettings.fsMode.toLowerCase() == 'webdav') {
                     const { exec } = require('child_process');
                     let cmd = 'net use P: /delete';
                     exec(cmd, (error, stdout, stderr) => {

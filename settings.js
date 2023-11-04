@@ -81,10 +81,10 @@ var Settings = {
         const app = require('electron').app;
         const path = require('path');
         const packageJson = require('./package.json');
-        let pwsSettings = {
+        let pwSettings = {
             version: packageJson.version,
             webFolder: path.join(app.getPath('home'), 'Sites'),
-            pwsPass: 'personal-web-server',
+            pwPass: 'personal-web-server',
             sshPort: 8022,
             cpPort: 8083,
             fsMode: 'None',
@@ -98,36 +98,36 @@ var Settings = {
         // Default to WebDAV on Windows and Samba on Linux/Darwin
         const { platform } = require('os');
         if (platform() === 'win32') {
-            pwsSettings.fsMode = 'WebDAV';
+            pwSettings.fsMode = 'WebDAV';
         }else{
-            pwsSettings.fsMode = 'Samba';
+            pwSettings.fsMode = 'Samba';
         }
         
         // Read settings file
-        const pwsFile = path.join(pwsSettings.appFolder, 'settings.json');
+        const pwsFile = path.join(pwSettings.appFolder, 'settings.json');
         const fs = require('fs');
         if (fs.existsSync(pwsFile)) {
-            pwsSettings = JSON.parse(fs.readFileSync(pwsFile));
-            pwsSettings.pwsPass = this.decrypt(pwsSettings.pwsPass);
+            pwSettings = JSON.parse(fs.readFileSync(pwsFile));
+            pwSettings.pwPass = this.decrypt(pwSettings.pwPass);
         }else{
-            this.save(pwsSettings); // Save the default settings
+            this.save(pwSettings); // Save the default settings
         }
-        return pwsSettings;
+        return pwSettings;
     },
 
     /**
      * save - Saves the settings to the settings file.
      * 
-     * @param {Object} pwsSettings Application settings.
+     * @param {Object} pwSettings Application settings.
      */
-    save: function(pwsSettings) {
-        let pwsCopy = JSON.parse(JSON.stringify(pwsSettings));
+    save: function(pwSettings) {
+        let pwCopy = JSON.parse(JSON.stringify(pwSettings));
 
         // Ensure the folder exists
         const fs = require('fs');
-        if (!fs.existsSync(pwsCopy.appFolder)) {
+        if (!fs.existsSync(pwCopy.appFolder)) {
             try {
-                fs.mkdirSync(pwsCopy.appFolder, { recursive: true });
+                fs.mkdirSync(pwCopy.appFolder, { recursive: true });
             } catch (error) {
                 console.log("Unable to create application settings folder.");
                 console.log(error);
@@ -135,10 +135,10 @@ var Settings = {
         }
     
         // Save the settings
-        pwsCopy.pwsPass = this.encrypt(pwsCopy.pwsPass);
+        pwCopy.pwPass = this.encrypt(pwCopy.pwPass);
         const path = require('path');
-        const pwsFilePath = path.join(pwsCopy.appFolder, 'settings.json');
-        fs.writeFileSync(pwsFilePath, JSON.stringify(pwsCopy, null, 2));
+        const pwsFilePath = path.join(pwCopy.appFolder, 'settings.json');
+        fs.writeFileSync(pwsFilePath, JSON.stringify(pwCopy, null, 2));
     }
 };
 module.exports = Settings;

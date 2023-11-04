@@ -1,7 +1,7 @@
 module.exports = {
     packagerConfig: {
-        name: 'CodeGarden',
-        icon: './images/cg'
+        name: 'Devstia',
+        icon: './images/dev_pws'
     },
     rebuildConfig: {},
     makers: [
@@ -27,7 +27,7 @@ module.exports = {
             // Remove win32_x64 directory from macOS build
             if (options.platform === 'darwin') {
                 const path = require('path');
-                const assetsDir = path.resolve(options.outputPaths[0], 'CodeGarden.app', 'Contents', 'Resources', 'app');
+                const assetsDir = path.resolve(options.outputPaths[0], 'Devstia.app', 'Contents', 'Resources', 'app');
                 const win32_x64 = path.resolve(assetsDir, 'runtime', 'win32_x64');
                 const fs = require('fs');
                 await fs.promises.rmdir(win32_x64, { recursive: true });

@@ -105,11 +105,11 @@
 
         // Handle save password
         $('#savePass').click( (r) => {
-            let pwsPass = $('#pws-pass').val();
-            if (window.lastPass == pwsPass) return;
+            let pwPass = $('#pws-pass').val();
+            if (window.lastPass == pwPass) return;
             showWaitingSecurity('Updating passwords...');
-            window.lastPass = pwsPass;
-            ipcComm.send('savePass', { 'pwsPass': pwsPass }, function() {
+            window.lastPass = pwPass;
+            ipcComm.send('savePass', { 'pwPass': pwPass }, function() {
                 $('#show-pw').show();
                 $('#hide-pw').hide();
                 $('#pws-pass').attr('type', 'password');
@@ -119,9 +119,9 @@
             });
         });
 
-        window.fillOutSettings = function(pwsSettings) {
-            window.lastPass = pwsSettings.pwsPass;
-            $('#pws-pass').val(pwsSettings.pwsPass);
+        window.fillOutSettings = function(pwSettings) {
+            window.lastPass = pwSettings.pwPass;
+            $('#pws-pass').val(pwSettings.pwPass);
         }
 
         // Prevent prohibited characters from being entered into the password field

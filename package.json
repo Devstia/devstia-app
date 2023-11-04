@@ -1,7 +1,7 @@
 {
   "name": "@virtuosoft/devstia-app",
   "version": "1.0.0",
-  "description": "Virtuosoft's Devstia Preview (a localhost web server) for running and developing web applications locally.",
+  "description": "Virtuosoft's Devstia Preview (a localhost development server) for running and developing web applications locally.",
   "main": "main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -9,7 +9,7 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish"
   },
-  "repository": "https://github.com/steveorevo/cg-personal-web-server",
+  "repository": "https://github.com/virtuosoft-dev/devstia-app",
   "keywords": [
     "pws",
     "localhost",

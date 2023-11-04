@@ -30,7 +30,6 @@ function uuidv4() {
     return uuid;
 }
 global.ipcMain_callbacks = {};
-//global.ipcMain_listensers = {};
 global.ipcComm = {
 
     // Methods

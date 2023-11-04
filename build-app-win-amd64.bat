@@ -38,7 +38,7 @@ copy /Y bin\cyggcc_s-seh-1.dll "..\runtime\win32_x64\cyggcc_s-seh-1.dll"
 cd ..
 rmdir /s /q temp
 
-:: assume default qemu is installed (i.e. via cg-pws-vm/build-vm-win-amd64.bat)
+:: assume default qemu is installed (i.e. via devstia-vm/build-vm-win-amd64.bat)
 copy /Y "C:\Program Files\qemu\qemu-system-x86_64.exe" ".\runtime\win32_x64\qemu-system-x86_64.exe"
 copy /Y "C:\Program Files\qemu\sdl2.dll" ".\runtime\win32_x64\sdl2.dll"
 copy /Y "C:\Program Files\qemu\sdl2_image.dll" ".\runtime\win32_x64\sdl2_image.dll"
@@ -50,6 +50,7 @@ copy /Y "C:\Program Files\qemu\libwinpthread-1.dll" ".\runtime\win32_x64\libwinp
 copy /Y "C:\Program Files\qemu\libbrotlidec.dll" ".\runtime\win32_x64\libbrotlidec.dll"
 copy /Y "C:\Program Files\qemu\libbrotlicommon.dll" ".\runtime\win32_x64\libbrotlicommon.dll"
 copy /Y "C:\Program Files\qemu\libbrotlienc.dll" ".\runtime\win32_x64\libbrotlienc.dll"
+copy /Y "C:\Program Files\qemu\liblzma-5.dll" ".\runtime\win32_x64\liblzma-5.dll"
 copy /Y "C:\Program Files\qemu\libhwy.dll" ".\runtime\win32_x64\libhwy.dll"
 copy /Y "C:\Program Files\qemu\liblcms2-2.dll" ".\runtime\win32_x64\liblcms2-2.dll"
 copy /Y "C:\Program Files\qemu\libpng16-16.dll" ".\runtime\win32_x64\libpng16-16.dll"
@@ -57,7 +58,6 @@ copy /Y "C:\Program Files\qemu\libtiff-6.dll" ".\runtime\win32_x64\libtiff-6.dll
 copy /Y "C:\Program Files\qemu\libdeflate.dll" ".\runtime\win32_x64\libdeflate.dll"
 copy /Y "C:\Program Files\qemu\libjbig-0.dll" ".\runtime\win32_x64\libjbig-0.dll"
 copy /Y "C:\Program Files\qemu\liblerc.dll" ".\runtime\win32_x64\liblerc.dll"
-copy /Y "C:\Program Files\qemu\liblzma-5.dll" ".\runtime\win32_x64\liblzma-5.dll"
 copy /Y "C:\Program Files\qemu\libwebp-7.dll" ".\runtime\win32_x64\libwebp-7.dll"
 copy /Y "C:\Program Files\qemu\zlib1.dll" ".\runtime\win32_x64\zlib1.dll"
 copy /Y "C:\Program Files\qemu\libzstd.dll" ".\runtime\win32_x64\libzstd.dll"

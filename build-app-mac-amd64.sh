@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Virtuosoft build script for CodeGarden PWS (Personal Web Server) Edition
+# Virtuosoft build script for Devstia Preview (a localhost development server)
 # on macOS x86 64-bit compatible systems.
 #
 
-# assume default qemu is installed (i.e. via cg-pws-vm/build-vm-mac-amd64.sh)
+# assume default qemu is installed (i.e. via devstia-vm/build-vm-mac-amd64.sh)
 # copy dependencies to runtime folder for macOS
 mkdir -p ./runtime/darwin_x64
 cd ./runtime/darwin_x64

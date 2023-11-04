@@ -29,8 +29,8 @@ var Window = {
         dialog.showMessageBoxSync({
             type: 'info',
             message: message,
-            title: 'CodeGarden - ' + title,
-            icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`)
+            title: 'Devstia Preview - ' + title,
+            icon: nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`)
         });
     },
     /**
@@ -67,12 +67,12 @@ var Window = {
                 width: size.width,
                 height: size.height,
                 modal: true,
-                title: 'CodeGarden PWS',
+                title: 'Devstia Preview',
                 maximizable: false,
                 minimizable: false,
                 resizable: false,
                 show: false,
-                icon: './images/cg.png',
+                icon: './images/dev_pw.png',
                 webPreferences: {
                     preload: path.join(__dirname, 'preload.js')
                     //devTools: false
@@ -115,9 +115,9 @@ var Window = {
                     app.dock.show();
                 }
                 if (file.indexOf('settings.html') > -1) {
-                    let pwsSettings = Settings.read();
-                    this.executeJavaScript('fillOutSettings(' + JSON.stringify(pwsSettings) + ');');
-                    if (pwsSettings.fsMode.toLowerCase() == 'none') {
+                    let pwSettings = Settings.read();
+                    this.executeJavaScript('fillOutSettings(' + JSON.stringify(pwSettings) + ');');
+                    if (pwSettings.fsMode.toLowerCase() == 'none') {
                         this.executeJavaScript("$('#files').addClass('disabled');");
                     }
                 }
@@ -186,12 +186,12 @@ var Window = {
 
         // Handle saving settings
         ipcMain.on('savePass', function(event, newSettings) {
-            let pwsSettings = Settings.read();
-            if (newSettings.pwsPass != pwsSettings.pwsPass) {
-                VMS.updatePassword(newSettings.pwsPass);
-                pwsSettings.pwsPass = newSettings.pwsPass;
-                Settings.save(pwsSettings);
-                VMS.pwsSettings = pwsSettings;
+            let pwSettings = Settings.read();
+            if (newSettings.pwPass != pwSettings.pwPass) {
+                VMS.updatePassword(newSettings.pwPass);
+                pwSettings.pwPass = newSettings.pwPass;
+                Settings.save(pwSettings);
+                VMS.pwSettings = pwSettings;
                 event.sender.send(newSettings.uuid);
             }
         });
@@ -200,7 +200,7 @@ var Window = {
         ipcMain.on('erase', function(event, arg) {
             const prompt = require('electron-prompt');
             prompt({
-                title: 'CodeGarden - WARNING',
+                title: 'Devstia Preview - WARNING',
                 label: '<div style="font-size:smaller;"><span style="font-weight: bold;">WARNING:</span> This will destroy all sites and reset the server installation. <br>Please type "ERASE" to confirm.</div>',
                 value: '',
                 inputAttrs: {
@@ -233,11 +233,11 @@ var Window = {
                         // Show the custom error message box
                         const options = {
                             type: 'error',
-                            title: 'CodeGarden - Invalid Input',
+                            title: 'Devstia Preview - Invalid Input',
                             message: 'Incorrect validation.',
                             detail: 'Please type "ERASE" to confirm.',
                             buttons: ['OK'],
-                            icon: path.join(app.getAppPath(), 'images/cg.png')
+                            icon: path.join(app.getAppPath(), 'images/dev_pw.png')
                         };
                         dialog.showMessageBox(options);
                         event.sender.send(arg.uuid);
@@ -277,7 +277,7 @@ var Window = {
             const year = date.getFullYear().toString();
             const hours = date.getHours().toString().padStart(2, '0');
             const minutes = date.getMinutes().toString().padStart(2, '0');
-            const fileName = `pws-${month}-${day}-${year}-${hours}${minutes}.img`;
+            const fileName = `devstia-${month}-${day}-${year}-${hours}${minutes}.img`;
             const options = {
                 title: 'Save Snapshot Image',
                 defaultPath: path.join(os.homedir(), fileName),
@@ -293,9 +293,9 @@ var Window = {
                     return;
                 }
                 const filePath = result.filePath;
-                const pwsFile = process.arch == 'arm64' ? 'pws-arm64.img' : 'pws-amd64.img';
-                let pwsSettings = Settings.read();
-                const vmsFilePath = path.join(pwsSettings.vmsFolder, pwsFile);
+                const pwFile = process.arch == 'arm64' ? 'devstia-arm64.img' : 'devstia-amd64.img';
+                let pwSettings = Settings.read();
+                const vmsFilePath = path.join(pwSettings.vmsFolder, pwFile);
                 Window.executeJavaScript("$('#close-button').addClass('disabled');showSystemWaiting('Stopping server...');");
                 VMS.shutdown(function() {
                     global.Window.executeJavaScript("showSystemWaiting('Creating snapshot...<br> Please wait');");
@@ -341,7 +341,7 @@ var Window = {
                         title: 'Restore Snapshot',
                         message: 'Restoring the snapshot will delete and replace your current running server. Are you sure?',
                         buttons: ['Yes', 'No'],
-                        icon: nativeImage.createFromPath(`${app.getAppPath()}/images/cg.png`),
+                        icon: nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`),
                         defaultId: 1,
                         cancelId: 1
                     };
@@ -376,8 +376,8 @@ var Window = {
 
         // Handle security requests
         ipcMain.on('showMasterCert', function(event) {
-            let pwsSettings = Settings.read();
-            const masterCert = require('path').join(pwsSettings.appFolder, 'security', 'ca', 'dev.cc.crt');
+            let pwSettings = Settings.read();
+            const masterCert = require('path').join(pwSettings.appFolder, 'security', 'ca', 'dev.cc.crt');
             require('electron').shell.showItemInFolder(masterCert);
         });
         ipcMain.on('regenCerts', function(event, arg) {
@@ -385,8 +385,8 @@ var Window = {
             event.sender.send(arg.uuid);
         });
         ipcMain.on('showSSHKeys', function(event) {
-            let pwsSettings = Settings.read();
-            const sshKey = require('path').join(pwsSettings.appFolder, 'security', 'ssh', 'pws_rsa.pub');
+            let pwSettings = Settings.read();
+            const sshKey = require('path').join(pwSettings.appFolder, 'security', 'ssh', 'devstia_rsa.pub');
             require('electron').shell.showItemInFolder(sshKey);
         });
         ipcMain.on('regenKeys', function(event, arg) {   
