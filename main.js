@@ -180,7 +180,7 @@ app.on('ready', () => {
             const pwSettings = Settings.read();
             let cmd = `[ -n "$(mount -t smbfs | grep '/tmp/devstia')" ] && { open /tmp/devstia; } `;
             cmd += '|| { rm -rf /tmp/devstia; mkdir -p /tmp/devstia; mount -t smbfs //devstia:';
-            cmd += pwSettings.pwPass + '@local.dev.cc/Devstia /tmp/devstia && open /tmp/devstia; }';
+            cmd += pwSettings.pwPass + '@local.dev.pw/Devstia /tmp/devstia && open /tmp/devstia; }';
             exec(cmd, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error mounting samba: ${error.message}`);
@@ -193,7 +193,7 @@ app.on('ready', () => {
             const { execSync } = require('child_process');
             const pwSettings = Settings.read();
             try {
-                execSync('net use P: https://webdav-devstia.dev.cc /user:devstia "' + pwSettings.pwPass + '"');
+                execSync('net use P: https://webdav-devstia.dev.pw /user:devstia "' + pwSettings.pwPass + '"');
                 execSync(`powershell -Command "$a = New-Object -ComObject shell.application; $a.NameSpace('P:\\').self.name = 'Devstia'"`);
             }catch(err) {
                 console.error(`Error mounting webdav: ${err.message}`);

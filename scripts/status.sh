@@ -5,4 +5,4 @@
 # 
 sshPort=$1
 private_key="$(pwd)/../security/ssh/debian_rsa"
-ssh -q -o StrictHostKeyChecking=no -i "$private_key" -p "$sshPort" debian@local.dev.cc /usr/sbin/service --status-all
+ssh -q -o StrictHostKeyChecking=no -i "$private_key" -p "$sshPort" debian@local.dev.pw /usr/sbin/service --status-all

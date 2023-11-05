@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This script is executed by the startup routine in our CodeGarden app.
+# This script is executed by the startup routine in our Devstia app.
 # Optimized for macOS, we use Haswell-v1 CPU, but build with qemu64-v1
 #
 sshPort=$1

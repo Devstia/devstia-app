@@ -377,7 +377,7 @@ var Window = {
         // Handle security requests
         ipcMain.on('showMasterCert', function(event) {
             let pwSettings = Settings.read();
-            const masterCert = require('path').join(pwSettings.appFolder, 'security', 'ca', 'dev.cc.crt');
+            const masterCert = require('path').join(pwSettings.appFolder, 'security', 'ca', 'dev.pw.crt');
             require('electron').shell.showItemInFolder(masterCert);
         });
         ipcMain.on('regenCerts', function(event, arg) {

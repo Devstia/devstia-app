@@ -466,7 +466,7 @@ var VMS = {
         }
 
         // Allowed security server cert and key files to obtain from the VMS
-        const allowedFilenames = ['pwPass','ca/dev.cc.crt','ca/dev.cc.key','ssh/debian_rsa','ssh/debian_rsa.pub',
+        const allowedFilenames = ['pwPass','ca/dev.pw.crt','ca/dev.pw.key','ssh/debian_rsa','ssh/debian_rsa.pub',
             'ssh/devstia_rsa','ssh/devstia_rsa.pub','ssh/ssh_host_ecdsa_key.pub','ssh/ssh_host_rsa_key.pub'];
 
         // Start the security server
