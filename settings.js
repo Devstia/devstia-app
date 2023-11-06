@@ -11,7 +11,7 @@ var Settings = {
      */
     decrypt: function(data) {
         const crypto = require('crypto');
-        const key = crypto.createHash('md5').update('personal-web-server').digest('hex');
+        const key = crypto.createHash('md5').update('devstia-preview').digest('hex');
         let encryptedText = data.split(':');
         let iv = encryptedText[1];
         iv = Buffer.from(iv, 'base64');
@@ -37,7 +37,7 @@ var Settings = {
      */
     encrypt: function(data) {
         const crypto = require('crypto');
-        const key = crypto.createHash('md5').update('personal-web-server').digest('hex');
+        const key = crypto.createHash('md5').update('devstia-preview').digest('hex');
         let iv = crypto.randomBytes(16);
         let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
         let encrypted = cipher.update(data);
@@ -84,7 +84,7 @@ var Settings = {
         let pwSettings = {
             version: packageJson.version,
             webFolder: path.join(app.getPath('home'), 'Sites'),
-            pwPass: 'personal-web-server',
+            pwPass: 'preview',
             sshPort: 8022,
             cpPort: 8083,
             fsMode: 'None',
@@ -104,10 +104,10 @@ var Settings = {
         }
         
         // Read settings file
-        const pwsFile = path.join(pwSettings.appFolder, 'settings.json');
+        const pwFile = path.join(pwSettings.appFolder, 'settings.json');
         const fs = require('fs');
-        if (fs.existsSync(pwsFile)) {
-            pwSettings = JSON.parse(fs.readFileSync(pwsFile));
+        if (fs.existsSync(pwFile)) {
+            pwSettings = JSON.parse(fs.readFileSync(pwFile));
             pwSettings.pwPass = this.decrypt(pwSettings.pwPass);
         }else{
             this.save(pwSettings); // Save the default settings
@@ -137,8 +137,8 @@ var Settings = {
         // Save the settings
         pwCopy.pwPass = this.encrypt(pwCopy.pwPass);
         const path = require('path');
-        const pwsFilePath = path.join(pwCopy.appFolder, 'settings.json');
-        fs.writeFileSync(pwsFilePath, JSON.stringify(pwCopy, null, 2));
+        const pwFilePath = path.join(pwCopy.appFolder, 'settings.json');
+        fs.writeFileSync(pwFilePath, JSON.stringify(pwCopy, null, 2));
     }
 };
 module.exports = Settings;

@@ -5,7 +5,7 @@
 # SSH on the given port number.
 # 
 port=$1
-private_key="$(pwd)/../security/ssh/pws_rsa"
+private_key="$(pwd)/../security/ssh/devstia_rsa"
 
 if [[ $(uname) == "Darwin" ]]; then
   osascript <<EOF
@@ -14,7 +14,7 @@ if [[ $(uname) == "Darwin" ]]; then
       
       -- Open a new window and execute SSH command
       set newTab to do script ""
-      do script "chmod 600 \"$private_key\" && ssh -q -o StrictHostKeyChecking=no -i \"$private_key\" pws@local.dev.pw -p \"$port\" && exit" in newTab
+      do script "chmod 600 \"$private_key\" && ssh -q -o StrictHostKeyChecking=no -i \"$private_key\" devstia@local.dev.pw -p \"$port\" && exit" in newTab
       repeat while newTab is not missing value
           delay 1
           set custom title of newTab to "Devstia\n"

@@ -352,7 +352,7 @@ var VMS = {
     },
     /**
      * state - Determines the state of our virtual machine server.
-     * @param {object} pwSettings - The PWS settings object.
+     * @param {object} pwSettings - The PW settings object.
      * @returns {string} - The state of our virtual machine server.
      */
     state: function() {

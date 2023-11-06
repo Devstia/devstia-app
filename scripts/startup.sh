@@ -22,7 +22,7 @@ qemu-system-x86_64 \
         -vga virtio \
         -bios bios.img \
         -display default,show-cursor=on \
-        -drive if=virtio,format=qcow2,file=pws-amd64.img \
+        -drive if=virtio,format=qcow2,file=devstia-amd64.img \
         -device virtio-net-pci,netdev=net0 \
         -netdev user,id=net0,hostfwd=tcp::$sshPort-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::$cpPort-:$cpPort$samba \
         -device virtio-balloon-pci \

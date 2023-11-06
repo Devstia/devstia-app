@@ -27,11 +27,11 @@
             </div>
         </div>
         <div class="datagrid-item">
-            <div class="datagrid-title">PWS Password</div>
+            <div class="datagrid-title">Devstia Password</div>
             <div class="datagrid-content">
                 <div class="row g-2">
                     <div class="col">
-                        <input id="pws-pass" type="password" class="form-control" />
+                        <input id="pw-pass" type="password" class="form-control" />
                     </div>
                     <div class="col-auto">
                         <button id="view-pass" class="btn btn-icon" aria-label="view password">
@@ -105,14 +105,14 @@
 
         // Handle save password
         $('#savePass').click( (r) => {
-            let pwPass = $('#pws-pass').val();
+            let pwPass = $('#pw-pass').val();
             if (window.lastPass == pwPass) return;
             showWaitingSecurity('Updating passwords...');
             window.lastPass = pwPass;
             ipcComm.send('savePass', { 'pwPass': pwPass }, function() {
                 $('#show-pw').show();
                 $('#hide-pw').hide();
-                $('#pws-pass').attr('type', 'password');
+                $('#pw-pass').attr('type', 'password');
                 setTimeout(function() {
                     hideWaitingSecurity();
                 }, 1000);
@@ -121,11 +121,11 @@
 
         window.fillOutSettings = function(pwSettings) {
             window.lastPass = pwSettings.pwPass;
-            $('#pws-pass').val(pwSettings.pwPass);
+            $('#pw-pass').val(pwSettings.pwPass);
         }
 
         // Prevent prohibited characters from being entered into the password field
-        $('#pws-pass').on('keypress', function (event) {
+        $('#pw-pass').on('keypress', function (event) {
             let key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
             let prohibitedChars = '\'"\\`'
             if (prohibitedChars.indexOf(key) !== -1) {
@@ -139,11 +139,11 @@
             if ($('#show-pw').is(':visible')) {
                 $('#show-pw').hide();
                 $('#hide-pw').show();
-                $('#pws-pass').attr('type', 'text');
+                $('#pw-pass').attr('type', 'text');
             } else {
                 $('#show-pw').show();
                 $('#hide-pw').hide();
-                $('#pws-pass').attr('type', 'password');
+                $('#pw-pass').attr('type', 'password');
             }
         });
     </script>
