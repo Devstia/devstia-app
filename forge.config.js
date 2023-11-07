@@ -1,7 +1,7 @@
 module.exports = {
     packagerConfig: {
         name: 'Devstia',
-        icon: './images/dev_pw
+        icon: './images/dev_pw'
     },
     rebuildConfig: {},
     makers: [
