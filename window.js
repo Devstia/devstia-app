@@ -74,12 +74,13 @@ var Window = {
                 show: false,
                 icon: './images/dev_pw.png',
                 webPreferences: {
-                    preload: path.join(__dirname, 'preload.js')
-                    //devTools: false
+                    preload: path.join(__dirname, 'preload.js'),
+                    devTools: true
                 }
             }
             this.win = new BrowserWindow(winOptions);
             this.win.setMenu(null);
+            this.win.setMenuBarVisibility(false);
             this.win.on('closed', () => {
                 const app = require('electron').app;
                 if (process.platform === 'darwin') {
