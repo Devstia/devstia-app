@@ -127,8 +127,13 @@ var Window = {
             this.win.setSize(size.width, size.height + (process.platform === 'darwin' ? 3 : 0));
             this.win.loadFile(file);
         }else{
+            let rememberQuitOnClose = this.quitOnClose;
+            this.quitOnClose = false;
             this.close();
-            setTimeout(() => { this.show(file, size); }, 1000);
+            setTimeout(() => { 
+                this.show(file, size); 
+                this.quitOnClose = rememberQuitOnClose;
+            }, 1000);
         }
     },
 

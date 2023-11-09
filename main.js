@@ -75,9 +75,6 @@ app.on('ready', () => {
     function VMSError(msg) {
         Window.show('./web/error.html');
         Window.setElmTextById('error', msg.error);
-        setTimeout(() => {
-            QuitOnClose();
-        }, 500);
     }
     VMS.on('downloadError', VMSError);
     VMS.on('extractError', VMSError);
