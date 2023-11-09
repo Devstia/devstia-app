@@ -92,7 +92,7 @@ app.on('ready', () => {
             VMS.on('downloadProgress', (msg) => {
                 let percent = msg.value;
                 if (isNaN(percent)) percent = 0;
-                Window.setElmTextById('progress', percent + '%');
+                Window.setElmTextById('txtDLPercent', percent + '%');
             });
             VMS.on('downloadComplete', () => {
                 showWindow(); // Done, re-check state, and extract
