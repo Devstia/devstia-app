@@ -39,6 +39,7 @@ var Window = {
     close: function() {
         if (this.win == null) return;
         this.win.close();
+        this.win = null;
     },
     /**
      * executeJavaScript - Executes the given JavaScript code in the main window.
@@ -122,7 +123,7 @@ var Window = {
                         this.executeJavaScript("$('#files').addClass('disabled');");
                     }
                 }
-                setTimeout(() => { this.win.show(); }, 300);
+                setTimeout(() => { if (this.win != null) { this.win.show(); } }, 300);
             });
             this.win.setSize(size.width, size.height + (process.platform === 'darwin' ? 3 : 0));
             this.win.loadFile(file);
