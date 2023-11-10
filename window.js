@@ -59,6 +59,7 @@ var Window = {
      * @param {object} size optional size object with width and height properties.
      */
     show: function(file = './web/index.html', size = { width: 620, height: 450} ) {
+        this.quitOnClose = false;
         if (this.win == null) {
             
             // Handle UI events
@@ -128,12 +129,9 @@ var Window = {
             this.win.setSize(size.width, size.height + (process.platform === 'darwin' ? 3 : 0));
             this.win.loadFile(file);
         }else{
-            let rememberQuitOnClose = this.quitOnClose;
-            this.quitOnClose = false;
             this.close();
             setTimeout(() => { 
                 this.show(file, size); 
-                this.quitOnClose = rememberQuitOnClose;
             }, 1000);
         }
     },
@@ -166,6 +164,11 @@ var Window = {
      * registerUIEvents - Handles user interface events from the window.
      */
     registerUIEvents: function() {
+
+        // Handle request to allow quit on window close
+        ipcMain.on('allowQuitOnClose', function(event, arg) {
+            global.Window.quitOnClose = arg;
+        });
 
         // Handle request for server status
         ipcMain.on('checkStatus', function(event, arg) {

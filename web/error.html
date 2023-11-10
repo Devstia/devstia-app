@@ -29,5 +29,8 @@
     <br/>
     <p>Close this window to quit the application.</p>
     <script src="links.js"></script>
+    <script>
+        ipcComm.send('allowQuitOnClose', true);
+    </script>
 </body>
 </html>

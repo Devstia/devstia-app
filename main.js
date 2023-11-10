@@ -125,13 +125,6 @@ app.on('ready', () => {
             Tray.setMenuState('files', (pwSettings.fsMode.toLowerCase() != 'none'));
             Tray.setMenuState('settings', true);
         }
-
-        // Allow quit the application if we're not in startup/running state
-        if (vms_state == 'download' || vms_state == 'extract' || vms_state == 'error') {
-            Window.quitOnClose = true;
-        }else{
-            Window.quitOnClose = false;
-        }
     }
     showWindow();
 
