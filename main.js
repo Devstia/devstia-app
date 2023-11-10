@@ -85,10 +85,10 @@ app.on('ready', () => {
     var vms_state = '';
     function showWindow() {
         vms_state = global.VMS.state();
-        Window.show('./web/' + vms_state + '.html');
 
         // Download compatible VMS (virtual machine server) runtime
         if (vms_state == 'download') {
+            Window.show('./web/download.html');
             VMS.on('downloadProgress', (msg) => {
                 let percent = msg.value;
                 if (isNaN(percent)) percent = 0;
@@ -102,6 +102,7 @@ app.on('ready', () => {
         
         // Extract the VMS archive runtime
         if (vms_state == 'extract') {
+            Window.show('./web/extract.html');
             VMS.on('extractComplete', () => {
                 showWindow(); // Done, re-check state, and start
             });
@@ -124,6 +125,7 @@ app.on('ready', () => {
             Tray.setMenuState('terminal', true);
             Tray.setMenuState('files', (pwSettings.fsMode.toLowerCase() != 'none'));
             Tray.setMenuState('settings', true);
+            Window.show('./web/running.html');
         }
     }
     showWindow();

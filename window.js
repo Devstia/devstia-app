@@ -94,7 +94,8 @@ var Window = {
                 this.win = null;
             });
             this.win.webContents.on('did-finish-load', () => {
-    
+                if (this.win == null) return;
+                
                 // Set initial theme mode (light/dark)
                 const nativeTheme = require('electron').nativeTheme;
                 if (nativeTheme.shouldUseDarkColors) {
