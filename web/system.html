@@ -101,6 +101,20 @@
     showStatusWait();
     checkStatus();
 
+    // Sync/Query until tray menu items are enabled
+    var queryTrayMenuInterval = false;
+    function queryTrayMenu() {
+        ipcComm.send('queryTrayMenu', function() {
+            clearInterval(queryTrayMenuInterval);
+            queryTrayMenuInterval = false;
+            let controls = ['tab-security', 'localhost', 'terminal', 'files'];
+            controls.forEach(function(control) {
+                $('#' + control).removeClass('disabled');
+            });
+        });
+    }
+    queryTrayMenu();
+
     // Show/hide Status wait overlay
     function showStatusWait() {
         $('#status-waiting').show();
@@ -109,20 +123,10 @@
             $('#' + control).addClass('disabled');
         });
     }
-    var queryTrayMenuInterval = false;
     function hideStatusWait() {
         $('#status-waiting').hide();
-
-        // Sync/Query until tray menu items are enabled
         queryTrayMenuInterval = setInterval(function() {
-            ipcComm.send('queryTrayMenu', function() {
-                clearInterval(queryTrayMenuInterval);
-                queryTrayMenuInterval = false;
-                let controls = ['tab-security', 'localhost', 'terminal', 'files'];
-                controls.forEach(function(control) {
-                    $('#' + control).removeClass('disabled');
-                });
-            });
+            queryTrayMenu();
         }, 500);
     }
 
