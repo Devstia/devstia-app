@@ -17,6 +17,20 @@ label.form-label {
     position: fixed;
     left: 8px;
 }
+#devstia-logo {
+    background-repeat: no-repeat;
+    position: absolute;
+    margin-left:10px;
+    margin-top:52px;
+    width: 167px;
+    height: 45px;
+}
+body[data-bs-theme="light"] #devstia-logo {
+    background-image: url('../images/logo-light.svg');
+}
+body[data-bs-theme="dark"] #devstia-logo {
+    background-image: url('../images/logo-dark.svg');
+}
 
 /* Security */
 .info {
