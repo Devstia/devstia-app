@@ -72,12 +72,12 @@ var Window = {
                 title: 'Devstia Preview',
                 maximizable: false,
                 minimizable: false,
-                resizable: true,
+                resizable: false,
                 show: false,
                 icon: './images/dev_pw.png',
                 webPreferences: {
                     preload: path.join(__dirname, 'preload.js'),
-                    devTools: true
+                    devTools: false
                 }
             }
             this.win = new BrowserWindow(winOptions);
@@ -230,7 +230,13 @@ var Window = {
                         global.Window.executeJavaScript("$('#close-button').addClass('disabled');showSystemWaiting('Erasing server...');document.getElementById('close-button').addClass('disabled');");
                         VMS.erase();
                         setTimeout(function() {
-                            global.Window.executeJavaScript("showSystemWaiting('Re-installing server...<br> Please wait');");
+
+                            global.Window.executeJavaScript("showSystemWaiting('Re-installing server... <span id=\"txtReinstallPercent\"></span><br> Please wait');");
+                            VMS.on('extractProgress', (msg) => {
+                                let percent = msg.value;
+                                if (isNaN(percent)) percent = 0;
+                                Window.setElmTextById('txtReinstallPercent', percent + '%');
+                            });
                             VMS.extract(function() {
                                 global.Window.executeJavaScript("$('.badge').css('opacity', '20%');showStatusWait();hideSystemWaiting();$('#close-button').removeClass('disabled');");
                                 VMS.startup(true); // restarted

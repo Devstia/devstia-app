@@ -130,7 +130,7 @@ app.on('ready', () => {
             Tray.setMenuState('terminal', true);
             Tray.setMenuState('files', (pwSettings.fsMode.toLowerCase() != 'none'));
             Tray.setMenuState('settings', true);
-            Window.show('./web/running.html');
+            showSettings();
         }
     }
     showWindow();
