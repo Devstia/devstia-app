@@ -121,14 +121,16 @@ app.on('ready', () => {
                     showWindow();
                 }
             });
+            VMS.on('certsKeysPublished', () => {
+                Tray.setMenuState('localhost', true);
+                Tray.setMenuState('terminal', true);
+                Tray.setMenuState('files', (pwSettings.fsMode.toLowerCase() != 'none'));
+            });
             VMS.startup();
         }
 
         // Running state, enable menu items
         if (vms_state == 'running') {
-            Tray.setMenuState('localhost', true);
-            Tray.setMenuState('terminal', true);
-            Tray.setMenuState('files', (pwSettings.fsMode.toLowerCase() != 'none'));
             Tray.setMenuState('settings', true);
             showSettings();
         }

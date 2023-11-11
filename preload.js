@@ -65,41 +65,5 @@ global.ipcComm = {
         }
         ipcRenderer.send(event, message);
     }
-    // },
-    // /**
-    //  * on - allows the render process to listen for events from the main process.
-    //  * @param {string} event - the name of the event to listen for.
-    //  * @param {function} listener - the listener function to invoke when the event is received.
-    //  */
-    // on: function(event, listener) {
-    //     let initListener = false;
-    //     if (ipcMain_listensers[event] == undefined) {
-    //         ipcMain_listensers[event] = [];
-    //         initListener = true;
-    //     }
-    //     ipcMain_listensers[event].push(listener);
-    //     if (initListener) {
-    //         ipcRenderer.on(event, (event, message) => {
-    //             this.invoke(event, message);
-    //         });
-    //     }
-    // },
-    // /**
-    //  * 
-    //  * @param {string} event - the name of the event to invoke.
-    //  * @param {*} message - an optional message to send, if not an object, will be wrapped in an object with a 'value' property.
-    //  */
-    // invoke: function(event, message = {}) {
-    //     if (typeof message == 'object' && Array.isArray(message) == false) {
-    //     }else{
-    //         message = { value: message, uuid: this.uuidv4() };
-    //     }
-    //     if (ipcMain_listensers[event] != undefined) {
-    //         ipcMain_listensers[event].forEach(listener => {
-    //             listener(this, message);
-    //         });
-    //     }
-    // }
 }
-console.log("exposing ipcComm in MainWorld");
 contextBridge.exposeInMainWorld('ipcComm', global.ipcComm);

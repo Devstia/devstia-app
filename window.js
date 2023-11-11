@@ -72,12 +72,12 @@ var Window = {
                 title: 'Devstia Preview',
                 maximizable: false,
                 minimizable: false,
-                resizable: false,
+                resizable: true,
                 show: false,
                 icon: './images/dev_pw.png',
                 webPreferences: {
                     preload: path.join(__dirname, 'preload.js'),
-                    devTools: false
+                    devTools: true
                 }
             }
             this.win = new BrowserWindow(winOptions);

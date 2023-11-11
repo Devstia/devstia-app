@@ -526,7 +526,10 @@ var VMS = {
                                             }
                                         });
                                         res.writeHead(200, { 'Content-Type': 'text/plain' });
-                                        res.end('OK');                                    
+                                        res.end('OK');
+                                        if (filename == 'ssh/devstia_rsa') {
+                                            self.invoke('certsKeysPublished');
+                                        }
                                     }
                                 });
                             }
@@ -570,7 +573,6 @@ var VMS = {
 
                 // Automatically turn off Samba if host forward error detected
                 if (exec_error.indexOf("Could not set up host forwarding rule 'tcp::445-:445'") > -1) {
-                    //const Settings = require('./settings.js');
                     let pwSettings = Settings.read();
                     pwSettings.fsMode = 'None';
                     Settings.save(pwSettings);
