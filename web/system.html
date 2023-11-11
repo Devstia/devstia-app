@@ -109,12 +109,21 @@
             $('#' + control).addClass('disabled');
         });
     }
+    var queryTrayMenuInterval = false;
     function hideStatusWait() {
         $('#status-waiting').hide();
-        let controls = ['tab-security', 'localhost', 'terminal', 'files'];
-        controls.forEach(function(control) {
-            $('#' + control).removeClass('disabled');
-        });
+
+        // Sync/Query until tray menu items are enabled
+        queryTrayMenuInterval = setInterval(function() {
+            ipcComm.send('queryTrayMenu', function() {
+                clearInterval(queryTrayMenuInterval);
+                queryTrayMenuInterval = false;
+                let controls = ['tab-security', 'localhost', 'terminal', 'files'];
+                controls.forEach(function(control) {
+                    $('#' + control).removeClass('disabled');
+                });
+            });
+        }, 1000);
     }
 
     // Show/hide System waiting screen

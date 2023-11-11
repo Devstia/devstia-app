@@ -87,5 +87,8 @@ var Tray = {
     setMenuState: function(menuItem, enabled) {
         this.menu.getMenuItemById(menuItem).enabled = enabled;
     },
+    getMenuState: function(menuItem) {
+        return this.menu.getMenuItemById(menuItem).enabled;
+    }
 }
 module.exports = Tray;

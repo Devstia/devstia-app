@@ -208,6 +208,11 @@ var Window = {
         });
 
         // Handle system requests
+        ipcMain.on('queryTrayMenu', function(event, arg) {
+            if (global.Tray.getMenuState('localhost') == true) {
+                event.sender.send(arg.uuid);
+            }
+        });
         ipcMain.on('erase', function(event, arg) {
             const prompt = require('electron-prompt');
             prompt({
