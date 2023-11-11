@@ -7,4 +7,4 @@
 title Devstia
 set port=%1
 set private_key=%cd%\..\security\ssh\devstia_rsa
-ssh -q -o StrictHostKeyChecking=no -i "%private_key%" devstia@local.dev.pw -p %port% && exit
+ssh -q -o StrictHostKeyChecking=no -i "%private_key%" devstia@localhost -p %port% && exit

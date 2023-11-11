@@ -6,4 +6,4 @@ sshPort=$1
 password=$2
 command=$3
 private_key="$(pwd)/../security/ssh/debian_rsa"
-echo "$password" | ssh -q -o StrictHostKeyChecking=no -i "$private_key" debian@local.dev.pw -p "$sshPort" "sudo -S -p '' $command"
+echo "$password" | ssh -q -o StrictHostKeyChecking=no -i "$private_key" debian@localhost -p "$sshPort" "sudo -S -p '' $command"

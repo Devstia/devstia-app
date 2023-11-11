@@ -179,7 +179,7 @@ app.on('ready', () => {
             const pwSettings = Settings.read();
             let cmd = `[ -n "$(mount -t smbfs | grep '/tmp/devstia')" ] && { open /tmp/devstia; } `;
             cmd += '|| { rm -rf /tmp/devstia; mkdir -p /tmp/devstia; mount -t smbfs //devstia:';
-            cmd += pwSettings.pwPass + '@local.dev.pw/Devstia /tmp/devstia && open /tmp/devstia; }';
+            cmd += pwSettings.pwPass + '@localhost/Devstia /tmp/devstia && open /tmp/devstia; }';
             exec(cmd, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Error mounting samba: ${error.message}`);

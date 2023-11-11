@@ -5,4 +5,4 @@
 :: 
 set sshPort=%1
 set private_key=%cd%\..\security\ssh\debian_rsa
-ssh -q -o StrictHostKeyChecking=no -i "%private_key%" debian@local.dev.pw -p %sshPort% "/usr/sbin/service --status-all"
+ssh -q -o StrictHostKeyChecking=no -i "%private_key%" debian@localhost -p %sshPort% "/usr/sbin/service --status-all"

@@ -14,7 +14,7 @@ if [[ $(uname) == "Darwin" ]]; then
       
       -- Open a new window and execute SSH command
       set newTab to do script ""
-      do script "chmod 600 \"$private_key\" && ssh -q -o StrictHostKeyChecking=no -i \"$private_key\" devstia@local.dev.pw -p \"$port\" && exit" in newTab
+      do script "chmod 600 \"$private_key\" && ssh -q -o StrictHostKeyChecking=no -i \"$private_key\" devstia@localhost -p \"$port\" && exit" in newTab
       repeat while newTab is not missing value
           delay 1
           set custom title of newTab to "Devstia\n"
