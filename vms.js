@@ -226,6 +226,8 @@ var VMS = {
         const path = require('path');
         const filename = this.filename;
         const archiveFile = path.join(self.pwSettings.vmsFolder, filename + '.tar.xz');
+        const imageFileSizeGuess = fs.statSync(archiveFile).size * 4;
+        const imageFile = path.join(self.pwSettings.vmsFolder, filename + '.img');
         let pathAddendum = '';
         if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
             pathAddendum = path.join(__dirname, 'runtime', 'win32_x64', 'bin') + ';';
@@ -236,7 +238,18 @@ var VMS = {
                 PATH: pathAddendum + `${process.env.PATH}${path.delimiter}`,
             },
         });
+        let checkImageSize = setInterval(() => {
+            try {
+                const imageFileSize = fs.statSync(imageFile).size;
+                let percent = Math.round((imageFileSize / imageFileSizeGuess) * 100);
+                if (percent >= 100) percent = 100;
+                self.invoke('extractProgress', percent);
+            }catch(error) {
+                console.error(`Error checking image file size: ${error}`);
+            }
+        }, 3000 );
         tarProcess.on('exit', (code) => {
+            clearInterval(checkImageSize);
             if (code === 0) {
                 self.invoke('extractComplete');
                 if (fComplete != null) fComplete();
@@ -250,6 +263,7 @@ var VMS = {
             }
         });
         tarProcess.on('error', (err) => {
+            clearInterval(checkImageSize);
             err = `Archive extraction failed: ${err}`;
             console.error(err);
             self.invoke('extractError', { error: err });

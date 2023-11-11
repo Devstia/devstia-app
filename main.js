@@ -103,6 +103,11 @@ app.on('ready', () => {
         // Extract the VMS archive runtime
         if (vms_state == 'extract') {
             Window.show('./web/extract.html');
+            VMS.on('extractProgress', (msg) => {
+                let percent = msg.value;
+                if (isNaN(percent)) percent = 0;
+                Window.setElmTextById('txtExtractPercent', percent + '%');
+            });
             VMS.on('extractComplete', () => {
                 showWindow(); // Done, re-check state, and start
             });
