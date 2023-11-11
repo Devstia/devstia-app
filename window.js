@@ -72,12 +72,12 @@ var Window = {
                 title: 'Devstia Preview',
                 maximizable: false,
                 minimizable: false,
-                resizable: true,
+                resizable: false,
                 show: false,
                 icon: './images/dev_pw.png',
                 webPreferences: {
                     preload: path.join(__dirname, 'preload.js'),
-                    devTools: true
+                    devTools: false
                 }
             }
             this.win = new BrowserWindow(winOptions);
@@ -184,6 +184,14 @@ var Window = {
             .catch((error) => {
                 console.error(`Error executing VMS.checkStatus command: ${error}`);
             });
+        });
+
+        // Handle showTipsDone for first time users
+        ipcMain.on('showTipsDone', (event, args) => {
+            let pwSettings = Settings.read();
+            pwSettings.showTips = false;
+            Settings.save(pwSettings);
+            VMS.pwSettings = pwSettings;
         });
 
         // Handle request for opening external http/s links
