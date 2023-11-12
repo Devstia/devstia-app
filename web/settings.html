@@ -53,9 +53,11 @@
                 $('#step-2').hide();
                 ipcComm.send('showTipsDone');
                 $('#browser-install').off('click', browserInstallClick);
+                $('#showMasterCert').off('click', browserInstallClick);
             }
             $('#tab-security').on('click', tabSecurityClick);
             $('#browser-install').on('click', browserInstallClick);
+            $('#showMasterCert').on('click', browserInstallClick);
         }
         function bounce(ele, times = 5, distance = '5px', speed = 300) {
             for (var i = 0; i < times; i++) {
