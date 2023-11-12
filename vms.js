@@ -102,6 +102,69 @@ var VMS = {
             });               
         }
 
+        // const axios = require('axios');
+        // function downloadFile(url, destFile) {
+        //     return new Promise((resolve, reject) => {
+        //         const writer = fs.createWriteStream(destFile);
+        //         let downloadedLength = 0;
+        
+        //         axios({
+        //             method: 'get',
+        //             url: url,
+        //             responseType: 'stream'
+        //         }).then(response => {
+        //             const totalLength = response.headers['content-length'];
+        
+        //             response.data.on('data', (chunk) => {
+        //                 downloadedLength += chunk.length;
+        //                 const percent = Math.round((downloadedLength / totalLength) * 100);
+        //                 if (self.quitting == true) {
+        //                     writer.close();
+
+        //                     // Show electron ok dialog
+        //                     const { dialog } = require('electron');
+        //                     dialog.showMessageBoxSync({
+        //                         type: 'error',
+        //                         title: 'Error',
+        //                         message: 'Error downloading file: ' + error.message,
+        //                         buttons: ['OK']
+        //                     });
+        //                     process.exit(1);
+        //                 } else {
+        //                     if (percent >= 99) percent = 99;
+        //                     self.invoke('downloadProgress', percent);
+        //                 }
+        //             });
+        
+        //             response.data.on('end', () => {
+        //                 self.invoke('downloadProgress', 100);
+        //                 setTimeout(() => {
+        //                     self.invoke('downloadComplete');
+        //                 }, 1000);
+        //                 resolve(destFile);
+        //             });
+        
+        //             response.data.on('error', (error) => {
+        //                 reject(error);
+        //             });
+        
+        //             response.data.pipe(writer);
+        
+        //         }).catch(error => {
+        //             // Show electron ok dialog
+        //             const { dialog } = require('electron');
+        //             dialog.showMessageBoxSync({
+        //                 type: 'error',
+        //                 title: 'Error',
+        //                 message: 'Error downloading file: ' + error.message,
+        //                 buttons: ['OK']
+        //             });
+        //             process.exit(1);
+        //         });
+        //     });
+        // }
+        
+
         // Download the VMS runtime
         function downloadFile(url, destFile) {
             return new Promise((resolve, reject) => {
@@ -117,10 +180,22 @@ var VMS = {
                             // Update download progress
                             const totalLength = parseInt(response.headers['content-length'], 10);
                             let downloadedLength = 0;
+                            let forceExit = false;
                             response.on('data', (chunk) => {
+                                if (forceExit == true) return;
                                 if (self.quitting == true) {
-                                    request.abort();
-                                    fileStream.close();
+
+                                    // Show electron ok dialog
+                                    forceExit = true;
+                                    const { dialog } = require('electron');
+                                    dialog.showMessageBoxSync({
+                                        type: 'error',
+                                        title: 'Devstia Preview - Download Error',
+                                        message: 'Error downloading file. Please try again.',
+                                        buttons: ['OK']
+                                    });
+                                    response.destroy();
+                                    process.exit(1);
                                 }else{
                                     downloadedLength += chunk.length;
                                     const percent = Math.round((downloadedLength / totalLength) * 100);
