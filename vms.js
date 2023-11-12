@@ -191,7 +191,7 @@ var VMS = {
                                     dialog.showMessageBoxSync({
                                         type: 'error',
                                         title: 'Devstia Preview - Download Error',
-                                        message: 'Error downloading file. Please try again.',
+                                        message: 'File download aborted. Please try again.',
                                         buttons: ['OK']
                                     });
                                     response.destroy();
