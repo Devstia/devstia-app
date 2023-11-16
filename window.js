@@ -415,7 +415,24 @@ var Window = {
             require('electron').shell.showItemInFolder(masterCert);
         });
         ipcMain.on('regenCerts', function(event, arg) {
-            VMS.regenerateCertificates();
+
+            // Confirm dialog to regenerate certificates
+            const { dialog } = require('electron');
+            const app = require('electron').app;
+            const nativeImage = require('electron').nativeImage;
+            const confirmOptions = {
+                type: 'warning',
+                title: 'Devstia Preview - Regenerate Certificates',
+                message: 'Regenerating certificates will delete and replace the master certificate and all current website certificates. Are you sure?',
+                buttons: ['Yes', 'No'],
+                icon: nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`),
+                defaultId: 1,
+                cancelId: 1
+            };
+            const choice = dialog.showMessageBoxSync(confirmOptions);
+            if (choice === 0) { // If 'Yes' is clicked
+                VMS.regenerateCertificates();
+            }
             event.sender.send(arg.uuid);
         });
         ipcMain.on('showSSHKeys', function(event) {
@@ -423,8 +440,25 @@ var Window = {
             const sshKey = require('path').join(pwSettings.appFolder, 'security', 'ssh', 'devstia_rsa.pub');
             require('electron').shell.showItemInFolder(sshKey);
         });
-        ipcMain.on('regenKeys', function(event, arg) {   
-            VMS.regenerateSSHKeys();
+        ipcMain.on('regenKeys', function(event, arg) {
+
+            // Confirm dialog to regenerate keys
+            const { dialog } = require('electron');
+            const app = require('electron').app;
+            const nativeImage = require('electron').nativeImage;
+            const confirmOptions = {
+                type: 'warning',
+                title: 'Devstia Preview - Regenerate SSH Keys',
+                message: 'Regenerating SSH keys will delete and replace the current SSH keys. Are you sure?',
+                buttons: ['Yes', 'No'],
+                icon: nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`),
+                defaultId: 1,
+                cancelId: 1
+            };
+            const choice = dialog.showMessageBoxSync(confirmOptions);
+            if (choice === 0) { // If 'Yes' is clicked
+                VMS.regenerateSSHKeys();
+            }
             event.sender.send(arg.uuid);
         });
     },
