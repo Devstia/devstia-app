@@ -8,7 +8,7 @@
 # copy dependencies to runtime folder for macOS
 mkdir -p ./runtime/darwin_x64
 cd ./runtime/darwin_x64
-cp -f /usr/local/Cellar/qemu/8.1.1/bin/qemu-system-x86_64 ./
+cp -f /usr/local/Cellar/qemu/8.1.2/bin/qemu-system-x86_64 ./
 cp -f /usr/local/Cellar/zstd/1.5.5/lib/libzstd.1.5.5.dylib ./
 ln -s ./libzstd.1.5.5.dylib ./libzstd.1.dylib
 cp -f /usr/local/Cellar/vde/2.3.3/lib/libvdeplug.3.dylib ./
@@ -53,6 +53,6 @@ cp -f /usr/local/Cellar/nettle/3.9.1/lib/libhogweed.6.8.dylib ./
 ln -s ./libhogweed.6.8.dylib ./libhogweed.6.dylib
 
 mkdir -p ./share/qemu
-cp -f /usr/local/Cellar/qemu/8.1.1/share/qemu/kvmvapic.bin ./share/qemu/
-cp -f /usr/local/Cellar/qemu/8.1.1/share/qemu/vgabios-virtio.bin ./share/qemu/
-cp -f /usr/local/Cellar/qemu/8.1.1/share/qemu/efi-virtio.rom ./share/qemu/
+cp -f /usr/local/Cellar/qemu/8.1.2/share/qemu/kvmvapic.bin ./share/qemu/
+cp -f /usr/local/Cellar/qemu/8.1.2/share/qemu/vgabios-virtio.bin ./share/qemu/
+cp -f /usr/local/Cellar/qemu/8.1.2/share/qemu/efi-virtio.rom ./share/qemu/
