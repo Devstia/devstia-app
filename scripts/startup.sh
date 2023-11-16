@@ -54,6 +54,7 @@ if [[ $cpu_arch == *"Apple M"* ]]; then
                 -device virtio-blk-pci,drive=drivedevstia-arm64,bootindex=0 \
                 -drive if=none,media=disk,id=drivedevstia-arm64,file=devstia-arm64.img,discard=unmap,detect-zeroes=unmap \
                 -device virtio-balloon-pci \
-                -net nic -net user,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083 \
+                -net nic -net  user,id=net0,hostfwd=tcp::$sshPort-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::$cpPort-:$cpPort$samba \
                 -nographic
+                #-net nic -net user,hostfwd=tcp::8022-:22,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443,hostfwd=tcp::8083-:8083 \
 fi
