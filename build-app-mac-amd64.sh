@@ -6,8 +6,8 @@
 
 # assume default qemu is installed (i.e. via devstia-vm/build-vm-mac-amd64.sh)
 # copy dependencies to runtime folder for macOS
-mkdir -p ./runtime/darwin_x64
-cd ./runtime/darwin_x64
+mkdir -p ./runtime/darwin_x86
+cd ./runtime/darwin_x86
 cp -f /usr/local/Cellar/qemu/8.1.1/bin/qemu-system-x86_64 ./
 cp -f /usr/local/Cellar/zstd/1.5.5/lib/libzstd.1.5.5.dylib ./
 ln -s ./libzstd.1.5.5.dylib ./libzstd.1.dylib
