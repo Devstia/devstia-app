@@ -242,7 +242,7 @@ var VMS = {
         const imageFile = path.join(self.pwSettings.vmsFolder, filename + '.img');
         let pathAddendum = '';
         if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
-            pathAddendum = path.join(__dirname, 'runtime', 'win32_x86', 'bin') + ';';
+            pathAddendum = path.join(__dirname, 'runtime', 'win32_x64', 'bin') + ';';
         }
         const tarProcess = require('child_process').spawn('tar', ['-xf', path.basename(archiveFile)], {
             cwd: path.dirname(archiveFile),
