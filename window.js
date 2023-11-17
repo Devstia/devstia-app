@@ -92,6 +92,34 @@ var Window = {
                 if (process.platform === 'darwin') {
                     app.dock.hide();
                 }
+                if (process.platform === 'win32') {
+
+                    // Kill any stuck ssh processes on windows doing --status-all querying
+                    const { exec } = require('child_process');
+                    let cmd = `wmic process where "name='ssh.exe'" get processid,commandline`;
+                    exec(cmd, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`Error getting ssh.exe processes: ${error.message}`);
+                            return;
+                        }
+                        let lines = stdout.split('\n');
+                        lines.forEach(line => {
+                            if (line.includes('service --status-all')) {
+                                console.log("Found stuck ssh.exe process: " + line);
+                                let pid = line.trim().split(' ').pop();
+                                if (isNaN(pid)) {
+                                    pid = line.split(' ')[0];
+                                }
+                                console.log("Killing ssh.exe process " + pid);
+                                exec(`taskkill /F /PID ${pid}`, (error, stdout, stderr) => {
+                                    if (error) {
+                                        console.error(`Error killing ssh.exe process ${pid}: ${error.message}`);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
                 if (this.quitOnClose == true) {
                     global.doQuitting();
                 }

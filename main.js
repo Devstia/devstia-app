@@ -213,40 +213,40 @@ app.on('ready', () => {
     global.doQuitting = function() {
         VMS.quitting = true;
 
-        // if (quitting == true) {
-            const os = require('os');
-            if (os.platform() === 'darwin') {
+        const os = require('os');
+        if (os.platform() === 'darwin') {
 
-                // Unmount Samba share for macOS
-                if (pwSettings.fsMode.toLowerCase() == 'samba') {
-                    const { exec } = require('child_process');
-                    let cmd = 'umount /tmp/devstia && rm -rf /tmp/devstia';
-                    exec(cmd, (error, stdout, stderr) => {
-                        if (error) {
-                            console.error(`Error unmounting samba: ${error.message}`);
-                            return;
-                        }
-                    });
-                }
-            }else if (os.platform() === 'win32') {
-
-                // Unmount WebDAV share for Windows
-                if (pwSettings.fsMode.toLowerCase() == 'webdav') {
-                    const { exec } = require('child_process');
-                    let cmd = 'net use P: /delete';
-                    exec(cmd, (error, stdout, stderr) => {
-                        if (error) {
-                            console.error(`Error unmounting webdav: ${error.message}`);
-                            return;
-                        }
-                    });
-                }
-            }else{
-                // TODO: Support for Linux
+            // Unmount Samba share for macOS
+            if (pwSettings.fsMode.toLowerCase() == 'samba') {
+                const { exec } = require('child_process');
+                let cmd = 'umount /tmp/devstia && rm -rf /tmp/devstia';
+                exec(cmd, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error unmounting samba: ${error.message}`);
+                        return;
+                    }
+                });
             }
-            VMS.shutdown(function() {
-                app.quit();
-            });
+        }else if (os.platform() === 'win32') {
+
+            // Unmount WebDAV share for Windows
+            if (pwSettings.fsMode.toLowerCase() == 'webdav') {
+                const { exec } = require('child_process');
+                let cmd = 'net use P: /delete';
+                exec(cmd, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error unmounting webdav: ${error.message}`);
+                        return;
+                    }
+                });
+            }
+
+        }else{
+            // TODO: Support for Linux
+        }
+        VMS.shutdown(function() {
+            app.quit();
+        });
     }
 });
 
