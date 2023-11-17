@@ -4,55 +4,70 @@
 # on macOS x86 64-bit compatible systems.
 #
 
-# assume default qemu is installed (i.e. via devstia-vm/build-vm-mac-amd64.sh)
-# copy dependencies to runtime folder for macOS
-mkdir -p ./runtime/darwin_x64
-cd ./runtime/darwin_x64
-cp -f /usr/local/Cellar/qemu/8.1.2/bin/qemu-system-x86_64 ./
-cp -f /usr/local/Cellar/zstd/1.5.5/lib/libzstd.1.5.5.dylib ./
-ln -s ./libzstd.1.5.5.dylib ./libzstd.1.dylib
-cp -f /usr/local/Cellar/vde/2.3.3/lib/libvdeplug.3.dylib ./
-cp -f /usr/local/Cellar/snappy/1.1.10/lib/libsnappy.1.1.10.dylib ./
-ln -s ./libsnappy.1.1.10.dylib ./libsnappy.1.dylib
-cp -f /usr/local/Cellar/pixman/0.42.2/lib/libpixman-1.0.42.2.dylib ./
-ln -s ./libpixman-1.0.42.2.dylib ./libpixman-1.0.dylib
-cp -f /usr/local/Cellar/ncurses/6.4/lib/libncursesw.6.dylib ./
-cp -f /usr/local/Cellar/lzo/2.10/lib/liblzo2.2.dylib ./
-cp -f /usr/local/Cellar/libusb/1.0.26/lib/libusb-1.0.0.dylib ./
-cp -f /usr/local/Cellar/libssh/0.10.5_1/lib/libssh.4.9.5.dylib ./
-ln -s ./libssh.4.9.5.dylib ./libssh.4.dylib
-cp -f /usr/local/Cellar/openssl@3/3.1.3/lib/libcrypto.3.dylib ./
-cp -f /usr/local/Cellar/libslirp/4.7.0/lib/libslirp.0.dylib ./
-cp -f /usr/local/Cellar/pcre2/10.42/lib/libpcre2-8.0.dylib ./
-cp -f /usr/local/Cellar/libpng/1.6.40/lib/libpng16.16.dylib ./
-cp -f /usr/local/Cellar/jpeg-turbo/3.0.0/lib/libjpeg.8.3.2.dylib ./
-ln -s ./libjpeg.8.3.2.dylib ./libjpeg.8.dylib
-cp -f /usr/local/Cellar/gnutls/3.8.1/lib/libgnutls.30.dylib ./
-cp -f /usr/local/Cellar/gmp/6.2.1_1/lib/libgmp.10.dylib ./
-cp -f /usr/local/Cellar/libunistring/1.1/lib/libunistring.5.dylib ./
-cp -f /usr/local/Cellar/glib/2.78.0/lib/libgobject-2.0.0.dylib ./
-cp -f /usr/local/Cellar/pcre2/10.42/lib/libpcre2-8.0.dylib ./
-cp -f /usr/local/Cellar/glib/2.78.0/lib/libgmodule-2.0.0.dylib ./
-cp -f /usr/local/Cellar/pcre2/10.42/lib/libpcre2-8.0.dylib ./
-cp -f /usr/local/Cellar/glib/2.78.0/lib/libglib-2.0.0.dylib ./
-cp -f /usr/local/Cellar/pcre2/10.42/lib/libpcre2-8.0.dylib ./
-cp -f /usr/local/Cellar/glib/2.78.0/lib/libgio-2.0.0.dylib ./
-cp -f /usr/local/Cellar/pcre2/10.42/lib/libpcre2-8.0.dylib ./
-cp -f /usr/local/Cellar/pcre2/10.42/lib/libpcre2-8.0.dylib ./
-cp -f /usr/local/Cellar/pcre2/10.42/lib/libpcre2-8.0.dylib ./
-cp -f /usr/local/Cellar/dtc/1.7.0/lib/libfdt-1.7.0.dylib ./
-ln -s ./libfdt-1.7.0.dylib ./libfdt.1.dylib
-cp -f /usr/local/Cellar/capstone/5.0.1/lib/libcapstone.5.dylib ./
-cp -f /usr/local/Cellar/gettext/0.22.3/lib/libintl.8.dylib ./
-cp -f /usr/local/Cellar/p11-kit/0.25.0/lib/libp11-kit.0.dylib ./
-cp -f /usr/local/Cellar/libidn2/2.3.4_1/lib/libidn2.0.dylib ./
-cp -f /usr/local/Cellar/libtasn1/4.19.0/lib/libtasn1.6.dylib ./
-cp -f /usr/local/Cellar/nettle/3.9.1/lib/libnettle.8.8.dylib ./
-ln -s ./libnettle.8.8.dylib ./libnettle.8.dylib
-cp -f /usr/local/Cellar/nettle/3.9.1/lib/libhogweed.6.8.dylib ./
-ln -s ./libhogweed.6.8.dylib ./libhogweed.6.dylib
+# Check for qemu installation (installed from https://github.com/virtuosoft-dev/devstia-vm)
+qemu_path=$(which qemu-system-x86_64)
 
-mkdir -p ./share/qemu
-cp -f /usr/local/Cellar/qemu/8.1.2/share/qemu/kvmvapic.bin ./share/qemu/
-cp -f /usr/local/Cellar/qemu/8.1.2/share/qemu/vgabios-virtio.bin ./share/qemu/
-cp -f /usr/local/Cellar/qemu/8.1.2/share/qemu/efi-virtio.rom ./share/qemu/
+if [ -z "$qemu_path" ]; then
+  echo 'Error: qemu-system-x86_64 is not installed.' >&2
+  exit 1
+fi
+
+# Get list of dependencies of qemu-system-x86_64
+output=$(otool -L $qemu_path)
+
+# Convert the output into an array
+arr=()
+while IFS= read -r line; do
+    line=$(echo "$line" | awk -F '(' '{print $1}' | awk '{$1=$1};1')
+    if [[ $line == *"/opt/"* ]]; then
+        arr+=("$line")
+    fi
+done <<< "$output"
+
+# Remove existing runtime/darwin_x64 folder
+rm -rf ./runtime/darwin_x64
+
+# Create the runtime/darwin_x64 folder if it does not exist
+mkdir -p ./runtime/darwin_x64/bin
+mkdir -p ./runtime/darwin_x64/lib
+mkdir -p ./runtime/darwin_x64/share/qemu
+
+# Copy qemu-system-x86_64 to runtime folder for macOS
+cp -f $qemu_path ./runtime/darwin_x64/bin/
+
+# Copy each dependency to runtime folder for macOS
+for i in "${arr[@]}"; do
+
+    cp -f "$i" ./runtime/darwin_x64/lib/
+    echo "$i"
+
+    # Get list of dependencies for each lib dependency
+    output2=$(otool -L "$i")
+
+    # Convert the output into an array
+    arr2=()
+    while IFS= read -r line; do
+
+        line=$(echo "$line" | awk -F '(' '{print $1}' | awk '{$1=$1};1')
+        if [[ $line == *"/opt/"* ]] && [[ $line != *":" ]]; then
+            arr2+=("$line")
+        fi
+    done <<< "$output2"
+
+    # Copy each lib dependency to runtime folder for macOS
+    for j in "${arr2[@]}"; do
+        j=/usr/local/opt/${j#*/opt/}
+        cp -f "$j" ./runtime/darwin_x64/lib/
+        echo "$j"
+    done
+done
+
+# Find share dependencies, and copy them over too
+qemu_folder=$(dirname "$(dirname "$qemu_path")")/Cellar/qemu
+kvmvapic_path=$(find "$qemu_folder" -name kvmvapic.bin)
+vgabios_virtio_path=$(find "$qemu_folder" -name vgabios-virtio.bin)
+efi_virtio_path=$(find "$qemu_folder" -name efi-virtio.rom)
+cp -f "$kvmvapic_path" ./runtime/darwin_x64/share/qemu/
+cp -f "$vgabios_virtio_path" ./runtime/darwin_x64/share/qemu/
+cp -f "$efi_virtio_path" ./runtime/darwin_x64/share/qemu/
+
