@@ -21,16 +21,23 @@ var VMS = {
     checkStatus: function() {
         return new Promise((resolve, reject) => {
             const { spawn } = require('child_process');
-            const scriptsFolder = require('path').join(this.pwSettings.appFolder, 'scripts');
+            const path = require('path');
+            const scriptsFolder = path.join(this.pwSettings.appFolder, 'scripts');
             let cmd = '';
             let ssh = null;
+            const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch, 'bin')
+                + path.delimiter + `${process.env.PATH}${path.delimiter}`;
             if (process.platform === 'win32') {
                 let cmd = `cd ${scriptsFolder.replace(/ /g, '\\ ')} && status.bat ${this.pwSettings.sshPort}`;
                 console.log(cmd);
-                ssh = spawn('cmd', ['/C', cmd]);
+                ssh = spawn('cmd', ['/C', cmd], {
+                    env: { PATH: runtimePath }
+                });
             }else{
                 cmd = `cd "${scriptsFolder}" && ./status.sh ${this.pwSettings.sshPort}`;
-                ssh = spawn('bash', ['-c', cmd]);
+                ssh = spawn('bash', ['-c', cmd], {
+                    env: { PATH: runtimePath }
+                });
             }            
             let output = '';
             ssh.stdout.on('data', (data) => {

@@ -159,7 +159,6 @@ app.on('ready', () => {
         }else{
             scriptTerminal = path.join(pwSettings.appFolder, 'scripts', 'terminal.sh');
         }
-        console.log(scriptTerminal);
         const p = spawn(scriptTerminal, [pwSettings.sshPort.toString()], {
             cwd: path.dirname(scriptTerminal),
             detached: true,
@@ -209,9 +208,9 @@ app.on('ready', () => {
     }
 
     // Quit the application
-    //global.doQuitting = function(quitting) {
     global.doQuitting = function() {
         VMS.quitting = true;
+        Tray.tray.destroy();
 
         const os = require('os');
         if (os.platform() === 'darwin') {
