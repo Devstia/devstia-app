@@ -6,6 +6,7 @@ var Tray = {
     // Properties
     listeners: [],
     menu: null,
+    tray: null,
     //quitting: false,
 
     // Methods
@@ -20,7 +21,7 @@ var Tray = {
             width: 16
         });
         const Tray = require('electron').Tray;
-        const tray = new Tray(icon);
+        this.tray = new Tray(icon);
      
         // Create the menu
         const Menu = require('electron').Menu;
@@ -71,7 +72,7 @@ var Tray = {
                 }
             }
         ]);
-        tray.setContextMenu(this.menu);
+        this.tray.setContextMenu(this.menu);
     },
     invoke: function(event, arg) {
         for (let i = 0; i < this.listeners.length; i++) {
