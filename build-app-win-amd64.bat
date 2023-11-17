@@ -2,6 +2,15 @@
 :: Get the CYGWIN dependencies for our runtime folder.
 :: 
 
+:: Check for qemu installation (installed from https://github.com/virtuosoft-dev/devstia-vm)
+if not exist "C:\Program Files\qemu\qemu-system-x86_64.exe" (
+    echo Error: qemu-system-x86_64.exe is not installed.
+    exit /b
+) else (
+    echo QEMU is already installed.
+)
+set PATH=%PATH%;"C:\Program Files\qemu"
+
 :: Make temp folder if it does not exist
 if not exist "temp" (
     mkdir temp
