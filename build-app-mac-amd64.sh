@@ -12,6 +12,9 @@ if [ -z "$qemu_path" ]; then
   exit 1
 fi
 
+# Get NodeJS dependencies
+npm install
+
 # Get list of dependencies of qemu-system-x86_64
 output=$(otool -L $qemu_path)
 

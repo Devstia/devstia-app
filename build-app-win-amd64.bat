@@ -11,6 +11,9 @@ if not exist "C:\Program Files\qemu\qemu-system-x86_64.exe" (
 )
 set PATH=%PATH%;"C:\Program Files\qemu"
 
+:: Get NodeJS dependencies
+npm install
+
 :: Make temp folder if it does not exist
 if not exist "temp" (
     mkdir temp
