@@ -71,3 +71,6 @@ cp -f "$kvmvapic_path" ./runtime/darwin_x64/share/qemu/
 cp -f "$vgabios_virtio_path" ./runtime/darwin_x64/share/qemu/
 cp -f "$efi_virtio_path" ./runtime/darwin_x64/share/qemu/
 
+# Package the application
+npm run package
+

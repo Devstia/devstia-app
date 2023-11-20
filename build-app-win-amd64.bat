@@ -94,3 +94,6 @@ rmdir /s /q temp
 copy /Y "C:\Program Files\qemu\share\kvmvapic.bin" ".\runtime\win32_x64\bin\share\kvmvapic.bin"
 copy /Y "C:\Program Files\qemu\share\vgabios-virtio.bin" ".\runtime\win32_x64\bin\share\vgabios-virtio.bin"
 copy /Y "C:\Program Files\qemu\share\efi-e1000e.rom" ".\runtime\win32_x64\bin\share\efi-e1000e.rom"
+
+:: Package the application
+npm run package
