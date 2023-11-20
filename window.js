@@ -61,7 +61,7 @@ var Window = {
     show: function(file = './web/index.html', size = { width: 620, height: 450} ) {
         this.quitOnClose = false;
         if (process.platform == 'win32') {
-            size.width += 5;
+            size.width += 3;
             size.height += 3;
         }
         if (this.win == null) {
