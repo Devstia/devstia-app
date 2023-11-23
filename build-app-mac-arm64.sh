@@ -86,3 +86,6 @@ find out/Devstia-darwin-arm64/Devstia.app/Contents -name '*.dylib' -exec codesig
 codesign --deep --options runtime --force --verbose --sign "$APPLE_DEV_ID" out/Devstia-darwin-arm64/Devstia.app
 ditto -c -k --keepParent out/Devstia-darwin-arm64/Devstia.app out/Devstia-darwin-arm64/Devstia.zip
 xcrun altool --notarize-app --primary-bundle-id "com.devstia.preview" --username "$APPLE_USER" --password "$APPLE_PW" --file 'out/Devstia-darwin-arm64/Devstia.zip'
+
+# Notice to check notarization status
+echo "Check notarization status with: xcrun altool --notarization-info <UUID> --username <APPLE_USER> --password <APPLE_PW>"
