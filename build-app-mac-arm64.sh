@@ -76,3 +76,13 @@ cp -f "$efi_virtio_path" ./runtime/darwin_arm64/share/qemu/
 
 # Package the application
 npm run package
+
+# Sign and notarize the application manually
+# (Note: This is a temporary workaround until electron-builder supports Apple Silicon)
+# (Note: You will need to replace the APPLE_DEV_ID, APPLE_USER, and APPLE_PW variables with your own)
+codesign --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-arm64/Devstia.app/Contents/Resources/app/runtime/darwin_arm64/bin/qemu-system-aarch64
+codesign --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-arm64/Devstia.app/Contents/Frameworks/Squirrel.framework/Versions/A/Resources/ShipIt
+find out/Devstia-darwin-arm64/Devstia.app/Contents -name '*.dylib' -exec codesign --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
+codesign --deep --options runtime --force --verbose --sign "$APPLE_DEV_ID" out/Devstia-darwin-arm64/Devstia.app
+ditto -c -k --keepParent out/Devstia-darwin-arm64/Devstia.app out/Devstia-darwin-arm64/Devstia.zip
+xcrun altool --notarize-app --primary-bundle-id "com.devstia.preview" --username "$APPLE_USER" --password "$APPLE_PW" --file 'out/Devstia-darwin-arm64/Devstia.zip'
