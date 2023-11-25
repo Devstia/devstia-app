@@ -80,7 +80,12 @@ var Settings = {
         // Default settings
         const app = require('electron').app;
         const path = require('path');
+        const { platform } = require('os');
         const packageJson = require('./package.json');
+        let appData = path.join(app.getPath('appData'), packageJson.name);
+        if (platform() === 'win32') { // Avoid roaming profile on Windows
+            appData = path.join(app.getPath('userData'), packageJson.name);
+        }
         let pwSettings = {
             version: packageJson.version,
             webFolder: path.join(app.getPath('home'), 'Sites'),
@@ -90,13 +95,12 @@ var Settings = {
             fsMode: 'None',
             debugMode: false,
             lanIP: this.getDefaultLocalIP(),
-            appFolder: path.join(app.getPath('appData'), packageJson.name, 'app' ),
-            vmsFolder: path.join(app.getPath('appData'), packageJson.name, 'vms' ),
+            appFolder: path.join(appData, 'app' ),
+            vmsFolder: path.join(appData, 'vms' ),
             showTips: true
         };
 
         // Default to WebDAV on Windows and Samba on Linux/Darwin
-        const { platform } = require('os');
         if (platform() === 'win32') {
             pwSettings.fsMode = 'WebDAV';
         }else{
