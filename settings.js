@@ -82,9 +82,9 @@ var Settings = {
         const path = require('path');
         const { platform } = require('os');
         const packageJson = require('./package.json');
-        let appData = path.join(app.getPath('appData'), packageJson.name);
-        if (platform() === 'win32') { // Avoid roaming profile on Windows
-            appData = path.join(app.getPath('userData'), packageJson.name);
+        let appData = path.join(app.getPath('userData'));
+        if (platform() === 'win32') { // Large files, avoid roaming profile on Windows, user local instead
+            appData = path.join(app.getPath('appData'), '..', 'Local', packageJson.name);
         }
         let pwSettings = {
             version: packageJson.version,
