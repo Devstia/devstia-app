@@ -80,13 +80,13 @@ npm run package
 # Sign and notarize the application manually
 # (Note: This is a temporary workaround until electron-builder supports Apple Silicon)
 # (Note: You will need to replace the APPLE_DEV_ID, APPLE_USER, and APPLE_PW variables with your own)
-codesign --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app/Contents/Resources/app/runtime/darwin_x64/bin/qemu-system-x86_64
-codesign --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app/Contents/Frameworks/Squirrel.framework/Versions/A/Resources/ShipIt
-find out/Devstia-darwin-x64/Devstia.app/Contents -name '*.dylib' -exec codesign --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
-codesign --deep --options runtime --force --verbose --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app
+codesign --entitlements ./entitlements/qemu.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app/Contents/Resources/app/runtime/darwin_x64/bin/qemu-system-x86_64
+codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app/Contents/Frameworks/Squirrel.framework/Versions/A/Resources/ShipIt
+find out/Devstia-darwin-x64/Devstia.app/Contents/Resources/app/runtime/darwin_x64/lib/ -name '*.dylib' -exec codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
+find "out/Devstia-darwin-x64/Devstia.app/Contents/Frameworks/Electron Framework.framework/" -name '*.dylib' -exec codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
+codesign --entitlements ./entitlements/devstia.plist --deep --options runtime --force --verbose --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app
 ditto -c -k --keepParent out/Devstia-darwin-x64/Devstia.app out/Devstia-darwin-x64/Devstia.zip
 xcrun altool --notarize-app --primary-bundle-id "com.devstia.preview" --username "$APPLE_USER" --password "$APPLE_PW" --file 'out/Devstia-darwin-x64/Devstia.zip'
 
 # Notice to check notarization status
 echo "Check notarization status with: xcrun altool --notarization-info <UUID> --username <APPLE_USER> --password <APPLE_PW>"
-
