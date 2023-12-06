@@ -247,6 +247,11 @@ app.on('ready', () => {
             app.quit();
         });
     }
+
+    // When the dock icon is clicked, show the settings window
+    app.on('activate', () => {
+        showSettings();
+    });
 });
 
 // Prevent the application from closing when all windows are closed
