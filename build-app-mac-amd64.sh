@@ -16,7 +16,7 @@ fi
 npm install
 
 # Get list of dependencies of qemu-system-x86_64
-output=$(otool -L $qemu_path)
+output=$(otool -L "$qemu_path")
 
 # Convert the output into an array
 arr=()
@@ -36,7 +36,7 @@ mkdir -p ./runtime/darwin_x64/lib
 mkdir -p ./runtime/darwin_x64/share/qemu
 
 # Copy qemu-system-x86_64 to runtime folder for macOS
-cp -f $qemu_path ./runtime/darwin_x64/bin/
+cp -f "$qemu_path" ./runtime/darwin_x64/bin/
 
 # Copy each dependency to runtime folder for macOS
 for i in "${arr[@]}"; do
