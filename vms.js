@@ -545,14 +545,17 @@ var VMS = {
                                                 console.error(`Error setting file mode: ${err}`);
                                             }
                                         });
-                                        res.writeHead(200, { 'Content-Type': 'text/plain' });
-                                        res.end('OK');
                                         if (filename == 'ssh/devstia_rsa') {
                                             self.invoke('certsKeysPublished');
                                         }
                                     }
                                 });
                             }
+                            res.writeHead(200, { 'Content-Type': 'text/plain' });
+
+                            // Respond with our lanIP
+                            res.write(self.pwSettings.lanIP);
+                            res.end('OK');
                         }catch(error) {
                             console.error(`Error parsing JSON data: ${error}`);
                             res.writeHead(500, {'Content-Type': 'text/plain'});
