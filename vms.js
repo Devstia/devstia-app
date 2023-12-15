@@ -12,6 +12,7 @@ var VMS = {
     filename: null,
     quitting: false,
     listeners: {},
+    
 
     // Methods
     /**
@@ -222,21 +223,6 @@ var VMS = {
         });
     },
     /**
-     * restore - Restores the virtual machine server from a given img file.
-     * @param {string} imgFile - The path to the img file to restore.
-     * @param {function} callback - The optional callback function to invoke after restore completes.
-     */
-    restore: function(imgFile, fDone = null) {
-        const path = require('path');
-        const fs = require('fs');
-        const pwFile = process.arch == 'arm64' ? 'devstia-arm64.img' : 'devstia-amd64.img';
-
-        // Copy the file to the VMS folder
-        const vmsFilePath = path.join(this.pwSettings.vmsFolder, pwFile);
-        fs.copyFileSync(imgFile, vmsFilePath);
-        if (fDone != null) setTimeout(() => { fDone(); }, 1000);
-    },
-    /**
      * extract - Extracts the VMS runtime from the downloaded archive.
      * @param {function} callback - Optional callback function to invoke after extraction completes.
      */
@@ -291,6 +277,32 @@ var VMS = {
                 fs.unlinkSync(archiveFile);
             }
         });
+    },
+    /**
+     * restore - Restores the virtual machine server from a given img file.
+     * @param {string} imgFile - The path to the img file to restore.
+     * @param {function} callback - The optional callback function to invoke after restore completes.
+     */
+    restore: function(imgFile, fDone = null) {
+        const path = require('path');
+        const fs = require('fs');
+        const pwFile = process.arch == 'arm64' ? 'devstia-arm64.img' : 'devstia-amd64.img';
+
+        // Copy the file to the VMS folder
+        const vmsFilePath = path.join(this.pwSettings.vmsFolder, pwFile);
+        fs.copyFileSync(imgFile, vmsFilePath);
+        if (fDone != null) setTimeout(() => { fDone(); }, 1000);
+    },
+    /**
+     * startDNSProxy - Starts the DNS proxy server.
+     */
+    startDNSProxy: function() {
+
+    },
+    /**
+     * stopDNSProxy - Stops the DNS proxy server.
+     */
+    stopDNSProxy: function() {
     },
     /**
      * getProcessID - Gets the process ID of the VMS server running under QEMU.

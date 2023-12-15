@@ -247,6 +247,33 @@ var Window = {
             }
         });
 
+        // Handle saving LAN IP address
+        ipcMain.on('saveLANIP', function(event, newSettings) {
+            let pwSettings = Settings.read();
+            if (newSettings.lanIP != pwSettings.lanIP) {
+                pwSettings.lanIP = newSettings.lanIP;
+                Settings.save(pwSettings);
+                VMS.pwSettings = pwSettings;
+                event.sender.send(newSettings.uuid);
+            }
+        });
+
+        // Handle getting LAN IP address
+        ipcMain.on('getLANIP', function(event, arg) {
+            let lanIP = Settings.getDefaultLocalIP();
+            event.sender.send(arg.uuid, lanIP);
+        });
+
+        // Handle turning on and off the DNS proxy server
+        ipcMain.on('dnsProxy', function(event, arg) {
+            if (arg.dnsProxy == true) {
+                VMS.startDNSProxy();
+            }else{
+                VMS.stopDNSProxy();
+            }
+            event.sender.send(arg.uuid);
+        });
+
         // Handle system requests
         ipcMain.on('queryTrayMenu', function(event, arg) {
             if (global.Tray.getMenuState('localhost') == true) {

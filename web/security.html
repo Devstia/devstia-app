@@ -55,7 +55,7 @@
                         </button>
                     </div>
                     <div>
-                        <a href="#" id="savePass" class="btn btn-pill btn-primary btn-sm">Save</a>
+                        <a style="float:right;" href="#" id="savePass" class="btn btn-pill btn-primary btn-sm">Save</a>
                     </div>
                 </div>
             </div>
@@ -66,6 +66,39 @@
                 <a href="#showSSHKeys" id="showSSHKeys" class="btn btn-secondary w-100" aria-label="Show SSH Keys">Show SSH Keys</a>
                 <p> </p>
                 <a href="#regenKeys" id="regenKeys" class="btn btn-secondary w-100">Regenerate SSH Keys</a>
+            </div>
+        </div>
+        <div class="datagrid-item">
+            <div class="datagrid-title">LAN IP</div>
+            <div class="datagrid-content">
+                <div class="row g-2">
+                    <div class="col">
+                        <input id="lan-ip" class="form-control" />
+                    </div>
+                    <div class="col-auto">
+                        <button id="get-lanip" class="btn btn-icon" aria-label="get LAN IP">
+                            <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                                width="20" height="20" viewBox="0 0 96.666 96.666">
+                            <g>
+                                <g>
+                                    <rect x="36" y="6" width="24.666" height="24.666"/>
+                                    <rect y="66" width="24.666" height="24.666"/>
+                                    <rect x="72" y="66" width="24.666" height="24.666"/>
+                                    <polygon points="15.311,51.333 82.105,51.333 82.105,63.066 86.561,63.066 86.561,46.4 84.334,46.4 84.334,46.333 50.833,46.333 
+                                        50.833,35 45.833,35 45.833,46.333 12.334,46.333 12.334,46.4 10.855,46.4 10.855,63.066 15.311,63.066 		"/>
+                                </g>
+                            </g>
+                            </svg>
+                        </button>
+                    </div>
+                    <div>
+                        <a style="float:right;" href="#" id="saveLANIP" class="btn btn-pill btn-primary btn-sm">Save</a>
+                        <label class="form-check form-switch">
+                            <input id="dnsProxy" class="form-check-input" type="checkbox">
+                            <span class="form-check-label">DNS Proxy</span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -118,10 +151,41 @@
                 }, 1000);
             });
         });
-
+        $('#saveLANIP').click( (r) => {
+            let lanIP = $('#lan-ip').val();
+            showWaitingSecurity('Updating LAN IP...');
+            ipcComm.send('saveLANIP', { 'lanIP': lanIP }, function() {
+                setTimeout(function() {
+                    hideWaitingSecurity();
+                }, 1000);
+            });
+        });
+        $('#get-lanip').click( (r) => {
+            showWaitingSecurity('Getting LAN IP...');
+            ipcComm.send('getLANIP', function(lanIP) {
+                $('#lan-ip').val(lanIP);
+                setTimeout(function() {
+                    hideWaitingSecurity();
+                }, 1000);
+            });
+        });
+        $('#dnsProxy').click( (r) => {
+            let dnsProxy = $('#dnsProxy').is(':checked');
+            if ( dnsProxy ) {
+                showWaitingSecurity('Starting DNS Proxy...');
+            } else {
+                showWaitingSecurity('Stopping DNS Proxy...');
+            }
+            ipcComm.send('saveDNSProxy', { 'dnsProxy': dnsProxy }, function() {
+                setTimeout(function() {
+                    hideWaitingSecurity();
+                }, 1000);
+            });
+        });
         window.fillOutSettings = function(pwSettings) {
             window.lastPass = pwSettings.pwPass;
             $('#pw-pass').val(pwSettings.pwPass);
+            $('#lan-ip').val(pwSettings.lanIP);
             if (pwSettings.showTips) {
                 showTips();
             }
