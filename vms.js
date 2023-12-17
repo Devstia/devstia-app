@@ -295,14 +295,61 @@ var VMS = {
     },
     /**
      * startDNSProxy - Starts the DNS proxy server.
+     * @param {function} callback - The optional callback function to invoke after startup completes.
      */
-    startDNSProxy: function() {
+    startDNSProxy: function(cb) {
+        const path = require('path');
+       
+        // Use sudo-prompt
+        const sudo = require('sudo-prompt');
+        const options = {
+            name: 'Electron',
+        };
 
+        // Path to the script that runs the DNS server
+        const scriptPath = path.join(__dirname, 'dnsproxy.js');
+
+        // Command to run with elevated privileges
+        // Use Electron's built-in Node.js runtime
+        const command = `"${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}"`;
+
+        sudo.exec(command, options, (error, stdout, stderr) => {
+            if (error) throw error;
+            console.log('stdout: ', stdout);
+            console.error('stderr: ', stderr);
+            cb();
+        });
     },
     /**
      * stopDNSProxy - Stops the DNS proxy server.
+     * @param {function} callback - The optional callback function to invoke after shutdown completes.
      */
-    stopDNSProxy: function() {
+    stopDNSProxy: function(cb) {
+        // Read the PID from the file
+        const fs = require('fs');
+        const path = require('path');
+        const pidFile = path.join(this.pwSettings.appFolder, 'dnsproxy.pid');
+        if (!fs.existsSync(pidFile)) {
+            cb();
+            return;
+        }
+        const pid = fs.readFileSync(pidFile, 'utf8');
+        fs.unlinkSync(pidFile);
+
+        // Command to kill the process on Windows
+        const killCommand = process.platform === 'win32' ? `taskkill /F /PID ${pid}` : `kill -SIGUSR2 ${pid}`;
+      
+        // Use sudo-prompt
+        const sudo = require('sudo-prompt');
+        const options = {
+            name: 'Electron',
+        };
+        sudo.exec(killCommand, options, (error, stdout, stderr) => {
+            if (error) throw error;
+            console.log('stdout: ', stdout);
+            console.error('stderr: ', stderr);
+            cb();
+        });
     },
     /**
      * getProcessID - Gets the process ID of the VMS server running under QEMU.
@@ -458,6 +505,9 @@ var VMS = {
     shutdown: function(fDone = null) {
         this.sudo("shutdown now");
 
+        // Shutdown dnsproxy
+        this.stopDNSProxy(() => {});
+        
         // Wait up to 20 seconds for qemu to shutdown
         const execSync = require('child_process').execSync;
         let pid = null;

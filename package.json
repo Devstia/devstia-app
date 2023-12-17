@@ -45,6 +45,7 @@
     "electron-tabs": "^1.0.1",
     "fs-extra": "^11.1.1",
     "jquery": "^3.6.4",
+    "native-dns": "^0.7.0",
     "shell-escape": "^0.2.0",
     "sudo-prompt": "^9.2.1"
   }

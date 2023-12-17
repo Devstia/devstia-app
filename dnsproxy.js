@@ -2,9 +2,23 @@ const dns = require('native-dns');
 const server = dns.createServer();
 const { exec } = require('child_process');
 const os = require('os');
-const Settings = global.Settings;
+const fs = require('fs');
+const path = require('path');
 let dnsServer = null;
-const pwSettings = Settings.read();
+
+// Get the appFolder path from the command line arguments
+const appFolder = process.argv[2];
+
+// Read settings file
+const pwFile = path.join(appFolder, 'settings.json');
+let pwSettings = null;
+if (fs.existsSync(pwFile)) {
+    pwSettings = JSON.parse(fs.readFileSync(pwFile));
+} else {
+    console.log("Unable to read application settings file.");
+    process.exit(1);
+}
+
 
 // Get the current DNS on macOS
 if (os.platform() === 'darwin') { // 'darwin' is the value for macOS
@@ -83,6 +97,13 @@ server.on('request', function (request, response) {
     }
 });
 
+process.on('SIGUSR2', function() {
+    server.close(() => {
+      console.log('Server shut down');
+      process.exit(0);
+    });
+});
+
 server.on('error', function (err, buff, req, res) {
     console.log(err.stack);
 });
@@ -90,7 +111,5 @@ server.on('error', function (err, buff, req, res) {
 server.serve(53);
 
 // Write the PID to a file
-const fs = require('fs');
-const path = require('path');
-const pidFile = require('path').join(pwSettings.appFolder, 'dns-server.pid');
+const pidFile = path.join(pwSettings.appFolder, 'dnsproxy.pid');
 fs.writeFileSync(pidFile, process.pid.toString());
