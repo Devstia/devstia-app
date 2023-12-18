@@ -189,6 +189,9 @@
             if (pwSettings.showTips) {
                 showTips();
             }
+            ipcComm.send('dnsProxyState', function(state) {
+                $('#dnsProxy').prop('checked', state);
+            });
         }
 
         // Prevent prohibited characters from being entered into the password field

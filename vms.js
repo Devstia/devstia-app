@@ -298,27 +298,35 @@ var VMS = {
      * @param {function} callback - The optional callback function to invoke after startup completes.
      */
     startDNSProxy: function(cb) {
-        const path = require('path');
-       
-        // Use sudo-prompt
-        const sudo = require('sudo-prompt');
-        const options = {
-            name: 'Electron',
-        };
-
         // Path to the script that runs the DNS server
+        const path = require('path');
         const scriptPath = path.join(__dirname, 'dnsproxy.js');
 
         // Command to run with elevated privileges
         // Use Electron's built-in Node.js runtime
-        const command = `"${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}"`;
+        const command = `ELECTRON_RUN_AS_NODE=1 "${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}"  > /dev/null 2>&1 &`;
 
-        sudo.exec(command, options, (error, stdout, stderr) => {
-            if (error) throw error;
-            console.log('stdout: ', stdout);
-            console.error('stderr: ', stderr);
-            cb();
-        });
+        // Use sudo-prompt on Windows/Linux and child_process on macOS
+        if (process.platform === 'darwin') {            
+            const exec = require('child_process').exec;
+            exec(command, (error, stdout, stderr) => {
+                if (error) throw error;
+                console.log('stdout: ', stdout);
+                console.error('stderr: ', stderr);
+                cb();
+            });
+        }else{
+            const sudo = require('sudo-prompt');
+            const options = {
+                name: 'Electron',
+            };
+            sudo.exec(command, options, (error, stdout, stderr) => {
+                if (error) throw error;
+                console.log('stdout: ', stdout);
+                console.error('stderr: ', stderr);
+                cb();
+            });    
+        }
     },
     /**
      * stopDNSProxy - Stops the DNS proxy server.
@@ -335,21 +343,37 @@ var VMS = {
         }
         const pid = fs.readFileSync(pidFile, 'utf8');
         fs.unlinkSync(pidFile);
-
-        // Command to kill the process on Windows
-        const killCommand = process.platform === 'win32' ? `taskkill /F /PID ${pid}` : `kill -SIGUSR2 ${pid}`;
       
-        // Use sudo-prompt
-        const sudo = require('sudo-prompt');
-        const options = {
-            name: 'Electron',
-        };
-        sudo.exec(killCommand, options, (error, stdout, stderr) => {
-            if (error) throw error;
-            console.log('stdout: ', stdout);
-            console.error('stderr: ', stderr);
-            cb();
-        });
+        // Command to kill the process on Windows
+        let killCommand = "kill -SIGTERM " + pid;
+        if (process.platform === 'win32') {
+            killCommand = "taskkill /F /PID " + pid;
+        }
+        if (process.platform === 'darwin') {
+            killCommand = "kill -USR2 " + pid;
+        }
+
+        // Use sudo-prompt on Windows/Linux and child_process on macOS
+        if (process.platform === 'darwin') {            
+            const exec = require('child_process').exec;
+            exec(killCommand, (error, stdout, stderr) => {
+                if (error) throw error;
+                console.log('stdout: ', stdout);
+                console.error('stderr: ', stderr);
+                cb();
+            });
+        }else{
+            const sudo = require('sudo-prompt');
+            const options = {
+                name: 'Electron',
+            };
+            sudo.exec(killCommand, options, (error, stdout, stderr) => {
+                if (error) throw error;
+                console.log('stdout: ', stdout);
+                console.error('stderr: ', stderr);
+                cb();
+            });
+        }
     },
     /**
      * getProcessID - Gets the process ID of the VMS server running under QEMU.

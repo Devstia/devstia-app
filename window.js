@@ -277,6 +277,20 @@ var Window = {
             }
         });
 
+        // Handle DNS proxy state requests
+        ipcMain.on('dnsProxyState', function(event, arg) {
+            const fs = require('fs');
+            const path = require('path');
+            const pwSettings = Settings.read();
+            const pidFile = path.join(pwSettings.appFolder, 'dnsproxy.pid');
+            if (fs.existsSync(pidFile)) {
+                state = 'checked';
+            }else{
+                state = '';
+            }
+            event.sender.send(arg.uuid, state);
+        });
+
         // Handle system requests
         ipcMain.on('queryTrayMenu', function(event, arg) {
             if (global.Tray.getMenuState('localhost') == true) {

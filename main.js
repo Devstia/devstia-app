@@ -250,7 +250,11 @@ app.on('ready', () => {
 
     // When the dock icon is clicked, show the settings window
     app.on('activate', () => {
-        showSettings();
+        if (global.Window.win != null) {
+            global.Window.win.focus();
+        }else{
+            showSettings();
+        }
     });
 });
 
