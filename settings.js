@@ -57,15 +57,18 @@ var Settings = {
         const interfaces = os.networkInterfaces();
 
         for (const interfaceName of Object.keys(interfaces)) {
-        const interfaceList = interfaces[interfaceName];
-    
-        for (const interface of interfaceList) {
-
-            // Skip over non-IPv4 and internal addresses
-            if (interface.family === 'IPv4' && !interface.internal) {
-                return interface.address;
+            if (os.platform == 'win32' && interfaceName.startsWith('vEthernet')) {
+                continue; // Skip Hyper-V interfaces on Windows
             }
-        }
+            const interfaceList = interfaces[interfaceName];
+    
+            for (const interface of interfaceList) {
+
+                // Skip over non-IPv4 and internal addresses
+                if (interface.family === 'IPv4' && !interface.internal) {
+                    return interface.address;
+                }
+            }
         }  
         return '127.0.0.1';
     },
