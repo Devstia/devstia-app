@@ -302,30 +302,65 @@ var VMS = {
         const path = require('path');
         const scriptPath = path.join(__dirname, 'dnsproxy.js');
 
-        // Command to run with elevated privileges
-        // Use Electron's built-in Node.js runtime
-        const command = `ELECTRON_RUN_AS_NODE=1 "${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}"  > /dev/null 2>&1 &`;
-
         // Use sudo-prompt on Windows/Linux and child_process on macOS
         if (process.platform === 'darwin') {            
+            const command = `ELECTRON_RUN_AS_NODE=1 "${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}" > /dev/null 2>&1 &`;
             const exec = require('child_process').exec;
             exec(command, (error, stdout, stderr) => {
                 if (error) throw error;
                 console.log('stdout: ', stdout);
                 console.error('stderr: ', stderr);
-                cb();
+                cb('checked');
             });
-        }else{
+        }
+        if (process.platform !== 'darwin' && process.platform !== 'win32') {            
+            const command = `ELECTRON_RUN_AS_NODE=1 "${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}" > /dev/null 2>&1 &`;
             const sudo = require('sudo-prompt');
             const options = {
-                name: 'Electron',
+                name: 'Devstia Preview'
             };
             sudo.exec(command, options, (error, stdout, stderr) => {
                 if (error) throw error;
                 console.log('stdout: ', stdout);
                 console.error('stderr: ', stderr);
-                cb();
-            });    
+                cb('checked');
+            }); 
+        }
+        if (process.platform === 'win32') {
+
+            // Check for existing process occupying port 53 on Windows
+            const { execSync } = require('child_process');
+            try {
+                const stdout = execSync('netstat -ano | findstr :53');
+                if ( stdout.indexOf(':53 ') > -1) {
+
+                    // Display error dialog
+                    const { dialog } = require('electron');
+                    dialog.showMessageBoxSync({
+                        type: 'error',
+                        title: 'Devstia Preview - DNS Error',
+                        message: 'DNS proxy server cannot start. Port 53 is already in use. Try stopping "Host Network Service" and "Internet Connection Sharing" from Windows\' Services panel.',
+                        buttons: ['OK']
+                    });
+                    cb('');
+                    return;
+                }
+            } catch (error) {
+                console.error(`Error executing VMS.startDNSProxy command: ${error.message}`);
+            }
+
+            // Start the DNS proxy server
+            const command = `start /b "set ELECTRON_RUN_AS_NODE=1" && "${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}" > nul 2>&1`;
+            const sudo = require('sudo-prompt');
+            const options = {
+                name: 'Devstia Preview'
+            };
+            sudo.exec(command, options, (error, stdout, stderr) => {
+                if (error) throw error;
+                console.log('stdout: ', stdout);
+                console.error('stderr: ', stderr);
+            });
+            cb('checked');
         }
     },
     /**
@@ -333,45 +368,53 @@ var VMS = {
      * @param {function} callback - The optional callback function to invoke after shutdown completes.
      */
     stopDNSProxy: function(cb) {
+
         // Read the PID from the file
         const fs = require('fs');
         const path = require('path');
         const pidFile = path.join(this.pwSettings.appFolder, 'dnsproxy.pid');
         if (!fs.existsSync(pidFile)) {
-            cb();
+            cb('');
             return;
         }
         const pid = fs.readFileSync(pidFile, 'utf8');
         fs.unlinkSync(pidFile);
-      
-        // Command to kill the process on Windows
-        let killCommand = "kill -SIGTERM " + pid;
-        if (process.platform === 'win32') {
-            killCommand = "taskkill /F /PID " + pid;
-        }
-        if (process.platform === 'darwin') {
-            killCommand = "kill -USR2 " + pid;
-        }
 
         // Use sudo-prompt on Windows/Linux and child_process on macOS
         if (process.platform === 'darwin') {            
+            const killCommand = "kill -USR2 " + pid;
             const exec = require('child_process').exec;
             exec(killCommand, (error, stdout, stderr) => {
                 if (error) throw error;
                 console.log('stdout: ', stdout);
                 console.error('stderr: ', stderr);
-                cb();
+                cb('');
             });
-        }else{
+        }
+        if (process.platform !== 'darwin' && process.platform !== 'win32') {
             const sudo = require('sudo-prompt');
+            const killCommand = "kill -SIGUSR2 " + pid;
             const options = {
-                name: 'Electron',
+                name: 'Devstia Preview'
             };
             sudo.exec(killCommand, options, (error, stdout, stderr) => {
                 if (error) throw error;
                 console.log('stdout: ', stdout);
                 console.error('stderr: ', stderr);
-                cb();
+                cb('');
+            });
+        }
+        if (process.platform == 'win32' ) {
+            killCommand = "taskkill /F /PID " + pid;
+            const sudo = require('sudo-prompt');
+            const options = {
+                name: 'Devstia Preview',
+            };
+            sudo.exec(killCommand, options, (error, stdout, stderr) => {
+                if (error) throw error;
+                console.log('stdout: ', stdout);
+                console.error('stderr: ', stderr);
+                cb('');
             });
         }
     },

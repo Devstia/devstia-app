@@ -35,81 +35,88 @@ if (os.platform() === 'darwin') { // 'darwin' is the value for macOS
         const lines = stdout.split('\n');
         const servers = lines.map(line => line.split(': ')[1]).filter(Boolean);
         dnsServer = servers[0];
+        startServer();
     });
 }
 
 // Get the current DNS on Windows
-if (os.platform() === 'win32') {
+if (os.platform() === 'win32') {   
     exec("netsh interface ip show dns", (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-
         const lines = stdout.split('\n');
-        const servers = lines.map(line => line.split(': ')[1]).filter(Boolean);
-        dnsServer = servers[0];
+        let inEthernetSection = false;       
+        for (const line of lines) {
+            if (line.includes('Configuration for interface "Ethernet"')) {
+                inEthernetSection = true;
+            } else if (line.includes('Configuration for interface')) {
+                inEthernetSection = false;
+            }
+        
+            if (inEthernetSection && line.includes('DNS servers')) {
+                dnsServer = line.split(': ')[1];
+                dnsServer = dnsServer.trim();
+                break;
+            }
+        }
+        startServer();
     });
 }
 
-server.on('request', function (request, response) {
-    let domainHandled = false;
+// Forward the DNS query to another DNS server
+if (dnsServer === null) {
+    dnsServer = '8.8.8.8'; // Fallback to Google's DNS
+}
 
-    request.question.forEach(function (question) {
-        if (question.name.endsWith('.dev.cc') || question.name.endsWith('.dev.cc.') || question.name.endsWith('.dev.pw') || question.name.endsWith('.dev.pw.')) {
-            response.answer.push(dns.A({
-                name: question.name,
-                address: '10.0.1.27',
-                ttl: 600,
-            }));
-            domainHandled = true;
-        }
-    });
-
-    if (domainHandled) {
-        response.send();
-    } else {
-        // Forward the DNS query to another DNS server
-        if (dnsServer === null) {
-            dnsServer = '8.8.8.8'; // Fallback to Google's DNS
-        }
-        console.log(dnsServer);
-        const proxy = dns.Request({
-            question: request.question[0], // Forward the first question
-            server: { address: dnsServer, port: 53, type: 'udp' }, // Google's DNS
-            timeout: 3000
+// Start the DNS proxy server
+function startServer() {
+    server.on('request', function (request, response) {
+        let domainHandled = false;
+        request.question.forEach(function (question) {
+            if (question.name.endsWith('.dev.cc') || question.name.endsWith('.dev.cc.') || question.name.endsWith('.dev.pw') || question.name.endsWith('.dev.pw.')) {
+                response.answer.push(dns.A({
+                    name: question.name,
+                    address: pwSettings.lanIP,
+                    ttl: 600,
+                }));
+                domainHandled = true;
+            }
         });
 
-        proxy.on('message', (err, msg) => {
-            msg.answer.forEach(a => response.answer.push(a));
+        if (domainHandled) {
             response.send();
-        });
+        } else {
+            const proxy = dns.Request({
+                question: request.question[0], // Forward the first question
+                server: { address: dnsServer, port: 53, type: 'udp' }, // Google's DNS
+                timeout: 3000
+            });
 
-        proxy.on('timeout', () => {
-            console.log('Timeout in making request');
-        });
+            proxy.on('message', (err, msg) => {
+                msg.answer.forEach(a => response.answer.push(a));
+                response.send();
+            });
 
-        proxy.send();
-    }
-});
+            proxy.on('timeout', () => {
+                console.log('Timeout in making request');
+            });
 
-process.on('SIGUSR2', function() {
-    server.close(() => {
-      console.log('Server shut down');
-      process.exit(0);
+            proxy.send();
+        }
     });
-});
 
-server.on('error', function (err, buff, req, res) {
-    console.log(err.stack);
-});
+    process.on('SIGUSR2', function() {
+        server.close(() => {
+        console.log('Server shut down');
+        process.exit(0);
+        });
+    });
 
-server.serve(53);
+    server.on('error', function (err, buff, req, res) {
+        console.log(err.stack);
+    });
+    server.serve(53);
+    console.log("DNS proxy started on " + pwSettings.lanIP + " with passthru DNS server at " + dnsServer);
 
-// Write the PID to a file
-const pidFile = path.join(pwSettings.appFolder, 'dnsproxy.pid');
-fs.writeFileSync(pidFile, process.pid.toString());
+    // Write the PID to a file
+    const pidFile = path.join(pwSettings.appFolder, 'dnsproxy.pid');
+    fs.writeFileSync(pidFile, process.pid.toString());
+}

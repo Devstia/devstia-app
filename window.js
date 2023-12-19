@@ -267,12 +267,12 @@ var Window = {
         // Handle turning on and off the DNS proxy server
         ipcMain.on('dnsProxy', function(event, arg) {
             if (arg.dnsProxy == true) {
-                VMS.startDNSProxy(() => {
-                    event.sender.send(arg.uuid);
+                VMS.startDNSProxy((state) => {
+                    event.sender.send(arg.uuid, state);
                 });
             }else{
-                VMS.stopDNSProxy(() => {
-                    event.sender.send(arg.uuid);
+                VMS.stopDNSProxy((state) => {
+                    event.sender.send(arg.uuid, state);
                 });
             }
         });

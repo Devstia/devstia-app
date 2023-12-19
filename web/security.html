@@ -176,8 +176,9 @@
             } else {
                 showWaitingSecurity('Stopping DNS Proxy...');
             }
-            ipcComm.send('dnsProxy', { 'dnsProxy': dnsProxy }, function() {
+            ipcComm.send('dnsProxy', { 'dnsProxy': dnsProxy }, function(state) {
                 setTimeout(function() {
+                    $('#dnsProxy').prop('checked', state);
                     hideWaitingSecurity();
                 }, 1000);
             });
