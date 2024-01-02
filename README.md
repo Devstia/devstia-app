@@ -14,7 +14,7 @@ These features help facilitate running and developing diverse web based applicat
 &nbsp;
 
 ## Building
-Building the Devstia Preview application is a separate process from the architecture specific Debian based runtime (those instructions can be found in the [devstia-vm](https://github.com/virtuosoft-dev/devstia-vm). This repo is specific for the native desktop application and system menu/tray application used to manage the devstia-vm runtime.
+Building the Devstia Preview application is a separate process from the architecture specific Debian based runtime (those instructions can be found in the [devstia-vm](https://github.com/virtuosoft-dev/devstia-vm)). This repo is specific for the native desktop application and system menu/tray application used to manage the devstia-vm runtime.
 
 This repo is to provide source code and technology transparancy, and assists in the complex task of building Devstia Preview from scratch.
 
