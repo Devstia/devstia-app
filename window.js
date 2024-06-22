@@ -404,18 +404,27 @@ var Window = {
                 const vmsFilePath = path.join(pwSettings.vmsFolder, pwFile);
                 Window.executeJavaScript("$('#close-button').addClass('disabled');showSystemWaiting('Stopping server...');");
                 VMS.shutdown(function() {
-                    global.Window.executeJavaScript("showSystemWaiting('Creating snapshot...<br> Please wait');");
+                    global.Window.executeJavaScript("showSystemWaiting('Compacting snapshot...<br> Please wait');");
 
-                    // Copy the current vms file to the selected location
-                    const fs = require('fs');
-                    fs.copyFile(vmsFilePath, filePath, (err) => {
-                        if (err) throw err;
+                    // Create a compact copy of the current server
+                    const { exec } = require('child_process');
+                    const convertCommand = `qemu-img convert -O qcow2 "${vmsFilePath}" "${filePath}"`;
+                    exec(convertCommand, (err, stdout, stderr) => {
+                        if (err) {
+                            console.error(`exec error: ${err}`);
+                            return;
+                        }
+                        // Log output if needed
+                        console.log(`stdout: ${stdout}`);
+                        console.error(`stderr: ${stderr}`);
+
                         global.Window.executeJavaScript("showSystemWaiting('Resuming the server...');");
                         setTimeout(function() {
                             global.Window.executeJavaScript("$('.badge').css('opacity', '20%');showStatusWait();hideSystemWaiting();$('#close-button').removeClass('disabled');");
                             VMS.startup(true); // restarted
                         }, 3000);
                     });
+
                     event.sender.send(arg.uuid);
                 });
             }).catch(err => {
