@@ -100,3 +100,5 @@ copy /Y "C:\Program Files\qemu\share\efi-e1000e.rom" ".\runtime\win32_x64\bin\sh
 
 :: Package the application
 npm run package
+
+:: Sign the application binaries

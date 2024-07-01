@@ -58,7 +58,7 @@ The resulting executable can be found for your architecture and platform in the 
 Digitally signing the Devstia Preview application incurs private distribution costs and is not a part of this open source project's endeavors. Packaging and signing is solely up to the application distributor. Officially signed application binaries can be found at https://devstia.com. However, these notes can assist users that wish to sign their own application and is furnished as a complimentary reference guide by the application founder:
 
 ### For Windows
-The application uses the free Inno Setup project at https://jrsoftware.org/isinfo to create an installer. A setup project file can be executed using Inno Setup’s package builder and can be found in the file titled “installer.iss” in this repo’s root. Prior to executing the script; one should digitally sign the application’s main executables. Both the runtime binaries and associated installer should be signed with a valid digital certificate. Windows compatible digital certificates can be obtained from any number of commercial vendors. At the time of this writing; only Certum furnishes discounted, open source, digital certificates and is used in the official distribution. The runtime executables to be signed are as follows are at (relative the project root):
+On Windows, the application uses the free Inno Setup project at https://jrsoftware.org/isinfo to create an installer. A setup project file can be executed using Inno Setup’s package builder and can be found in the file titled “installer.iss” in this repo’s root. Prior to executing the script; one should digitally sign the application’s main executables. Both the runtime binaries and associated installer should be signed with a valid digital certificate. Windows compatible digital certificates can be obtained from any number of commercial vendors. At the time of this writing; only Certum furnishes discounted, open source, digital certificates and is used in the official distribution. The runtime executables to be signed are as follows are at (relative the project root):
 
 
 out\Devstia-win32-x64\Devstia.exe
@@ -81,7 +81,7 @@ This final setup/installer program should also be digitally signed from the “o
 signtool sign /n "Open Source Developer, Stephen Carnam" /t http://time.certum.pl/ /fd sha256 /v "Devstia Preview Setup.exe" 
 
 ### For Macintosh
-
+On Apple Macintosh, the application bundle is signed using Apple's XCode developmemnt tools. This requires a valid Apple Developer License and the XCode SDK installed. For reference, the following 
 
 &nbsp;
 
