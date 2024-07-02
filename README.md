@@ -31,20 +31,13 @@ git clone https://github.com/virtuosoft-dev/devstia-app devstia-app
 cd devstia-app
 ```
 
-#### 2) Next, install the NodeJS dependencies and build the application using the associated build script for your platform; I.e. for Windows on x86 64-bit compatible processors, run:
+#### 2) Next, install the NodeJS dependencies and build the application using the following npm commands OR use the automated build script (see the *Signing* section below).
+
 ```
-.\build-app-win-amd64.bat
+npm install
+nipm run package
 ```
 
-For macOS on x86 64-bit compatible processors, run:
-```
-./build-app-mac-amd64.sh
-```
-
-For macOS on Apple Silicon (M1, M2, and M3 processors), run:
-```
-./build-app-mac-arm64.sh
-```
 
 The resulting executable can be found for your architecture and platform in the resulting `out` folder. 
 
@@ -65,16 +58,13 @@ On Windows, use the automated build script `build-app-win-amd64.bat` to build th
 * The application is distributed with an automated installer; Inno Setup. The free Inno Setup project at https://jrsoftware.org/isinfo is used to create the installer via the included project file `installer.iss`. Ensure the Inno Setup command line tool is apart of the command line path i.e. `set PATH=%PATH%;"C:\Program Files (x86)\Inno Setup 6"`.
 * You must set the environment variable `WIN_CERT_SUBJECT_NAME` with a valid subject name of the Windows compatible signer's certificate. This is used to locate the certificate in the Windows Certificate Store used to sign the files i.e. `set "WIN_CERT_SUBJECT_NAME=Open Source Developer, Stephen Carnam"`.
 
-out\Devstia-win32-x64\Devstia.exe
-out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\qemu-system-x86_64.exe
-out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\ssh.exe
-out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\tar.exe
-out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\xz.exe
-
 ### For Macintosh
-On Apple Macintosh, use the automated build script `build-app-mac-amd64.sh` to build the Macintosh x86-64-bit compatible application or `build-app-mac-arm64.sh` to build the Apple Silicon M1, M2, or M3 compatible application; the application bundle is signed using Apple's XCode developmemnt tools. The following prerequisites are required:
+On Apple Macintosh, use the automated build script `build-app-mac-amd64.sh` to build the Macintosh x86-64-bit compatible application or `build-app-mac-arm64.sh` to build the Apple Silicon M1, M2, or M3 compatible application; and digitally sign the application binary. The following prerequisites are needed:
 
- This requires a valid Apple Developer License and the XCode SDK installed. For reference, the following 
+* A Macintosh system matching the platform architecture of the binary being build; an Intel-based Macintosh or Apple Silicon M1, M2 or M3 based Macintosh.
+* The application is digitally code signed using the XCode SDK, ensure the SDK is installed and that the codesign command is apart of the command line path.
+* You must have a valid Apple Developer License with associated Apple Username/email, Apple Developer ID, and Apple Developer application password. 
+* You must set the environment variables for APPLE_USER, APPLE_PW, and APPLE_DEV_ID, i.e. `APPLE_USER=steve@steveorevo.com\nAPPLE_PW=0123-4567-89AB-CDEF\nAPPLE_DEV_ID=ABCDE12345`
 
 &nbsp;
 
