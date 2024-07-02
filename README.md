@@ -58,8 +58,12 @@ The resulting executable can be found for your architecture and platform in the 
 Digitally signing the Devstia Preview application incurs private distribution costs and is not a part of this open source project's endeavors. Packaging and signing is solely up to the application distributor. Officially signed application binaries can be found at https://devstia.com. However, these notes can assist users that wish to sign their own application and is furnished as a complimentary reference guide by the application founder:
 
 ### For Windows
-On Windows, the application uses the free Inno Setup project at https://jrsoftware.org/isinfo to create an installer. A setup project file can be executed using Inno Setup’s package builder and can be found in the file titled “installer.iss” in this repo’s root. Prior to executing the script; one should digitally sign the application’s main executables. Both the runtime binaries and associated installer should be signed with a valid digital certificate. Windows compatible digital certificates can be obtained from any number of commercial vendors. At the time of this writing; only Certum furnishes discounted, open source, digital certificates and is used in the official distribution. The runtime executables to be signed are as follows are at (relative the project root):
+On Windows, use the automated build script `build-app-win-amd64.bat` to build the Windows x86-64-bit compatible application, the setup installer, and digitally sign the application and setup binaries. The following prerequisites are needed:
 
+* A Windows system matching the platform architecture of the binary being built; currently only x86-64bit compatible systems are supported on Windows.
+* The application is digitally code signed using the Windows SDK, ensure the SDK is installed and that the signtool is apart of the command line path i.e. `set PATH=%PATH%;"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"`.
+* The application is distributed with an automated installer; Inno Setup. The free Inno Setup project at https://jrsoftware.org/isinfo is used to create the installer via the included project file `installer.iss`. Ensure the Inno Setup command line tool is apart of the command line path i.e. `set PATH=%PATH%;"C:\Program Files (x86)\Inno Setup 6"`.
+* You must set the environment variable `WIN_CERT_SUBJECT_NAME` with a valid subject name of the Windows compatible signer's certificate. This is used to locate the certificate in the Windows Certificate Store used to sign the files i.e. `set "WIN_CERT_SUBJECT_NAME=Open Source Developer, Stephen Carnam"`.
 
 out\Devstia-win32-x64\Devstia.exe
 out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\qemu-system-x86_64.exe

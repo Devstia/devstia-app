@@ -1,7 +1,7 @@
 :: 
 :: Get the CYGWIN dependencies for our runtime folder.
 :: 
-
+@echo off
 :: Check for qemu installation (installed from https://github.com/virtuosoft-dev/devstia-vm)
 if not exist "C:\Program Files\qemu\qemu-system-x86_64.exe" (
     echo Error: qemu-system-x86_64.exe is not installed.
@@ -12,7 +12,7 @@ if not exist "C:\Program Files\qemu\qemu-system-x86_64.exe" (
 set PATH=%PATH%;"C:\Program Files\qemu"
 
 :: Get NodeJS dependencies
-npm install
+call npm install
 
 :: Make temp folder if it does not exist
 if not exist "temp" (
@@ -99,6 +99,48 @@ copy /Y "C:\Program Files\qemu\share\vgabios-virtio.bin" ".\runtime\win32_x64\bi
 copy /Y "C:\Program Files\qemu\share\efi-e1000e.rom" ".\runtime\win32_x64\bin\share\efi-e1000e.rom"
 
 :: Package the application
-npm run package
+call npm run package
+:: Sign the application binaries
+
+:: Check if signtool is in the PATH
+@echo off
+signtool /? >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo signtool not found or not accessible. Exiting script...
+    exit /b
+) else (
+    echo signtool found and accessible.
+)
+
+:: Check if WIN_CERT_SUBJECT_NAME is set
+if "%WIN_CERT_SUBJECT_NAME%"=="" (
+    echo WIN_CERT_SUBJECT_NAME is not set. Exiting script...
+    exit /b
+) else (
+    echo WIN_CERT_SUBJECT_NAME is set to %WIN_CERT_SUBJECT_NAME%.
+)
 
 :: Sign the application binaries
+signtool sign /n "%WIN_CERT_SUBJECT_NAME%" /t http://time.certum.pl/ /fd sha256 /v ".\out\Devstia-win32-x64\Devstia.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\qemu-system-x86_64.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\ssh.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\tar.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\xz.exe"
+
+:: Check that the Inno Setup ISCC tool is in the PATH
+@echo off
+setlocal enabledelayedexpansion
+iscc /? >temp.txt 2>&1
+findstr /C:"not found" temp.txt >nul 2>&1
+if !ERRORLEVEL! equ 0 (
+    echo Inno Setup ISCC not found or not accessible. Exiting script...
+    del temp.txt
+    exit /b
+) else (
+    echo Inno Setup ISCC found and accessible.
+)
+del temp.txt
+endlocal
+
+:: Build the setup installer
+iscc installer.iss
+
+:: Sign the installer
+signtool sign /n "%WIN_CERT_SUBJECT_NAME%" /t http://time.certum.pl/ /fd sha256 /v ".\out\inno-setup\Devstia Preview Setup.exe"
+
