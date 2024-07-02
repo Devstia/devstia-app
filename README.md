@@ -71,21 +71,10 @@ out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\ssh.exe
 out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\tar.exe
 out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\xz.exe
 
-
-With the Windows SDK, one should have the signtool.exe for their platform/architecture installed; running the following commands will appropriately sign the executables. For the currently supported x64 architecture, the signtool.exe from the Windows SDK (i.e. “C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64”) should be in the command line tool’s path (i.e. via set PATH=%PATH%;"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"). With a valid path, a developer can sign their executable; for example this project author could sign Devstia Preview for Windows x64 architecture when equipped with the following valid certificate and hardware required to do physical signing:
-
-
-signtool sign /n "Open Source Developer, Stephen Carnam" /t http://time.certum.pl/ /fd sha256 /v "Devstia.exe" ".\resources\app\runtime\win32_x64\bin\qemu-system-x86_64.exe" ".\resources\app\runtime\win32_x64\bin\ssh.exe" ".\resources\app\runtime\win32_x64\bin\tar.exe" ".\resources\app\runtime\win32_x64\bin\xz.exe"
-
-
-With the out/Devstia-win32-x64 application binaries properly signed; the Inno Setup script can be executed to produce the setup package at: “out\inno-setup\Devstia Preview Setup.exe”
-
-
-This final setup/installer program should also be digitally signed from the “out\inno-setup” folder via:
-signtool sign /n "Open Source Developer, Stephen Carnam" /t http://time.certum.pl/ /fd sha256 /v "Devstia Preview Setup.exe" 
-
 ### For Macintosh
-On Apple Macintosh, the application bundle is signed using Apple's XCode developmemnt tools. This requires a valid Apple Developer License and the XCode SDK installed. For reference, the following 
+On Apple Macintosh, use the automated build script `build-app-mac-amd64.sh` to build the Macintosh x86-64-bit compatible application or `build-app-mac-arm64.sh` to build the Apple Silicon M1, M2, or M3 compatible application; the application bundle is signed using Apple's XCode developmemnt tools. The following prerequisites are required:
+
+ This requires a valid Apple Developer License and the XCode SDK installed. For reference, the following 
 
 &nbsp;
 
