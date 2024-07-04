@@ -86,7 +86,5 @@ find out/Devstia-darwin-x64/Devstia.app/Contents/Resources/app/runtime/darwin_x6
 find "out/Devstia-darwin-x64/Devstia.app/Contents/Frameworks/Electron Framework.framework/" -name '*.dylib' -exec codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
 codesign --entitlements ./entitlements/devstia.plist --deep --options runtime --force --verbose --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app
 ditto -c -k --keepParent out/Devstia-darwin-x64/Devstia.app out/Devstia-darwin-x64/Devstia.zip
-xcrun altool --notarize-app --primary-bundle-id "com.devstia.preview" --username "$APPLE_USER" --password "$APPLE_PW" --file 'out/Devstia-darwin-x64/Devstia.zip'
-
-# Notice to check notarization status
-echo "Check notarization status with: xcrun altool --notarization-info <UUID> --username <APPLE_USER> --password <APPLE_PW>"
+xcrun notarytool store-credentials "$APPLE_USER" --team-id="$APPLE_DEV_ID" --apple-id "$APPLE_USER" --password "$APPLE_PW"
+xcrun notarytool submit 'out/Devstia-darwin-x64/Devstia.zip' --keychain-profile "$APPLE_USER" --apple-id "$APPLE_USER" --password "$APPLE_PW" --wait

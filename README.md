@@ -64,7 +64,12 @@ On Apple Macintosh, use the automated build script `build-app-mac-amd64.sh` to b
 * A Macintosh system matching the platform architecture of the binary being build; an Intel-based Macintosh or Apple Silicon M1, M2 or M3 based Macintosh.
 * The application is digitally code signed using the XCode SDK, ensure the SDK is installed and that the codesign command is apart of the command line path.
 * You must have a valid Apple Developer License with associated Apple Username/email, Apple Developer ID, and Apple Developer application password. 
-* You must set the environment variables for APPLE_USER, APPLE_PW, and APPLE_DEV_ID, i.e. `APPLE_USER=steve@steveorevo.com\nAPPLE_PW=0123-4567-89AB-CDEF\nAPPLE_DEV_ID=ABCDE12345`
+* You must set the environment variables for APPLE_USER, APPLE_PW, and APPLE_DEV_ID, For example:
+```
+APPLE_USER=steve@steveorevo.com
+APPLE_PW=0123-4567-89AB-CDEF
+APPLE_DEV_ID=ABCDE12345
+```
 
 &nbsp;
 
