@@ -56,7 +56,10 @@ On Windows, use the automated build script `build-app-win-amd64.bat` to build th
 * A Windows system matching the platform architecture of the binary being built; currently only x86-64bit compatible systems are supported on Windows.
 * The application is digitally code signed using the Windows SDK, ensure the SDK is installed and that the signtool is apart of the command line path i.e. `set PATH=%PATH%;"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"`.
 * The application is distributed with an automated installer; Inno Setup. The free Inno Setup project at https://jrsoftware.org/isinfo is used to create the installer via the included project file `installer.iss`. Ensure the Inno Setup command line tool is apart of the command line path i.e. `set PATH=%PATH%;"C:\Program Files (x86)\Inno Setup 6"`.
-* You must set the environment variable `WIN_CERT_SUBJECT_NAME` with a valid subject name of the Windows compatible signer's certificate. This is used to locate the certificate in the Windows Certificate Store used to sign the files i.e. `set "WIN_CERT_SUBJECT_NAME=Open Source Developer, Stephen Carnam"`.
+* You must set the environment variable `WIN_CERT_SUBJECT_NAME` with a valid subject name of the Windows compatible signer's certificate. This is used to locate the certificate in the Windows Certificate Store used to sign the files i.e.: 
+```
+set "WIN_CERT_SUBJECT_NAME=Open Source Developer, Stephen Carnam"
+```
 
 ### For Macintosh
 On Apple Macintosh, use the automated build script `build-app-mac-amd64.sh` to build the Macintosh x86-64-bit compatible application or `build-app-mac-arm64.sh` to build the Apple Silicon M1, M2, or M3 compatible application; and digitally sign the application binary. The following prerequisites are needed:

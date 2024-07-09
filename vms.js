@@ -708,8 +708,8 @@ var VMS = {
             startup = 'startup.bat';
         }
         const startupScript = path.join(this.pwSettings.appFolder, 'scripts', startup);
-        let cmd = '"' + startupScript + '" ' + this.pwSettings.sshPort;
-        cmd += ' ' + this.pwSettings.cpPort + ' "' + this.pwSettings.vmsFolder + '"';
+        let cmd = '"' + startupScript + '" ' + this.pwSettings.vmsMemory + 'G ' + this.pwSettings.vmsCPUs + ' ';
+        cmd += this.pwSettings.sshPort + ' ' + this.pwSettings.cpPort + ' "' + this.pwSettings.vmsFolder + '"';
         if (this.pwSettings.fsMode.toLowerCase() == 'samba') {
             cmd += ' ",hostfwd=tcp::445-:445"';
         }else{

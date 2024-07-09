@@ -2,11 +2,14 @@
 #
 # This script is executed by the startup routine in our Devstia app.
 # Optimized for macOS, we use Haswell-v1 CPU, but build with qemu64-v1
+# and specific support for Apple Silicon-based Macs using aarch64.
 #
-sshPort=$1
-cpPort=$2
-vmsFolder="$3"
-samba=$4
+vmsMemory=$1
+vmsCPUs=$2
+sshPort=$3
+cpPort=$4
+vmsFolder="$5"
+samba=$6
 cd "$vmsFolder" || exit
 
 # Check if the CPU architecture 
@@ -23,8 +26,8 @@ if [[ $cpu_arch == *"Intel"* ]]; then
         qemu-system-x86_64 \
                 -machine q35,vmport=off -accel hvf \
                 -cpu Haswell-v1 \
-                -smp cpus=4,sockets=1,cores=4,threads=1 \
-                -m 4G \
+                -smp cpus=$vmsCPUs,sockets=1,cores=$vmsCPUs,threads=1 \
+                -m $vmsMemory \
                 -vga virtio \
                 -bios bios.img \
                 -display default,show-cursor=on \

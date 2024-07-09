@@ -41,11 +41,30 @@
                     </div>
                 </div>
             </div>
+            <div class="datagrid-title" style="margin-top:-8px">Resources</div>
+            <div class="datagrid-content row" style="margin-top:9px;">
+                <div class="text-secondary w-33">
+                    Mem.
+                    <div class="mx-2 d-inline-block">
+                      <input id="vmsMemory" type="text" class="form-control form-control-sm" size="2" aria-label="Memory">
+                    </div>
+                </div>
+                <div class="text-secondary w-33">
+                    CPUs
+                    <div class="mx-2 d-inline-block">
+                      <input id="vmsCPUs" type="text" class="form-control form-control-sm" size="2" aria-label="Logical CPUs">
+                    </div>
+                </div>
+                <div class="w-33" style="text-align:right;">
+                    <a href="#" id="saveResources" class="btn btn-pill btn-primary btn-sm">Save</a>
+                </div>
+            </div>
+            <p> </p>
             <div class="datagrid-title">Snapshots</div>
             <div class="datagrid-content row inline-btns">
-                <a href="#createSnapshot" id="createSnapshot" class="btn btn-secondary w-100">Create Snapshot</a>
-                <p> </p>
-                <a href="#restoreSnapshot" id="restoreSnapshot" class="btn btn-secondary w-100">Restore Snapshot</a>
+                <a href="#createSnapshot" id="createSnapshot" class="btn btn-secondary w-50">Create</a>
+                <!-- <p> </p> -->
+                <a href="#restoreSnapshot" id="restoreSnapshot" class="btn btn-secondary w-50">Restore</a>
                 <p> </p>
                 <a href="#erase" id="erase" class="btn btn-outline-danger w-100">Erase &amp; Re-install Server</a>
             </div>            
@@ -144,6 +163,20 @@
         });
     }
 
+    // Handle Resources
+    $('#saveResources').click( (r) => {
+        $('#saveResources').addClass('disabled');
+        let vmsMemory = parseInt($('#vmsMemory').val(), 10);
+        vmsMemory = isNaN(vmsMemory) || vmsMemory === 0 ? 4 : vmsMemory;
+        let vmsCPUs = parseInt($('#vmsCPUs').val(), 10);
+        vmsCPUs = isNaN(vmsCPUs) || vmsCPUs === 0 ? 4 : vmsCPUs;
+        ipcComm.send('saveResources', { 'vmsMemory': vmsMemory, 'vmsCPUs': vmsCPUs }, function() {
+            $('#saveResources').removeClass('disabled');
+            alert("Saved. You must restart the server for changes to take effect.");
+        });
+    });
+
+
     // Handle Snapshots
     $('#createSnapshot').click( (r) => {
         $('#createSnapshot').addClass('disabled');
@@ -188,6 +221,9 @@
         showSystemWaiting('Stopping server...');
         ipcComm.send('quit', true);
     });
+
+    // Fillout the memory and cpu fields is in security.html
+    
 </script>
 <script src="links.js"></script>
 <style>

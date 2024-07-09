@@ -3,16 +3,18 @@
 :: This script is executed by the startup routine in our Devstia app.
 :: Optimized for Windows 10 with Hyper-V
 :: 
-set sshPort=%1
-set cpPort=%2
-set vmsFolder=%3
-set samba=%4
+set vmsMemory=%1
+set vmsCPUs=%2
+set sshPort=%3
+set cpPort=%4
+set vmsFolder=%5
+set samba=%6
 cd /d "%vmsFolder%" || exit /b
 qemu-system-x86_64 ^
         -machine q35,vmport=off -accel whpx,kernel-irqchip=off ^
         -cpu qemu64-v1 ^
-        -smp cpus=4,sockets=1,cores=4,threads=1 ^
-        -m 4G ^
+        -smp cpus=%vmsCPUs%,sockets=1,cores=%vmsCPUs%,threads=1 ^
+        -m %vmsMemory% ^
         -vga virtio ^
         -bios bios.img ^
         -display default,show-cursor=on ^

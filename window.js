@@ -235,6 +235,16 @@ var Window = {
             }
         });
 
+        // Handle saving resources
+        ipcMain.on('saveResources', function(event, newSettings) {
+            let pwSettings = Settings.read();
+            pwSettings.vmsMemory = newSettings.vmsMemory;
+            pwSettings.vmsCPUs = newSettings.vmsCPUs;
+            Settings.save(pwSettings);
+            VMS.pwSettings = pwSettings;
+            event.sender.send(newSettings.uuid);
+        });
+
         // Handle saving settings
         ipcMain.on('savePass', function(event, newSettings) {
             let pwSettings = Settings.read();

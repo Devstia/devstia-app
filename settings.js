@@ -93,6 +93,8 @@ var Settings = {
             version: packageJson.version,
             webFolder: path.join(app.getPath('home'), 'Sites'),
             pwPass: 'preview',
+            vmsMemory: 2,
+            vmsCPUs: 2,
             sshPort: 8022,
             cpPort: 8083,
             fsMode: 'None',
