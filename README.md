@@ -56,7 +56,7 @@ On Windows, use the automated build script `build-app-win-amd64.bat` to build th
 * A Windows system matching the platform architecture of the binary being built; currently only x86-64bit compatible systems are supported on Windows.
 * The application is digitally code signed using the Windows SDK, ensure the SDK is installed and that the signtool is apart of the command line path i.e. `set PATH=%PATH%;"C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"`.
 * The application is distributed with an automated installer; Inno Setup. The free Inno Setup project at https://jrsoftware.org/isinfo is used to create the installer via the included project file `installer.iss`. Ensure the Inno Setup command line tool is apart of the command line path i.e. `set PATH=%PATH%;"C:\Program Files (x86)\Inno Setup 6"`.
-* You must set the environment variable `WIN_CERT_SUBJECT_NAME` with a valid subject name of the Windows compatible signer's certificate. This is used to locate the certificate in the Windows Certificate Store used to sign the files i.e.: 
+* You must set the variable for `WIN_CERT_SUBJECT_NAME` with a valid subject name of the Windows compatible signer's certificate *at the top of the build script file*. This is used to locate the certificate in the Windows Certificate Store used to sign the files i.e.: 
 ```
 set "WIN_CERT_SUBJECT_NAME=Open Source Developer, Stephen Carnam"
 ```
@@ -67,11 +67,11 @@ On Apple Macintosh, use the automated build script `build-app-mac-amd64.sh` to b
 * A Macintosh system matching the platform architecture of the binary being build; an Intel-based Macintosh or Apple Silicon M1, M2 or M3 based Macintosh.
 * The application is digitally code signed using the XCode SDK, ensure the SDK is installed and that the codesign command is apart of the command line path.
 * You must have a valid Apple Developer License with associated Apple Username/email, Apple Developer ID, and Apple Developer application password. 
-* You must set the environment variables for APPLE_USER, APPLE_PW, and APPLE_DEV_ID, For example:
+* You must set the variables for APPLE_USER, APPLE_PW, and APPLE_DEV_ID, *at the top of the build script file* For example:
 ```
-APPLE_USER=steve@steveorevo.com
-APPLE_PW=0123-4567-89AB-CDEF
-APPLE_DEV_ID=ABCDE12345
+export APPLE_USER="steve@steveorevo.com"
+export APPLE_PW="0123-4567-89AB-CDEF"
+export APPLE_DEV_ID="ABCDE12345"
 ```
 
 &nbsp;

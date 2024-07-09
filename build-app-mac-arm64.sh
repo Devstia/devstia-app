@@ -4,6 +4,11 @@
 # on macOS Apple Silicon compatible systems.
 #
 
+# Required for notarization and code-signing
+export APPLE_USER="steve@steveorevo.com"
+export APPLE_PW="0123-4567-89AB-CDEF"
+export APPLE_DEV_ID="ABCDE12345"
+
 # Check for qemu installation (installed from https://github.com/virtuosoft-dev/devstia-vm)
 qemu_path=$(which qemu-system-aarch64)
 

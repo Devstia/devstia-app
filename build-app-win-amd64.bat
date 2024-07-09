@@ -2,6 +2,10 @@
 :: Get the CYGWIN dependencies for our runtime folder.
 :: 
 @echo off
+
+:: Required for code-signing
+set "WIN_CERT_SUBJECT_NAME=Open Source Developer, Stephen Carnam"
+
 :: Check for qemu installation (installed from https://github.com/virtuosoft-dev/devstia-vm)
 if not exist "C:\Program Files\qemu\qemu-system-x86_64.exe" (
     echo Error: qemu-system-x86_64.exe is not installed.
