@@ -50,8 +50,8 @@ if [[ $cpu_arch == *"Apple M"* ]]; then
                 -machine virt -accel hvf \
                 -cpu host \
                 -vga none \
-                -smp cpus=4,sockets=1,cores=4,threads=1 \
-                -m 4G \
+                -smp cpus=$vmsCPUs,sockets=1,cores=$vmsCPUs,threads=1 \
+                -m $vmsMemory \
                 -drive if=pflash,format=raw,file=efi_arm64.img,file.locking=off,readonly=on \
                 -drive if=pflash,format=raw,file=efi_arm64_vars.img \
                 -device virtio-blk-pci,drive=drivedevstia-arm64,bootindex=0 \
