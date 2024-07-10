@@ -11,6 +11,7 @@ export APPLE_DEV_ID="ABCDE12345"
 
 # Check for qemu installation (installed from https://github.com/virtuosoft-dev/devstia-vm)
 qemu_path=$(which qemu-system-aarch64)
+qemu_img_path=$(which qemu-img)
 
 if [ -z "$qemu_path" ]; then
   echo 'Error: qemu-system-aarch64 is not installed.' >&2
@@ -40,8 +41,9 @@ mkdir -p ./runtime/darwin_arm64/bin
 mkdir -p ./runtime/darwin_arm64/lib
 mkdir -p ./runtime/darwin_arm64/share/qemu
 
-# Copy qemu-system-aarch64 to runtime folder for macOS
+# Copy qemu-system-aarch64, qemu-img to runtime folder for macOS
 cp -f "$qemu_path" ./runtime/darwin_arm64/bin/
+cp -f "$qemu_img_path" ./runtime/darwin_arm64/bin/
 
 # Copy each dependency to runtime folder for macOS
 for i in "${arr[@]}"; do
@@ -86,6 +88,7 @@ npm run package
 # (Note: This is a temporary workaround until electron-builder supports Apple Silicon)
 # (Note: You will need to replace the APPLE_DEV_ID, APPLE_USER, and APPLE_PW variables with your own)
 codesign --entitlements ./entitlements/qemu.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-arm64/Devstia.app/Contents/Resources/app/runtime/darwin_arm64/bin/qemu-system-aarch64
+codesign --entitlements ./entitlements/qemu.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-arm64/Devstia.app/Contents/Resources/app/runtime/darwin_arm64/bin/qemu-img
 codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" out/Devstia-darwin-arm64/Devstia.app/Contents/Frameworks/Squirrel.framework/Versions/A/Resources/ShipIt
 find out/Devstia-darwin-arm64/Devstia.app/Contents/Resources/app/runtime/darwin_arm64/lib/ -name '*.dylib' -exec codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
 find "out/Devstia-darwin-arm64/Devstia.app/Contents/Frameworks/Electron Framework.framework/" -name '*.dylib' -exec codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;

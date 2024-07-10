@@ -417,9 +417,18 @@ var Window = {
                     global.Window.executeJavaScript("showSystemWaiting('Compacting snapshot...<br> Please wait');");
 
                     // Create a compact copy of the current server
+                    let snapshot = 'snapshot.sh';
+                    if (process.platform === 'win32') {
+                        snapshot = 'snapshot.bat';
+                    }
+                    const path = require('path');
+                    const snapshotScript = path.join(VMS.pwSettings.appFolder, 'scripts', snapshot);
+                    let cmd = '"' + snapshotScript + '" "' + vmsFilePath + '" "' + filePath + '"';
+
                     const { exec } = require('child_process');
-                    const convertCommand = `qemu-img convert -O qcow2 "${vmsFilePath}" "${filePath}"`;
-                    exec(convertCommand, (err, stdout, stderr) => {
+                    const runtimePath = path.join(__dirname, 'runtime', process.platform + '_' +  process.arch, 'bin')
+                                        + path.delimiter + `${process.env.PATH}${path.delimiter}`;
+                    exec(cmd, { env: { PATH: runtimePath } }, (err, stdout, stderr) => {
                         if (err) {
                             console.error(`exec error: ${err}`);
                             return;

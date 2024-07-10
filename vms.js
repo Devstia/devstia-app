@@ -715,7 +715,6 @@ var VMS = {
         }else{
             cmd += ' ""';
         }
-        console.log(cmd);
         const { exec } = require('child_process');
         var exec_error = "";
         const child = exec(cmd, { env: { PATH: runtimePath }, detached: true }, (error, stdout, stderr) => {

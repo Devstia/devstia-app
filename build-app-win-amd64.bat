@@ -101,6 +101,8 @@ rmdir /s /q temp
 copy /Y "C:\Program Files\qemu\share\kvmvapic.bin" ".\runtime\win32_x64\bin\share\kvmvapic.bin"
 copy /Y "C:\Program Files\qemu\share\vgabios-virtio.bin" ".\runtime\win32_x64\bin\share\vgabios-virtio.bin"
 copy /Y "C:\Program Files\qemu\share\efi-e1000e.rom" ".\runtime\win32_x64\bin\share\efi-e1000e.rom"
+copy /Y "C:\Program Files\qemu\qemu-img.exe" ".\runtime\win32_x64\bin\qemu-img.exe"
+
 
 :: Package the application
 call npm run package
@@ -125,7 +127,7 @@ if "%WIN_CERT_SUBJECT_NAME%"=="" (
 )
 
 :: Sign the application binaries
-signtool sign /n "%WIN_CERT_SUBJECT_NAME%" /t http://time.certum.pl/ /fd sha256 /v ".\out\Devstia-win32-x64\Devstia.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\qemu-system-x86_64.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\ssh.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\tar.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\xz.exe"
+signtool sign /n "%WIN_CERT_SUBJECT_NAME%" /t http://time.certum.pl/ /fd sha256 /v ".\out\Devstia-win32-x64\Devstia.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\qemu-img.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\qemu-system-x86_64.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\ssh.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\tar.exe" ".\out\Devstia-win32-x64\resources\app\runtime\win32_x64\bin\xz.exe"
 
 :: Check that the Inno Setup ISCC tool is in the PATH
 @echo off
