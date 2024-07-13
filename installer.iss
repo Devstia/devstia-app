@@ -1,7 +1,7 @@
 ; Inno Setup Script for creating an installer for Windows x86_64-bit systems
 
 #define MyAppName "Devstia Preview"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Virtuosoft"
 #define MyAppURL "https://devstia.com"
 #define MyAppExeName "Devstia.exe"
