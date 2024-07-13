@@ -11,4 +11,4 @@ qemu_img_path=$(which qemu-img)
 lib_path=$(dirname "$qemu_img_path")/../lib
 export DYLD_FALLBACK_LIBRARY_PATH="$lib_path"
 
-qemu-img convert -O qcow2 "$vmsFilePath" "$outputFilePath"
+qemu-img convert -O qcow2 -c "$vmsFilePath" "$outputFilePath"

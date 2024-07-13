@@ -5,4 +5,4 @@
 set vmsFilePath=%1
 set outputFilePath=%2
 
-qemu-img convert -O qcow2 "%vmsFilePath%" "%outputFilePath%"
+qemu-img convert -O qcow2 -c "%vmsFilePath%" "%outputFilePath%"
