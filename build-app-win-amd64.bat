@@ -144,6 +144,9 @@ if !ERRORLEVEL! equ 0 (
 del temp.txt
 endlocal
 
+:: Update MyAppVersion in installer.iss
+call update_MyAppVersion.bat
+
 :: Build the setup installer
 iscc installer.iss
 
