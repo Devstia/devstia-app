@@ -3,9 +3,7 @@ Virtuosoft's [Devstia Preview](https://devstia.com/preview) is a fully featured,
 
 These features help facilitate running and developing diverse web based applications. It is offered as an "optimized" server, specific for the user's OS platform (Linux, Windows, or macOS) and is built specifically for modern hardware architectures (ARM64/Apple Silicon and AMD64/Intel x86, 64-bit processors). The application can optionally connect to [https://devstia.com](https://devstia.com) to obtain community updates and optional premium features.
 
-:star: **For pre-built binaries and support** :star:, visit [https://devstia.com](https://devstia.com).
-
-> :warning: !!! Note: this repo is in progress; when completed, a release will appear in the release tab.
+:star: **For pre-built binaries and support** :star:, visit [https://devstia.com](https://devstia.com) and/or see the signed binaries for the tagged release associated with your platform (check notes). 
 
 &nbsp;
 
