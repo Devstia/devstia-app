@@ -33,7 +33,7 @@ cd devstia-app
 
 ```
 npm install
-nipm run package
+npm run package
 ```
 
 
