@@ -98,4 +98,4 @@ find "out/Devstia-darwin-x64/Devstia.app/Contents/Frameworks/Electron Framework.
 codesign --entitlements ./entitlements/devstia.plist --deep --options runtime --force --verbose --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app
 ditto -c -k --keepParent out/Devstia-darwin-x64/Devstia.app out/Devstia-darwin-x64/Devstia-Apple-Intel.zip
 xcrun notarytool store-credentials "$APPLE_USER" --team-id="$APPLE_DEV_ID" --apple-id "$APPLE_USER" --password "$APPLE_PW"
-xcrun notarytool submit 'out/Devstia-darwin-x64/Devstia-Apple-Intel' --keychain-profile "$APPLE_USER" --apple-id "$APPLE_USER" --password "$APPLE_PW" --wait
+xcrun notarytool submit 'out/Devstia-darwin-x64/Devstia-Apple-Intel.zip' --keychain-profile "$APPLE_USER" --apple-id "$APPLE_USER" --password "$APPLE_PW" --wait
