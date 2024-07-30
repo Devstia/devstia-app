@@ -121,6 +121,9 @@ var Settings = {
         }else{
             this.save(pwSettings); // Save the default settings
         }
+
+        // Always reflect package version
+        pwSettings.version = packageJson.version;
         return pwSettings;
     },
 

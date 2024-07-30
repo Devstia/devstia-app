@@ -189,6 +189,7 @@
             $('#lan-ip').val(pwSettings.lanIP);
             $('#vmsMemory').val(pwSettings.vmsMemory);
             $('#vmsCPUs').val(pwSettings.vmsCPUs);
+            $('#devPwVersion').html("Version " + pwSettings.version);
             
             if (pwSettings.showTips) {
                 showTips();
