@@ -106,6 +106,10 @@ copy /Y "C:\Program Files\qemu\qemu-img.exe" ".\runtime\win32_x64\bin\qemu-img.e
 
 :: Package the application
 call npm run package
+
+:: Remove build scripts from the package to omit developer credentials
+del ".\out\Devstia-win32-x64\resources\app\build-*"
+
 :: Sign the application binaries
 
 :: Check if signtool is in the PATH
@@ -153,3 +157,14 @@ iscc installer.iss
 :: Sign the installer
 signtool sign /n "%WIN_CERT_SUBJECT_NAME%" /t http://time.certum.pl/ /fd sha256 /v ".\out\inno-setup\Devstia Preview Setup.exe"
 
+:: Zip the installer with platform label
+setlocal
+
+:: Define the source directory and the destination zip file
+set "source=.\out\inno-setup\Devstia Preview Setup.exe"
+set "destination=.\out\inno-setup\Devstia-Windows-x64.zip"
+
+:: Use PowerShell to create the zip file
+powershell -command "Compress-Archive -Path '%source%' -DestinationPath '%destination%'"
+
+endlocal

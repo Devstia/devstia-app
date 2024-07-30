@@ -5,9 +5,9 @@
 #
 
 # Required for notarization and code-signing
-export APPLE_USER="steve@steveorevo.com"
-export APPLE_PW="0123-4567-89AB-CDEF"
-export APPLE_DEV_ID="ABCDE12345"
+# export APPLE_USER="steve@steveorevo.com"
+# export APPLE_PW="0123-4567-89AB-CDEF"
+# export APPLE_DEV_ID="ABCDE12345"
 
 # Check for qemu installation (installed from https://github.com/virtuosoft-dev/devstia-vm)
 qemu_path=$(which qemu-system-x86_64)
@@ -84,6 +84,9 @@ cp -f "$efi_virtio_path" ./runtime/darwin_x64/share/qemu/
 # Package the application
 npm run package
 
+# Remove build scripts from the package to omit developer credentials
+rm -rf out/Devstia-darwin-x64/Devstia.app/Contents/Resources/app/build-*
+
 # Sign and notarize the application manually
 # (Note: This is a temporary workaround until electron-builder supports Apple Silicon)
 # (Note: You will need to replace the APPLE_DEV_ID, APPLE_USER, and APPLE_PW variables with your own)
@@ -93,6 +96,6 @@ codesign --entitlements ./entitlements/devstia.plist --force --options runtime -
 find out/Devstia-darwin-x64/Devstia.app/Contents/Resources/app/runtime/darwin_x64/lib/ -name '*.dylib' -exec codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
 find "out/Devstia-darwin-x64/Devstia.app/Contents/Frameworks/Electron Framework.framework/" -name '*.dylib' -exec codesign --entitlements ./entitlements/devstia.plist --force --options runtime --timestamp --sign "$APPLE_DEV_ID" {} \;
 codesign --entitlements ./entitlements/devstia.plist --deep --options runtime --force --verbose --sign "$APPLE_DEV_ID" out/Devstia-darwin-x64/Devstia.app
-ditto -c -k --keepParent out/Devstia-darwin-x64/Devstia.app out/Devstia-darwin-x64/Devstia.zip
+ditto -c -k --keepParent out/Devstia-darwin-x64/Devstia.app out/Devstia-darwin-x64/Devstia-Apple-Intel.zip
 xcrun notarytool store-credentials "$APPLE_USER" --team-id="$APPLE_DEV_ID" --apple-id "$APPLE_USER" --password "$APPLE_PW"
-xcrun notarytool submit 'out/Devstia-darwin-x64/Devstia.zip' --keychain-profile "$APPLE_USER" --apple-id "$APPLE_USER" --password "$APPLE_PW" --wait
+xcrun notarytool submit 'out/Devstia-darwin-x64/Devstia-Apple-Intel' --keychain-profile "$APPLE_USER" --apple-id "$APPLE_USER" --password "$APPLE_PW" --wait
