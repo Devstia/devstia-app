@@ -18,10 +18,17 @@ app.on('ready', () => {
 
     // On Windows, check for Hyper-V, if not enabled ask to enable/reboot
     if (process.platform === 'win32') {
-        const { execSync } = require('child_process');
-        const stdout = execSync('powershell -Command get-service | findstr vmcompute');
-        if (stdout.indexOf('Hyper-V') == -1) {
-
+        let isHyperVEnabled = false;
+        try {
+            const { execSync } = require('child_process');
+            const stdout = execSync('powershell -Command get-service | findstr vmcompute');
+            if (stdout.indexOf('Hyper-V') != -1) {
+                isHyperVEnabled = true;
+            }
+        }catch(err) {
+            isHyperVEnabled = false;
+        }
+        if (!isHyperVEnabled) {
             // Display message to user to enable Hyper-V
             const { dialog } = require('electron');
             const options = {
