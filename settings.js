@@ -11,7 +11,7 @@ var Settings = {
      */
     decrypt: function(data) {
         const crypto = require('crypto');
-        const key = crypto.createHash('md5').update('devstia-preview').digest('hex');
+        const key = crypto.createHash('md5').update('devstia-pw').digest('hex');
         let encryptedText = data.split(':');
         let iv = encryptedText[1];
         iv = Buffer.from(iv, 'base64');
@@ -37,7 +37,7 @@ var Settings = {
      */
     encrypt: function(data) {
         const crypto = require('crypto');
-        const key = crypto.createHash('md5').update('devstia-preview').digest('hex');
+        const key = crypto.createHash('md5').update('devstia-pw').digest('hex');
         let iv = crypto.randomBytes(16);
         let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
         let encrypted = cipher.update(data);
@@ -92,7 +92,7 @@ var Settings = {
         let pwSettings = {
             version: packageJson.version,
             webFolder: path.join(app.getPath('home'), 'Sites'),
-            pwPass: 'preview',
+            pwPass: 'personalweb',
             vmsMemory: 2,
             vmsCPUs: 2,
             sshPort: 8022,

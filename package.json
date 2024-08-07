@@ -1,10 +1,10 @@
 {
   "name": "@virtuosoft/devstia-app",
   "version": "1.0.2",
-  "description": "Virtuosoft's Devstia Preview (a localhost development server) for running and developing web applications locally.",
+  "description": "Virtuosoft's Devstia Personal Web (a localhost development server) for running and developing web applications locally.",
   "main": "main.js",
   "build": {
-    "appId": "com.devstia.preview"
+    "appId": "com.devstia.pw"
   },
   "scripts": {
     "start": "electron-forge start",

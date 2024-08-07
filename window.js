@@ -29,7 +29,7 @@ var Window = {
         dialog.showMessageBoxSync({
             type: 'info',
             message: message,
-            title: 'Devstia Preview - ' + title,
+            title: 'Devstia Personal Web - ' + title,
             icon: nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`)
         });
     },
@@ -73,7 +73,7 @@ var Window = {
                 width: size.width,
                 height: size.height,
                 modal: true,
-                title: 'Devstia Preview',
+                title: 'Devstia Personal Web',
                 maximizable: false,
                 minimizable: false,
                 resizable: false,
@@ -310,7 +310,7 @@ var Window = {
         ipcMain.on('erase', function(event, arg) {
             const prompt = require('electron-prompt');
             prompt({
-                title: 'Devstia Preview - WARNING',
+                title: 'Devstia Personal Web - WARNING',
                 label: '<div style="font-size:smaller;"><span style="font-weight: bold;">WARNING:</span> This will destroy all sites and reset the server installation. <br>Please type "ERASE" to confirm.</div>',
                 value: '',
                 inputAttrs: {
@@ -349,7 +349,7 @@ var Window = {
                         // Show the custom error message box
                         const options = {
                             type: 'error',
-                            title: 'Devstia Preview - Invalid Input',
+                            title: 'Devstia Personal Web - Invalid Input',
                             message: 'Incorrect validation.',
                             detail: 'Please type "ERASE" to confirm.',
                             buttons: ['OK'],
@@ -522,7 +522,7 @@ var Window = {
             const nativeImage = require('electron').nativeImage;
             const confirmOptions = {
                 type: 'warning',
-                title: 'Devstia Preview - Regenerate Certificates',
+                title: 'Devstia Personal Web - Regenerate Certificates',
                 message: 'Regenerating certificates will delete and replace the master certificate and all current website certificates. Are you sure?',
                 buttons: ['Yes', 'No'],
                 icon: nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`),
@@ -548,7 +548,7 @@ var Window = {
             const nativeImage = require('electron').nativeImage;
             const confirmOptions = {
                 type: 'warning',
-                title: 'Devstia Preview - Regenerate SSH Keys',
+                title: 'Devstia Personal Web - Regenerate SSH Keys',
                 message: 'Regenerating SSH keys will delete and replace the current SSH keys. Are you sure?',
                 buttons: ['Yes', 'No'],
                 icon: nativeImage.createFromPath(`${app.getAppPath()}/images/dev_pw.png`),

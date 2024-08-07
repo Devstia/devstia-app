@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Devstia Preview - Settings</title>
+    <title>Devstia Personal Web - Settings</title>
     <script src="../node_modules/@tabler/core/dist/js/tabler.min.js"></script>
     <link rel="stylesheet" href="../node_modules/@tabler/core/dist/css/tabler.min.css">
     <link rel="stylesheet" href="./style.css" media="all" />
@@ -71,7 +71,7 @@
     </script>
 
     <div class="card">
-        <a href="https://devstia.com/preview" class="nav-link">
+        <a href="https://devstia.com/personal-web" class="nav-link">
             <div id="devstia-logo"></div>
         </a>
         <div class="card-header">
@@ -152,7 +152,7 @@
         // Help button
         const helpButton = document.getElementById('help-button');
         helpButton.addEventListener('click', () => {
-            ipcComm.send('openLink', 'https://devstia.com/preview/support');
+            ipcComm.send('openLink', 'https://devstia.com/personal-web/support');
         });      
 
         // Close button

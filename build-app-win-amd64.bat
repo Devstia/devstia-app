@@ -155,13 +155,13 @@ call update_MyAppVersion.bat
 iscc installer.iss
 
 :: Sign the installer
-signtool sign /n "%WIN_CERT_SUBJECT_NAME%" /t http://time.certum.pl/ /fd sha256 /v ".\out\inno-setup\Devstia Preview Setup.exe"
+signtool sign /n "%WIN_CERT_SUBJECT_NAME%" /t http://time.certum.pl/ /fd sha256 /v ".\out\inno-setup\Devstia PW Setup.exe"
 
 :: Zip the installer with platform label
 setlocal
 
 :: Define the source directory and the destination zip file
-set "source=.\out\inno-setup\Devstia Preview Setup.exe"
+set "source=.\out\inno-setup\Devstia PW Setup.exe"
 set "destination=.\out\inno-setup\Devstia-Windows-x64.zip"
 
 :: Use PowerShell to create the zip file

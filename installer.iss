@@ -1,6 +1,6 @@
 ; Inno Setup Script for creating an installer for Windows x86_64-bit systems
 
-#define MyAppName "Devstia Preview"
+#define MyAppName "Devstia Personal Web"
 #define MyAppVersion "1.0.2"
 #define MyAppPublisher "Virtuosoft"
 #define MyAppURL "https://devstia.com"
@@ -23,7 +23,7 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ; PrivilegesRequired=lowest
 OutputDir=out\inno-setup
-OutputBaseFilename="Devstia Preview Setup"
+OutputBaseFilename="Devstia PW Setup"
 SetupIconFile=images\dev_pw_setup.ico
 UninstallDisplayIcon=images\dev_pw.ico
 Compression=lzma

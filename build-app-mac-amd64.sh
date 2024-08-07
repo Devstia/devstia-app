@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Virtuosoft build script for Devstia Preview (a localhost development server)
+# Virtuosoft build script for Devstia Personal Web (a localhost development server)
 # on macOS x86 64-bit compatible systems.
 #
 

@@ -1,5 +1,5 @@
 /**
- * Virtuosoft - Devstria Preview (a localhost development server)
+ * Virtuosoft - Devstria Personal Web (a localhost development server)
  * 
  * TODO: rewrite everything using VueJS :)
  */
@@ -33,7 +33,7 @@ app.on('ready', () => {
             const { dialog } = require('electron');
             const options = {
                 type: 'info',
-                title: 'Devstia Preview - Hyper-V is not enabled',
+                title: 'Devstia Personal Web - Hyper-V is not enabled',
                 message: "Hyper-V is not enabled, please enable it.\n\nClick Windows' Start button, type \"Turn Windows Features on or off\", check Hyper-V.",
                 buttons: ['OK']
             };

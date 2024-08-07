@@ -136,7 +136,7 @@ var VMS = {
                                     const { dialog } = require('electron');
                                     dialog.showMessageBoxSync({
                                         type: 'error',
-                                        title: 'Devstia Preview - Download Error',
+                                        title: 'Devstia Personal Web - Download Error',
                                         message: 'File download aborted. Please try again.',
                                         buttons: ['OK']
                                     });
@@ -317,7 +317,7 @@ var VMS = {
             const command = `ELECTRON_RUN_AS_NODE=1 "${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}" > /dev/null 2>&1 &`;
             const sudo = require('sudo-prompt');
             const options = {
-                name: 'Devstia Preview'
+                name: 'Devstia Personal Web'
             };
             sudo.exec(command, options, (error, stdout, stderr) => {
                 if (error) throw error;
@@ -338,7 +338,7 @@ var VMS = {
                     const { dialog } = require('electron');
                     dialog.showMessageBoxSync({
                         type: 'error',
-                        title: 'Devstia Preview - DNS Error',
+                        title: 'Devstia Personal Web - DNS Error',
                         message: 'DNS proxy server cannot start. Port 53 is already in use. Try stopping "Host Network Service" and "Internet Connection Sharing" from Windows\' Services panel.',
                         buttons: ['OK']
                     });
@@ -353,7 +353,7 @@ var VMS = {
             const command = `start /b "set ELECTRON_RUN_AS_NODE=1" && "${process.execPath}" "${scriptPath}" "${this.pwSettings.appFolder}" > nul 2>&1`;
             const sudo = require('sudo-prompt');
             const options = {
-                name: 'Devstia Preview'
+                name: 'Devstia Personal Web'
             };
             sudo.exec(command, options, (error, stdout, stderr) => {
                 if (error) throw error;
@@ -395,7 +395,7 @@ var VMS = {
             const sudo = require('sudo-prompt');
             const killCommand = "kill -SIGUSR2 " + pid;
             const options = {
-                name: 'Devstia Preview'
+                name: 'Devstia Personal Web'
             };
             sudo.exec(killCommand, options, (error, stdout, stderr) => {
                 if (error) throw error;
@@ -408,7 +408,7 @@ var VMS = {
             killCommand = "taskkill /F /PID " + pid;
             const sudo = require('sudo-prompt');
             const options = {
-                name: 'Devstia Preview',
+                name: 'Devstia Personal Web',
             };
             sudo.exec(killCommand, options, (error, stdout, stderr) => {
                 if (error) throw error;
