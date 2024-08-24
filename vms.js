@@ -232,7 +232,7 @@ var VMS = {
         const path = require('path');
         const filename = this.filename;
         const archiveFile = path.join(self.pwSettings.vmsFolder, filename + '.tar.xz');
-        const imageFileSizeGuess = fs.statSync(archiveFile).size * 1.5;
+        const imageFileSizeGuess = fs.statSync(archiveFile).size * 1.25;
         const imageFile = path.join(self.pwSettings.vmsFolder, filename + '.img');
         let pathAddendum = '';
         if (process.platform === 'win32') { // Add runtime binaries to path for tar functionality on Windows
