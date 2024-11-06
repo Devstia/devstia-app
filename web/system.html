@@ -24,7 +24,7 @@
                     <span class="badge badge-outline bg-green-lt" id="nginx">NGINX</span>
                     <span class="badge badge-outline bg-green-lt" id="php-fpm">PHP-FPM</span>
                     <span class="badge badge-outline bg-green-lt" id="postgresql">PostgreSQL</span>
-                    <span class="badge badge-outline bg-green-lt" id="smbd">Samba</span>
+                    <span class="badge badge-outline bg-green-lt" id="smbd">Security</span>
                     <span class="badge badge-outline bg-green-lt" id="vsftpd">VSFTP</span>
                 </div>
                 <div id="status-waiting">
@@ -90,21 +90,35 @@
 <script>
     // Make status initially unknown
     $('.badge').css('opacity', '20%');
+    var initSecurity = false;
 
     // Check status
     function checkStatus() {
         if ($('#waiting-system').is(':visible')) return;
         ipcComm.send('checkStatus', function(stats) {
             $('.badge').css('opacity', '100%');
-            setStatus('apache2', stats.indexOf('[ + ]  apache2') > -1);
-            setStatus('cron', stats.indexOf('[ + ]  cron') > -1);
-            setStatus('hestia', stats.indexOf('[ + ]  hestia') > -1);
-            setStatus('mariadb', stats.indexOf('[ + ]  mariadb') > -1);
-            setStatus('nginx', stats.indexOf('[ + ]  nginx') > -1);
-            setStatus('postgresql', stats.indexOf('[ + ]  postgresql') > -1);
-            setStatus('smbd', stats.indexOf('[ + ]  smbd') > -1);
-            setStatus('vsftpd', stats.indexOf('[ + ]  vsftpd') > -1);
-            setStatus('php-fpm', (stats.indexOf('[ - ]  php') > -1) == false);
+
+            // Get status
+            let bStatus_apache2 = stats.indexOf('[ + ]  apache2') > -1;
+            let bStatus_cron = stats.indexOf('[ + ]  cron') > -1;
+            let bStatus_hestia = stats.indexOf('[ + ]  hestia') > -1;
+            let bStatus_mariadb = stats.indexOf('[ + ]  mariadb') > -1;
+            let bStatus_nginx = stats.indexOf('[ + ]  nginx') > -1;
+            let bStatus_postgresql = stats.indexOf('[ + ]  postgresql') > -1;
+            //let bStatus_smbd = stats.indexOf('[ + ]  smbd') > -1;
+            let bStatus_vsftpd = stats.indexOf('[ + ]  vsftpd') > -1;
+            let bStatus_php_fpm = (stats.indexOf('[ - ]  php') > -1) == false;
+
+            // Set status
+            setStatus('apache2', bStatus_apache2);
+            setStatus('cron', bStatus_cron);
+            setStatus('hestia', bStatus_hestia);
+            setStatus('mariadb', bStatus_mariadb);
+            setStatus('nginx', bStatus_nginx);
+            setStatus('postgresql', bStatus_postgresql);
+            setStatus('smbd', initSecurity); //setStatus('smbd', bStatus_smbd);
+            setStatus('vsftpd', bStatus_vsftpd);
+            setStatus('php-fpm', bStatus_php_fpm);
             hideStatusWait();
         });
     }
@@ -115,7 +129,7 @@
             $('#' + service).removeClass('bg-green-lt').addClass('bg-red');
         }
     }
-    var csInterval = setInterval(checkStatus, 10000);
+    var csInterval = setInterval(checkStatus, 5000);
     showStatusWait();
     checkStatus();
 
@@ -129,6 +143,8 @@
             controls.forEach(function(control) {
                 $('#' + control).removeClass('disabled');
             });
+            initSecurity = true;
+            setStatus('smbd', initSecurity);
         });
     }
     queryTrayMenu();
