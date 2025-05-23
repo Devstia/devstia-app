@@ -1,8 +1,4 @@
 .DS_Store
 build
-temp
 node_modules
-out
-notaryEnv
-
-
+runtime
