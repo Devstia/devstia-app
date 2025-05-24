@@ -13,9 +13,11 @@
  * @param {object} res - The HTTP response object.
  * @returns {Promise<{headers: object, body: string}>} - A Promise resolving to the final headers and body.
  */
-async function processJXM(fileContent, initialHeaders, queryParams, postData, req, res) {
+async function processJXM(fileContent, initialHeaders, queryParams, postData, req, res, devstia) {
     // Split content by JXM tags. Even indices are static, odd are code.
-    const parts = fileContent.split(/<\?jxm|\?>/);
+    // Support <?jxml and <?jxm to <?
+    fileContent = fileContent.replace(/<\?jxml/g, '<?').replace(/<\?jxm/g, '<?');
+    const parts = fileContent.split(/<\?|\?>/);
     let bodyOutput = ''; // Accumulates the final body content
 
     const responseContext = {
@@ -34,7 +36,8 @@ async function processJXM(fileContent, initialHeaders, queryParams, postData, re
         query: queryParams, // GET parameters
         body: postData,     // POST parameters (as URLSearchParams for urlencoded)
         method: req.method, // Expose method
-        headers: req.headers // Expose request headers
+        headers: req.headers, // Expose request headers
+        devstia
         // Add other relevant req properties if needed
     };
 

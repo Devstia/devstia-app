@@ -38,6 +38,7 @@ async function readRequestBody(req) {
  * @returns {http.Server} - The configured HTTP server instance (not started).
  */
 function createServerInstance(options) {
+    const devstia = options.devstia;
     const {
         port,
         rootDir,
@@ -202,10 +203,10 @@ function createServerInstance(options) {
                     serveErrorPage(res, 500);
                     return;
                 }
-            // Handle .jxm files
+            // Handle .jxm, .jxml files
             } else if (extname === '.jxm' || extname === '.jxml' ) {
                 try {
-                    const result = await processJXM(fileBuffer.toString(), responseHeaders, queryParams, postData, req, res);
+                    const result = await processJXM(fileBuffer.toString(), responseHeaders, queryParams, postData, req, res, devstia);
                     responseHeaders = result.headers;
                     responseBody = result.body;
                 } catch (jxmError) {

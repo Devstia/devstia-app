@@ -1,3 +1,7 @@
+// Check for devmode argument
+const args = process.argv.slice(2);
+const devmode = args.includes('devmode');
+
 const SysTray = require('systray2').default;
 const path = require('path');
 const fs = require('fs');
@@ -5,16 +9,17 @@ const fsp = require('fs').promises; // Use promises API for setCGIPermissions
 const open = require('open');
 const { createServerInstance } = require('./server/server'); // Updated path
 const os = require('os'); // Make sure os is required at the top
+const git = require('isomorphic-git');
+const http = require('isomorphic-git/http/node');
+const semver = require('semver');
 
 // --- Configuration ---
 const PORT = 8080;
 const DEFAULT_FILES = ['index.html', 'index.htm', 'index.shtml', 'index.cgi', 'index.jxm'];
 const iconsDir = path.resolve(__dirname, '../images');
 const ERROR_DOCS_DIR = path.resolve(__dirname, '../document_errors');
-const DEFAULT_WEB_SOURCE = path.join(__dirname, '../web'); // Source of default web files
-let WEBDEV_MODE = process.cwd().indexOf('.app/Contents/Resources') === -1;
 
-// --- Determine Root Directory ---
+// Function to get the application data directory
 function getAppDataDir() {
     const homedir = os.homedir();
     switch (process.platform) {
@@ -27,11 +32,40 @@ function getAppDataDir() {
             return path.join(homedir, '.config', '@virtuosoft', 'devstia-app'); // Use .config convention
     }
 }
-const appDataDir = getAppDataDir();
-let ROOT_DIR = path.join(appDataDir, 'web'); // The actual web root the server will use
-if ( WEBDEV_MODE ) {
-    ROOT_DIR = DEFAULT_WEB_SOURCE; // Use the repo's web folder for development
+
+// Function to save the preferences to the preferences.json file
+function savePreferences(preferences = null) {
+    const preferencesPath = path.join(APP_DATA_DIR, 'preferences.json');
+    if (!fs.existsSync(APP_DATA_DIR)) {
+        fs.mkdirSync(APP_DATA_DIR, { recursive: true });
+    }
+    if (preferences == null) {
+        // Copy over the default preferences.json file
+        fs.copyFileSync(path.join(__dirname, './preferences.json'), preferencesPath);
+    }else{
+        // Save the preferences to the preferences.json file
+        fs.writeFileSync(preferencesPath, JSON.stringify(preferences, null, 2), 'utf8');
+        console.log("Preferences saved:", preferences);
+    }
 }
+
+// Function to get the preferences or default values
+function getPreferences() {
+
+    // Create the application data directory if it doesn't exist
+    const preferencesPath = path.join(APP_DATA_DIR, 'preferences.json');
+
+    // Load the preferences.json file
+    if (!fs.existsSync(preferencesPath)) {
+        savePreferences(null); // Create default preferences file
+        console.log("Default preferences file created.");
+    }
+    preferences = JSON.parse(fs.readFileSync(preferencesPath, 'utf8'));
+    return preferences;
+}
+
+const APP_DATA_DIR = getAppDataDir();
+const ROOT_DIR = path.join(APP_DATA_DIR, 'web'); // The actual web root the server will use
 
 // --- CGI Permissions Function (Moved from server.js) ---
 async function setCGIPermissions(directory) {
@@ -66,6 +100,7 @@ async function setCGIPermissions(directory) {
 let serverInstance = null;
 let systray = null;
 let menu = null;
+let preferences = {};
 
 async function startApp() {
     console.log('Starting Devstia PW Application...');
@@ -154,18 +189,167 @@ async function startApp() {
 
     // Initialize root directory
     try {
-        if (!fs.existsSync(ROOT_DIR) && WEBDEV_MODE == false) {
-            console.log(`Root directory (${ROOT_DIR}) not found. Copying default web content...`);
-            fs.mkdirSync(ROOT_DIR, { recursive: true });
-            if (fs.cpSync) {
-                 fs.cpSync(DEFAULT_WEB_SOURCE, ROOT_DIR, { recursive: true });
+        preferences = getPreferences();
+
+        // Check if Internet connection is available
+        const isOnline = await new Promise((resolve) => {
+            const checkOnline = () => {
+                const online = navigator.onLine;
+                resolve(online);
+            };
+            if (typeof navigator !== 'undefined') {
+                checkOnline();
             } else {
-                await fsp.cp(DEFAULT_WEB_SOURCE, ROOT_DIR, { recursive: true });
+                const net = require('net');
+                const socket = new net.Socket();
+                socket.setTimeout(2000);
+                socket.on('connect', () => {
+                    socket.destroy();
+                    resolve(true);
+                });
+                socket.on('timeout', () => {
+                    socket.destroy();
+                    resolve(false);
+                });
+                socket.on('error', () => {
+                    socket.destroy();
+                    resolve(false);
+                });
+                socket.connect(80, 'github.com');
             }
-            console.log(`Default web content copied to ${ROOT_DIR}`);
+        });
+
+        // Check if the root web directory exists
+        if (!fs.existsSync(ROOT_DIR)) {
+
+            // Clone the repository if it doesn't exist and we're online
+            if (isOnline) {
+                if (preferences['devstia-web'] == 'main') {
+                    console.log("Cloning devstia-web main branch into", ROOT_DIR);
+                    try {
+                        await git.clone({
+                            fs,
+                            http,
+                            dir: ROOT_DIR,
+                            url: 'https://github.com/devstia/devstia-web.git',
+                            ref: 'main',
+                            singleBranch: true,
+                            depth: 1
+                        });
+                        console.log("Clone complete.");
+                    } catch (cloneErr) {
+                        console.error("Failed to clone devstia-web:", cloneErr);
+                        process.exit(1);
+                    }
+                } else {
+                    try {
+                        console.log("Fetching tags from devstia-web...");
+                        const tags = await git.listServerRefs({
+                            http,
+                            url: 'https://github.com/devstia/devstia-web.git',
+                            prefix: 'refs/tags/'
+                        });
+
+                        if (!tags.length) {
+                            throw new Error("No tags found in remote repository.");
+                        }
+
+                        const tagNames = tags.map(ref => ref.ref.replace('refs/tags/', ''));
+                        const latestTag = tagNames.sort(semver.rcompare)[0];
+                        console.log(`Cloning latest tag (${latestTag}) into ${ROOT_DIR}`);
+
+                        await git.clone({
+                            fs,
+                            http,
+                            dir: ROOT_DIR,
+                            url: 'https://github.com/devstia/devstia-web.git',
+                            ref: latestTag,
+                            singleBranch: true,
+                            depth: 1
+                        });
+                        console.log("Clone of latest tag complete.");
+                    } catch (err) {
+                        console.error("Failed to clone latest tag of devstia-web:", err);
+                        process.exit(1);
+                    }
+                }
+            }else{
+                console.error(`Error: No Internet connection. Cannot clone repository.`);
+                process.exit(1);
+            }
         } else {
-            console.log(`Web root directory exists: ${ROOT_DIR}`);
+            // Pull latest changes if the directory already exists and we're online
+            if (isOnline && devmode == false) {
+                if (preferences['devstia-web'] == 'main') {
+
+                    // Fetch and hard reset to remote main
+                    try {
+                        console.log("Fetching latest from main branch...");
+                        await git.fetch({
+                            fs,
+                            http,
+                            dir: ROOT_DIR,
+                            url: 'https://github.com/devstia/devstia-web.git',
+                            ref: 'main',
+                            singleBranch: true,
+                            depth: 1
+                        });
+                        await git.checkout({
+                            fs,
+                            dir: ROOT_DIR,
+                            ref: 'main',
+                            force: true
+                        });
+                        console.log("Repo updated to latest main (force checkout).");
+                    } catch (err) {
+                        console.error("Failed to update main branch:", err);
+                        process.exit(1);
+                    }
+                } else {
+
+                    // Fetch tags, determine latest, and hard reset to that tag
+                    try {
+                        console.log("Fetching tags from devstia-web...");
+                        const tags = await git.listServerRefs({
+                            http,
+                            url: 'https://github.com/devstia/devstia-web.git',
+                            prefix: 'refs/tags/'
+                        });
+
+                        if (!tags.length) {
+                            throw new Error("No tags found in remote repository.");
+                        }
+
+                        const tagNames = tags.map(ref => ref.ref.replace('refs/tags/', ''));
+                        const latestTag = tagNames.sort(semver.rcompare)[0];
+                        console.log(`Latest tag is ${latestTag}. Fetching and resetting...`);
+
+                        await git.fetch({
+                            fs,
+                            http,
+                            dir: ROOT_DIR,
+                            url: 'https://github.com/devstia/devstia-web.git',
+                            ref: latestTag,
+                            singleBranch: true,
+                            depth: 1
+                        });
+                        await git.checkout({
+                            fs,
+                            dir: ROOT_DIR,
+                            ref: latestTag,
+                            force: true
+                        });
+                        console.log(`Repo updated to latest tag: ${latestTag} (force checkout).`);
+                    } catch (err) {
+                        console.error("Failed to update to latest tag:", err);
+                        process.exit(1);
+                    }
+                }
+            }else{
+                console.log(`Warning: No Internet connection. Skipping update of ${ROOT_DIR}.`);
+            }
         }
+
     } catch (err) {
         console.error(`Failed to create or populate directory ${ROOT_DIR}:`, err);
         process.exit(1);
@@ -177,11 +361,17 @@ async function startApp() {
     // Create server instance
     try {
         console.log("Creating server instance...");
+        const devstia = {
+            savePreferences: savePreferences,
+            getPreferences: getPreferences,
+            getAppDataDir: getAppDataDir
+        };
         serverInstance = createServerInstance({
             port: PORT,
             rootDir: ROOT_DIR,
             errorDocsDir: ERROR_DOCS_DIR,
-            defaultFiles: DEFAULT_FILES
+            defaultFiles: DEFAULT_FILES,
+            devstia: devstia
         });
 
         await new Promise((resolve, reject) => {
