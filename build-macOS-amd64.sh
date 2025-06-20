@@ -140,7 +140,7 @@ rsync -av --progress \
     --exclude '*.sh' \
     --exclude '.DS_Store' \
     --exclude 'launcher' \
-    src runtime node_modules images document_errors web package.json \
+    scripts src runtime node_modules images document_errors package.json \
     "${APP_RESOURCES_DIR}/"
 
 # --- Copy Node.js Runtime ---

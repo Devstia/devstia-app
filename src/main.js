@@ -15,9 +15,33 @@ const semver = require('semver');
 
 // --- Configuration ---
 const PORT = 8080;
-const DEFAULT_FILES = ['index.html', 'index.htm', 'index.shtml', 'index.cgi', 'index.jxm'];
+const DEFAULT_FILES = ['index.html', 'index.htm', 'index.shtml', 'index.cgi', 'index.jxml', 'index.jxm'];
 const iconsDir = path.resolve(__dirname, '../images');
 const ERROR_DOCS_DIR = path.resolve(__dirname, '../document_errors');
+
+// Function to get the runtime directory
+function getRuntimePlatformDir() {
+    // __dirname is the directory of main.js, so go one level up then append 'runtime'
+    if (process.platform === 'win32') {
+        return path.resolve(__dirname, '../runtime/win_x64');
+    } else if (process.platform === 'darwin') {
+        // Determine architecture for macOS
+        const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+        if (arch === 'arm64') {
+            return path.resolve(__dirname, '../runtime/mac_arm64');
+        }else if (arch === 'x64') {
+            return path.resolve(__dirname, '../runtime/mac_x64');
+        }
+    } else if (process.platform === 'linux') {
+        return path.resolve(__dirname, '../runtime/linux_x64');
+    }
+}
+
+// Function to get the scripts directory
+function getScriptsDir() {
+    // __dirname is the directory of main.js, so go one level up then append 'scripts'
+    return path.resolve(__dirname, '../scripts');
+}
 
 // Function to get the application data directory
 function getAppDataDir() {
@@ -364,7 +388,9 @@ async function startApp() {
         const devstia = {
             savePreferences: savePreferences,
             getPreferences: getPreferences,
-            getAppDataDir: getAppDataDir
+            getAppDataDir: getAppDataDir,
+            getRuntimePlatformDir: getRuntimePlatformDir,
+            getScriptsDir: getScriptsDir
         };
         serverInstance = createServerInstance({
             port: PORT,
@@ -401,7 +427,7 @@ async function startApp() {
         console.error("Failed to create or start server instance:", err);
         process.exit(1);
     }
-    console.log("Devstia PW setup complete.");
+    console.log("Devstia PW init complete.");
 }
 
 // --- Start the Application ---

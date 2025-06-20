@@ -34,7 +34,7 @@ async function readRequestBody(req) {
  * @param {number} options.port - The port number to listen on.
  * @param {string} options.rootDir - The absolute path to the web root directory.
  * @param {string} options.errorDocsDir - The absolute path to the directory containing error documents (e.g., 404.html).
- * @param {string[]} [options.defaultFiles=['index.html', 'index.htm']] - Array of default filenames to look for in directories.
+ * @param {string[]} [options.defaultFiles=['index.html', 'index.htm', 'index.jxml', 'index.jxm']] - Array of default filenames to look for in directories.
  * @returns {http.Server} - The configured HTTP server instance (not started).
  */
 function createServerInstance(options) {

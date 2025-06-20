@@ -45,6 +45,7 @@ if exist "..\runtime\win_x64" (
 
 :: copy dependencies to runtime folder for Windows
 mkdir "..\runtime\win_x64\bin\share"
+copy /Y bin\touchr.exe "..\runtime\win_x64\bin\touch.exe"
 copy /Y bin\tar.exe "..\runtime\win_x64\bin\tar.exe"
 copy /Y bin\xz.exe "..\runtime\win_x64\bin\xz.exe"
 copy /Y bin\ssh.exe "..\runtime\win_x64\bin\ssh.exe"
@@ -171,6 +172,6 @@ xcopy /E /I /Y node_modules build\dist\win_x64\node_modules
 xcopy /E /I /Y images build\dist\win_x64\images
 xcopy /E /I /Y document_errors build\dist\win_x64\document_errors
 xcopy /E /I /Y src build\dist\win_x64\src
-xcopy /E /I /Y web build\dist\win_x64\web
+xcopy /E /I /Y scripts build\dist\win_x64\scripts
 
 echo Build process complete

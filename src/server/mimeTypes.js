@@ -30,6 +30,7 @@ const mimeTypes = {
     '.json': 'application/json',
     '.jsonld': 'application/ld+json',
     '.jxm': 'text/html',
+    '.jxml': 'text/html',
     '.mid': 'audio/midi',
     '.midi': 'audio/midi',
     '.mjs': 'text/javascript',
