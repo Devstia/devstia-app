@@ -37,7 +37,7 @@ img="${base}.img"
 cat "${parts[@]}" > "$tarxz"
 
 # Extract .img file from the .tar.xz
-tar -xJf "$tarxz" --wildcards '*.img'
+tar -xJf "$tarxz" "$img"
 
 # Clean up: remove part files and .tar.xz
 rm -f "${parts[@]}"
