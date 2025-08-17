@@ -18,107 +18,11 @@ const PORT = 8080;
 const DEFAULT_FILES = ['index.html', 'index.htm', 'index.shtml', 'index.cgi', 'index.jxml', 'index.jxm'];
 const iconsDir = path.resolve(__dirname, '../images');
 const ERROR_DOCS_DIR = path.resolve(__dirname, '../document_errors');
-
-// Function to get the runtime directory
-function getRuntimePlatformDir() {
-    // __dirname is the directory of main.js, so go one level up then append 'runtime'
-    if (process.platform === 'win32') {
-        return path.resolve(__dirname, '../runtime/win_x64');
-    } else if (process.platform === 'darwin') {
-        // Determine architecture for macOS
-        const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
-        if (arch === 'arm64') {
-            return path.resolve(__dirname, '../runtime/mac_arm64');
-        }else if (arch === 'x64') {
-            return path.resolve(__dirname, '../runtime/mac_x64');
-        }
-    } else if (process.platform === 'linux') {
-        return path.resolve(__dirname, '../runtime/linux_x64');
-    }
-}
-
-// Function to get the scripts directory
-function getScriptsDir() {
-    // __dirname is the directory of main.js, so go one level up then append 'scripts'
-    return path.resolve(__dirname, '../scripts');
-}
-
-// Function to get the application data directory
-function getAppDataDir() {
-    const homedir = os.homedir();
-    switch (process.platform) {
-        case 'win32':
-            const localAppData = process.env.LOCALAPPDATA || path.join(homedir, 'AppData', 'Local');
-            return path.join(localAppData, '@virtuosoft', 'devstia-app');
-        case 'darwin':
-            return path.join(homedir, 'Library', 'Application Support', '@virtuosoft', 'devstia-app');
-        default: // Linux, etc.
-            return path.join(homedir, '.config', '@virtuosoft', 'devstia-app'); // Use .config convention
-    }
-}
-
-// Function to save the preferences to the preferences.json file
-function savePreferences(preferences = null) {
-    const preferencesPath = path.join(APP_DATA_DIR, 'preferences.json');
-    if (!fs.existsSync(APP_DATA_DIR)) {
-        fs.mkdirSync(APP_DATA_DIR, { recursive: true });
-    }
-    if (preferences == null) {
-        // Copy over the default preferences.json file
-        fs.copyFileSync(path.join(__dirname, './preferences.json'), preferencesPath);
-    }else{
-        // Save the preferences to the preferences.json file
-        fs.writeFileSync(preferencesPath, JSON.stringify(preferences, null, 2), 'utf8');
-        console.log("Preferences saved:", preferences);
-    }
-}
-
-// Function to get the preferences or default values
-function getPreferences() {
-
-    // Create the application data directory if it doesn't exist
-    const preferencesPath = path.join(APP_DATA_DIR, 'preferences.json');
-
-    // Load the preferences.json file
-    if (!fs.existsSync(preferencesPath)) {
-        savePreferences(null); // Create default preferences file
-        console.log("Default preferences file created.");
-    }
-    preferences = JSON.parse(fs.readFileSync(preferencesPath, 'utf8'));
-    return preferences;
-}
-
 const APP_DATA_DIR = getAppDataDir();
 const ROOT_DIR = path.join(APP_DATA_DIR, 'web'); // The actual web root the server will use
 
-// --- CGI Permissions Function (Moved from server.js) ---
-async function setCGIPermissions(directory) {
-    console.log(`Checking CGI permissions in ${directory}...`);
-    try {
-        const entries = await fsp.readdir(directory, { withFileTypes: true });
-        for (const entry of entries) {
-            const fullPath = path.join(directory, entry.name);
-            if (entry.isDirectory()) {
-                await setCGIPermissions(fullPath);
-            } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.cgi')) {
-                try {
-                    const stats = await fsp.stat(fullPath);
-                    const mode = stats.mode;
-                    if (!(mode & fs.constants.S_IXUSR)) {
-                        console.warn(`Setting +x for user on: ${fullPath}`);
-                        await fsp.chmod(fullPath, mode | fs.constants.S_IXUSR);
-                    }
-                } catch (statErr) {
-                    console.error(`Error accessing/chmodding ${fullPath}:`, statErr.message);
-                }
-            }
-        }
-    } catch (readErr) {
-        if (readErr.code !== 'ENOENT') { // Ignore if directory doesn't exist yet
-             console.error(`Error reading directory ${directory} for CGI permissions:`, readErr.message);
-        }
-    }
-}
+// Flag for first run to create default preferences
+let defaultPreferencesCreated = false;
 
 // --- Main Application Logic ---
 let serverInstance = null;
@@ -419,6 +323,14 @@ async function startApp() {
                 settingsItem.enabled = true;
                 systray.sendAction({ type: 'update-item', item: settingsItem });
                 resolve();
+
+                // Open the settings page in the default browser if this is a first run
+                if (defaultPreferencesCreated) {
+                    console.log("Opening settings page in browser...");
+                    try {
+                        open(`http://localhost:${PORT}`);
+                    } catch (err) { console.error('Failed to open URL:', err); }
+                }            
             });
         });
         console.log("Server is listening.");
@@ -450,4 +362,104 @@ process.on('SIGINT', () => {
          process.exit(0);
     }
 });
+
+// --- Utility Functions ---
+// Function to get the runtime directory
+function getRuntimePlatformDir() {
+    // __dirname is the directory of main.js, so go one level up then append 'runtime'
+    if (process.platform === 'win32') {
+        return path.resolve(__dirname, '../runtime/win_x64');
+    } else if (process.platform === 'darwin') {
+        // Determine architecture for macOS
+        const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+        if (arch === 'arm64') {
+            return path.resolve(__dirname, '../runtime/mac_arm64');
+        }else if (arch === 'x64') {
+            return path.resolve(__dirname, '../runtime/mac_x64');
+        }
+    } else if (process.platform === 'linux') {
+        return path.resolve(__dirname, '../runtime/linux_x64');
+    }
+}
+
+// Function to get the scripts directory
+function getScriptsDir() {
+    // __dirname is the directory of main.js, so go one level up then append 'scripts'
+    return path.resolve(__dirname, '../scripts');
+}
+
+// Function to get the application data directory
+function getAppDataDir() {
+    const homedir = os.homedir();
+    switch (process.platform) {
+        case 'win32':
+            const localAppData = process.env.LOCALAPPDATA || path.join(homedir, 'AppData', 'Local');
+            return path.join(localAppData, '@virtuosoft', 'devstia-app');
+        case 'darwin':
+            return path.join(homedir, 'Library', 'Application Support', '@virtuosoft', 'devstia-app');
+        default: // Linux, etc.
+            return path.join(homedir, '.config', '@virtuosoft', 'devstia-app'); // Use .config convention
+    }
+}
+
+// Function to save the preferences to the preferences.json file
+function savePreferences(preferences = null) {
+    const preferencesPath = path.join(APP_DATA_DIR, 'preferences.json');
+    if (!fs.existsSync(APP_DATA_DIR)) {
+        fs.mkdirSync(APP_DATA_DIR, { recursive: true });
+    }
+    if (preferences == null) {
+        // Copy over the default preferences.json file
+        fs.copyFileSync(path.join(__dirname, './preferences.json'), preferencesPath);
+    }else{
+        // Save the preferences to the preferences.json file
+        fs.writeFileSync(preferencesPath, JSON.stringify(preferences, null, 2), 'utf8');
+        console.log("Preferences saved:", preferences);
+    }
+}
+
+// Function to get the preferences or default values
+function getPreferences() {
+
+    // Create the application data directory if it doesn't exist
+    const preferencesPath = path.join(APP_DATA_DIR, 'preferences.json');
+
+    // Load the preferences.json file
+    if (!fs.existsSync(preferencesPath)) {
+        savePreferences(null); // Create default preferences file
+        console.log("Default preferences file created.");
+        defaultPreferencesCreated = true;
+    }
+    preferences = JSON.parse(fs.readFileSync(preferencesPath, 'utf8'));
+    return preferences;
+}
+
+// --- CGI Permissions Function (Moved from server.js) ---
+async function setCGIPermissions(directory) {
+    console.log(`Checking CGI permissions in ${directory}...`);
+    try {
+        const entries = await fsp.readdir(directory, { withFileTypes: true });
+        for (const entry of entries) {
+            const fullPath = path.join(directory, entry.name);
+            if (entry.isDirectory()) {
+                await setCGIPermissions(fullPath);
+            } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.cgi')) {
+                try {
+                    const stats = await fsp.stat(fullPath);
+                    const mode = stats.mode;
+                    if (!(mode & fs.constants.S_IXUSR)) {
+                        console.warn(`Setting +x for user on: ${fullPath}`);
+                        await fsp.chmod(fullPath, mode | fs.constants.S_IXUSR);
+                    }
+                } catch (statErr) {
+                    console.error(`Error accessing/chmodding ${fullPath}:`, statErr.message);
+                }
+            }
+        }
+    } catch (readErr) {
+        if (readErr.code !== 'ENOENT') { // Ignore if directory doesn't exist yet
+             console.error(`Error reading directory ${directory} for CGI permissions:`, readErr.message);
+        }
+    }
+}
 

@@ -5,6 +5,8 @@ These features help facilitate running and developing diverse web based applicat
 
 :star: **For pre-built binaries and support** :star:, visit [https://devstia.com](https://devstia.com) and/or see the signed binaries for the tagged release associated with your platform (check notes). 
 
+For development mode you can execute `npm start devmode`.
+
 &nbsp;
 
 -----

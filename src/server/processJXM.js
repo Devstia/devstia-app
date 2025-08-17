@@ -13,92 +13,109 @@
  * @param {object} res - The HTTP response object.
  * @returns {Promise<{headers: object, body: string}>} - A Promise resolving to the final headers and body.
  */
+const vm = require('vm'); // Import the vm module
+
 async function processJXM(fileContent, initialHeaders, queryParams, postData, req, res, devstia) {
-    // Split content by JXM tags. Even indices are static, odd are code.
     // Support <?jxml and <?jxm to <?
     fileContent = fileContent.replace(/<\?jxml/g, '<?').replace(/<\?jxm/g, '<?');
     const parts = fileContent.split(/<\?|\?>/);
-    let bodyOutput = ''; // Accumulates the final body content
+    let finalBody = '';
+    let allCode = '';
 
-    const responseContext = {
-        headers: { ...initialHeaders }
-    };
-
-    // Define echo and response context once, accessible via closure
-    const echo = (str) => {
-        bodyOutput += String(str); // Append directly to the main output buffer
-    };
-    const _e = echo;
-    const response = responseContext;
-
-    // Create a request context object to hold query params, post data, and other request info
-    const request = {
-        query: queryParams, // GET parameters
-        body: postData,     // POST parameters (as URLSearchParams for urlencoded)
-        method: req.method, // Expose method
-        headers: req.headers, // Expose request headers
-        devstia
-        // Add other relevant req properties if needed
-    };
-
-    // Iterate through the parts
-    for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-
+    // Separate static HTML from executable code.
+    // We will execute all code blocks together in one go.
+    const processedParts = parts.map((part, i) => {
         if (i % 2 === 0) {
-            // --- Static Part ---
-            bodyOutput += part; // Append static content directly
+            // Static part
+            return part;
         } else {
-            // --- Code Part ---
-            const userCode = part.trim();
-            if (!userCode) continue; // Skip empty code blocks
-
-            // Wrap user code in an async IIFE with internal error handling
-            const codeToEval = `
-                (async () => {
-                    try {
-                        // User's code goes here. It can use await.
-                        // Access GET via request.query, POST via request.body
-                        ${userCode}
-                    } catch (asyncError) {
-                        // Catch runtime errors *during* async execution
-                        console.error('Error during async JXM execution:', asyncError);
-                        const errorMsg = \`JXM Async Execution Error:\\n\${asyncError.message}\n\nStack:\n\${asyncError.stack}\`
-                            .replace(/&/g, "&amp;")
-                            .replace(/</g, "&lt;")
-                            .replace(/>/g, "&gt;")
-                            .replace(/"/g, "&quot;")
-                            .replace(/'/g, "&#039;");
-                        echo(\`<pre style="color: orange; border: 1px solid orange; padding: 10px; white-space: pre-wrap;">\${errorMsg}</pre>\`); // Report error via echo
-                    }
-                })() // Immediately invoke the async function
-            `;
-
-            // --- DANGER ZONE: Using eval() ---
-            try {
-                // Evaluate the async IIFE string. This returns a Promise.
-                // Await the promise to ensure async operations within complete.
-                // Place the outer try...catch HERE: around the await eval(...)
-                await eval(codeToEval);
-            } catch (evalError) {
-                // Catch syntax errors in userCode or other synchronous errors during eval setup.
-                console.error(`Syntax error or eval setup error in JXM code: ${evalError.message}\nCode:\n${userCode}`);
-                const errorMsg = `JXM Syntax/Setup Error:\n${evalError.message}`
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-                bodyOutput += `<pre style="color: red; border: 1px solid red; padding: 10px; white-space: pre-wrap;">${errorMsg}</pre>`; // Append error directly
+            // Code part. Add it to our script and leave a placeholder.
+            const code = part.trim();
+            if (code) {
+                // The echo() function will now write to an array.
+                // We replace the user's _e() or echo() with an internal one.
+                // Use a greedy match `(.*)` to correctly handle nested parentheses in arguments.
+                allCode += code.replace(/_e\((.*)\)|echo\((.*)\)/g, (match, g1, g2) => {
+                    return `__internal_echo(${g1 || g2});`;
+                });
+                allCode += '\n'; // Add newline for safety
             }
-            // --- End DANGER ZONE ---
+            return ''; // Return empty for now, we'll process it later
         }
+    });
+
+    // This array will hold the output from all echo() calls, in order.
+    const echoBuffer = [];
+    const echo = (str) => {
+        echoBuffer.push(String(str));
+    };
+
+    // Create a single, persistent context for the entire page request.
+    const context = {
+        __internal_echo: echo, // The echo function used by our replaced code
+        echo: echo, // A version for the user to call directly if they want
+        _e: echo,
+        response: { headers: { ...initialHeaders } },
+        request: {
+            query: queryParams,
+            body: postData,
+            method: req.method,
+            headers: req.headers,
+        },
+        devstia: devstia,
+        console: console,
+    };
+
+    // Make the context act like a global scope for the scripts.
+    vm.createContext(context);
+
+    // --- DANGER ZONE: Using vm.runInContext ---
+    try {
+        // Wrap all concatenated code in a single async IIFE to support top-level await
+        const script = new vm.Script(`(async () => { ${allCode} })()`);
+        
+        // Execute the entire script in the persistent context.
+        // Functions and variables will now persist across the scope of the entire page.
+        await script.runInContext(context);
+
+    } catch (execError) {
+        // Catch any error from creating or running the script.
+        console.error(`JXM Execution Error: ${execError.message}\nCode:\n${allCode}`);
+        const errorMsg = `JXM Execution Error:\n${execError.message}\n\nStack:\n${execError.stack}`
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        // On error, output the error message and stop processing.
+        return {
+            headers: context.response.headers,
+            body: `<pre style="color: red; border: 1px solid red; padding: 10px; white-space: pre-wrap;">${errorMsg}</pre>`
+        };
     }
+    // --- End DANGER ZONE ---
+
+    // Now, reassemble the final HTML, inserting the output from echo() calls
+    // where the code blocks used to be.
+    let echoIndex = 0;
+    finalBody = processedParts.map((part, i) => {
+        if (i % 2 === 0) {
+            return part;
+        } else {
+            // If the original code block contained an echo/_e call, it produced output.
+            const originalCode = parts[i].trim();
+            if (originalCode.includes('echo(') || originalCode.includes('_e(')) {
+                return echoBuffer[echoIndex++];
+            }
+            return '';
+        }
+    }).join('');
+
 
     // Return the final headers and the fully processed body
     return {
-        headers: responseContext.headers,
-        body: bodyOutput
+        headers: context.response.headers,
+        body: finalBody
     };
 }
 
