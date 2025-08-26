@@ -206,7 +206,8 @@ function createServerInstance(options) {
             // Handle .jxm, .jxml files
             } else if (extname === '.jxm' || extname === '.jxml' ) {
                 try {
-                    const result = await processJXM(fileBuffer.toString(), responseHeaders, queryParams, postData, req, res, devstia);
+                    // Pass the full filePath to processJXM so it knows the file's location
+                    const result = await processJXM(fileBuffer.toString(), responseHeaders, queryParams, postData, req, res, devstia, filePath);
                     responseHeaders = result.headers;
                     responseBody = result.body;
                 } catch (jxmError) {
