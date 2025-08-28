@@ -1,4 +1,4 @@
 {
     "devstia-web": "main",
-    "baseVMS": ""
+    "vm-folder": "vm"
 }
